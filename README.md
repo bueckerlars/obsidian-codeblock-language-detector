@@ -1,0 +1,2 @@
+# Obsidian Auto Syntax Highlight
+

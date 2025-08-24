@@ -316,7 +316,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		countInfo.style.fontSize = '0.9em';
 		countInfo.style.color = 'var(--text-muted)';
 		countInfo.style.textAlign = 'center';
-		countInfo.textContent = `${this.plugin.settings.enabledLanguages.length} von ${SUPPORTED_LANGUAGES.length} Sprachen aktiviert`;
+		countInfo.textContent = `${this.plugin.settings.enabledLanguages.length} von ${SUPPORTED_LANGUAGES.length} Languages enabled`;
 
 		// Plugin version and info
 		new Setting(containerEl)

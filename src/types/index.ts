@@ -32,6 +32,9 @@ export interface AutoSyntaxHighlightSettings {
 	// Enable notifications when language is detected
 	showNotifications: boolean;
 	
+	// Enabled languages for detection (only these will be detected)
+	enabledLanguages: string[];
+	
 	// Persistent history data storage
 	historyData: HistoryEntry[];
 }
@@ -104,19 +107,6 @@ export interface IHistoryService {
 	getEntryById(id: string): HistoryEntry | null;
 }
 
-// Default settings
-export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
-	triggerBehavior: 'auto-on-edit',
-	confidenceThreshold: 70,
-	detectionMethodOrder: ['highlight-js', 'pattern-matching'],
-	enableHighlightJs: true,
-	enablePatternMatching: true,
-	enableHistory: true,
-	maxHistoryEntries: 100,
-	showNotifications: true,
-	historyData: [],
-};
-
 // Constants
 export const SUPPORTED_LANGUAGES = [
 	'javascript',
@@ -149,3 +139,17 @@ export const SUPPORTED_LANGUAGES = [
 	'dockerfile',
 	'makefile',
 ];
+
+// Default settings
+export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
+	triggerBehavior: 'auto-on-edit',
+	confidenceThreshold: 70,
+	detectionMethodOrder: ['highlight-js', 'pattern-matching'],
+	enableHighlightJs: true,
+	enablePatternMatching: true,
+	enableHistory: true,
+	maxHistoryEntries: 100,
+	showNotifications: true,
+	enabledLanguages: [...SUPPORTED_LANGUAGES], // All languages enabled by default
+	historyData: [],
+};

@@ -71,7 +71,8 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		
 		this.languageDetectionEngine = new LanguageDetectionEngine(
 			this.settings.detectionMethodOrder,
-			this.settings.confidenceThreshold
+			this.settings.confidenceThreshold,
+			this.settings.enabledLanguages
 		);
 		
 		this.syntaxApplier = new SyntaxApplier();
@@ -363,6 +364,9 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	updateDetectionEngineSettings(): void {
 		// Set confidence threshold first
 		this.languageDetectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
+		
+		// Set enabled languages
+		this.languageDetectionEngine.setEnabledLanguages(this.settings.enabledLanguages);
 		
 		// Build the detection order based on enabled methods and user preference
 		const enabledMethods: DetectionMethod[] = [];

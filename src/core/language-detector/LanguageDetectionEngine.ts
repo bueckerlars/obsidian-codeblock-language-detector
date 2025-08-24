@@ -10,13 +10,16 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	private readonly patternMatchingDetector: PatternMatchingDetector;
 	private detectionOrder: DetectionMethod[];
 	private confidenceThreshold: number;
+	private enabledLanguages: string[];
 
 	constructor(
 		detectionOrder: DetectionMethod[] = ['highlight-js', 'pattern-matching'],
-		confidenceThreshold: number = 70
+		confidenceThreshold: number = 70,
+		enabledLanguages: string[] = []
 	) {
 		this.detectionOrder = detectionOrder;
 		this.confidenceThreshold = confidenceThreshold;
+		this.enabledLanguages = enabledLanguages;
 		
 		// Initialize detectors with threshold converted to 0-1 scale
 		const normalizedThreshold = confidenceThreshold / 100;
@@ -38,7 +41,9 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 			try {
 				const result = await this.detectWithMethod(code, method);
 				
-				if (result && result.confidence >= this.confidenceThreshold) {
+				if (result && 
+					result.confidence >= this.confidenceThreshold && 
+					this.isLanguageEnabled(result.language)) {
 					return result;
 				}
 			} catch (error) {
@@ -177,6 +182,36 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 */
 	getPatternMatchingDetector(): PatternMatchingDetector {
 		return this.patternMatchingDetector;
+	}
+
+	/**
+	 * Updates the list of enabled languages
+	 * @param enabledLanguages Array of language names that should be detected
+	 */
+	setEnabledLanguages(enabledLanguages: string[]): void {
+		this.enabledLanguages = [...enabledLanguages];
+	}
+
+	/**
+	 * Gets the current enabled languages
+	 * @returns Array of currently enabled language names
+	 */
+	getEnabledLanguages(): string[] {
+		return [...this.enabledLanguages];
+	}
+
+	/**
+	 * Checks if a language is enabled for detection
+	 * @param language The language to check
+	 * @returns True if the language is enabled, false otherwise
+	 */
+	private isLanguageEnabled(language: string): boolean {
+		// If no enabled languages are specified, allow all
+		if (this.enabledLanguages.length === 0) {
+			return true;
+		}
+		
+		return this.enabledLanguages.includes(language);
 	}
 
 	/**

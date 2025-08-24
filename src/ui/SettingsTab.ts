@@ -196,19 +196,127 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 	private createAdvancedSettingsSection(containerEl: HTMLElement): void {
 		containerEl.createEl('h3', { text: 'Advanced' });
 
-		// Supported languages info
-		new Setting(containerEl)
-			.setName('Supported languages')
-			.setDesc('List of languages supported by the plugin')
-			.then(setting => {
-				const languageContainer = setting.controlEl.createDiv('supported-languages');
-				languageContainer.style.marginTop = '8px';
-				languageContainer.style.fontSize = '0.9em';
-				languageContainer.style.color = 'var(--text-muted)';
-				
-				const languageList = SUPPORTED_LANGUAGES.join(', ');
-				languageContainer.textContent = languageList;
+		// Language Selection
+		const languageSettingContainer = containerEl.createDiv('language-selection-container');
+		languageSettingContainer.createEl('h4', { text: 'Language Detection' });
+		languageSettingContainer.createEl('p', { 
+			text: 'Select which languages should be detected and applied automatically',
+			cls: 'setting-item-description'
+		});
+
+		// Quick actions
+		const quickActionsContainer = languageSettingContainer.createDiv('quick-actions');
+		quickActionsContainer.style.marginBottom = '12px';
+		quickActionsContainer.style.display = 'flex';
+		quickActionsContainer.style.gap = '8px';
+		quickActionsContainer.style.flexWrap = 'wrap';
+
+		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All' });
+		selectAllBtn.style.padding = '4px 12px';
+		selectAllBtn.style.fontSize = '0.9em';
+		selectAllBtn.style.backgroundColor = 'var(--interactive-accent)';
+		selectAllBtn.style.color = 'var(--text-on-accent)';
+		selectAllBtn.style.border = 'none';
+		selectAllBtn.style.borderRadius = '4px';
+		selectAllBtn.style.cursor = 'pointer';
+		selectAllBtn.addEventListener('click', async () => {
+			this.plugin.settings.enabledLanguages = [...SUPPORTED_LANGUAGES];
+			await this.plugin.saveSettings();
+			this.display(); // Refresh display
+		});
+
+		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None' });
+		selectNoneBtn.style.padding = '4px 12px';
+		selectNoneBtn.style.fontSize = '0.9em';
+		selectNoneBtn.style.backgroundColor = 'var(--background-modifier-border)';
+		selectNoneBtn.style.color = 'var(--text-normal)';
+		selectNoneBtn.style.border = 'none';
+		selectNoneBtn.style.borderRadius = '4px';
+		selectNoneBtn.style.cursor = 'pointer';
+		selectNoneBtn.addEventListener('click', async () => {
+			this.plugin.settings.enabledLanguages = [];
+			await this.plugin.saveSettings();
+			this.display(); // Refresh display
+		});
+
+		// Language grid container
+		const languageContainer = languageSettingContainer.createDiv('language-toggles');
+		languageContainer.style.display = 'grid';
+		languageContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
+		languageContainer.style.gap = '6px';
+		languageContainer.style.maxHeight = '300px';
+		languageContainer.style.overflowY = 'auto';
+		languageContainer.style.padding = '12px';
+		languageContainer.style.backgroundColor = 'var(--background-primary-alt)';
+		languageContainer.style.border = '1px solid var(--background-modifier-border)';
+		languageContainer.style.borderRadius = '6px';
+
+		// Create language toggles
+		SUPPORTED_LANGUAGES.forEach(language => {
+			const isEnabled = this.plugin.settings.enabledLanguages.includes(language);
+			
+			const languageItem = languageContainer.createDiv('language-item');
+			languageItem.style.display = 'flex';
+			languageItem.style.alignItems = 'center';
+			languageItem.style.padding = '6px 8px';
+			languageItem.style.backgroundColor = isEnabled ? 'var(--interactive-accent)' : 'var(--background-secondary)';
+			languageItem.style.color = isEnabled ? 'var(--text-on-accent)' : 'var(--text-muted)';
+			languageItem.style.borderRadius = '4px';
+			languageItem.style.cursor = 'pointer';
+			languageItem.style.transition = 'all 0.2s ease';
+			languageItem.style.border = `1px solid ${isEnabled ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}`;
+			languageItem.style.fontSize = '0.9em';
+			languageItem.style.fontFamily = 'var(--font-monospace)';
+			
+			// Add hover effect
+			languageItem.addEventListener('mouseenter', () => {
+				if (!isEnabled) {
+					languageItem.style.backgroundColor = 'var(--background-modifier-hover)';
+				}
 			});
+			
+			languageItem.addEventListener('mouseleave', () => {
+				if (!isEnabled) {
+					languageItem.style.backgroundColor = 'var(--background-secondary)';
+				}
+			});
+
+			// Toggle icon
+			const toggleIcon = languageItem.createSpan('toggle-icon');
+			toggleIcon.textContent = isEnabled ? '✓' : '○';
+			toggleIcon.style.marginRight = '6px';
+			toggleIcon.style.fontSize = '0.8em';
+			toggleIcon.style.fontWeight = 'bold';
+
+			// Language name
+			const languageLabel = languageItem.createSpan('language-label');
+			languageLabel.textContent = language;
+			languageLabel.style.flex = '1';
+
+			// Click handler for toggle
+			languageItem.addEventListener('click', async () => {
+				const currentlyEnabled = this.plugin.settings.enabledLanguages.includes(language);
+				
+				if (currentlyEnabled) {
+					// Remove language
+					this.plugin.settings.enabledLanguages = this.plugin.settings.enabledLanguages.filter(lang => lang !== language);
+				} else {
+					// Add language
+					this.plugin.settings.enabledLanguages.push(language);
+				}
+				
+				await this.plugin.saveSettings();
+				this.display(); // Refresh display to update all states
+			});
+		});
+
+		// Show count of enabled languages
+		const countInfo = languageSettingContainer.createDiv('enabled-count');
+		countInfo.style.marginTop = '8px';
+		countInfo.style.fontSize = '0.9em';
+		countInfo.style.color = 'var(--text-muted)';
+		countInfo.style.textAlign = 'center';
+		countInfo.textContent = `${this.plugin.settings.enabledLanguages.length} von ${SUPPORTED_LANGUAGES.length} Sprachen aktiviert`;
 
 		// Plugin version and info
 		new Setting(containerEl)
@@ -302,7 +410,8 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 			typeof settings.enablePatternMatching === 'boolean' &&
 			typeof settings.enableHistory === 'boolean' &&
 			typeof settings.maxHistoryEntries === 'number' &&
-			typeof settings.showNotifications === 'boolean'
+			typeof settings.showNotifications === 'boolean' &&
+			Array.isArray(settings.enabledLanguages)
 		);
 	}
 }

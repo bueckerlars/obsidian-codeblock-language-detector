@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import AutoSyntaxHighlightPlugin from '../main';
+import AutoSyntaxHighlightPlugin from '../../main';
 import { DetectionMethod, TriggerBehavior, SUPPORTED_LANGUAGES } from '../types';
 
 /**

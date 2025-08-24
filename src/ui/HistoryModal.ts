@@ -1,4 +1,4 @@
-import { App, Modal, Setting, ButtonComponent } from 'obsidian';
+import { App, Modal, Setting, ButtonComponent, Notice, TFile, MarkdownView } from 'obsidian';
 import { HistoryEntry } from '../types';
 import { HistoryService } from '../services';
 import AutoSyntaxHighlightPlugin from '../../main';
@@ -24,6 +24,9 @@ export class HistoryModal extends Modal {
 	onOpen(): void {
 		const { contentEl } = this;
 		contentEl.empty();
+		
+		// Add CSS class for wider modal
+		this.modalEl.addClass('history-modal');
 
 		// Load entries
 		this.loadEntries();
@@ -153,11 +156,7 @@ export class HistoryModal extends Modal {
 		container.empty();
 
 		if (this.filteredEntries.length === 0) {
-			const emptyState = container.createDiv('empty-state');
-			emptyState.style.padding = '32px';
-			emptyState.style.textAlign = 'center';
-			emptyState.style.color = 'var(--text-muted)';
-			emptyState.textContent = 'No entries found';
+			this.createEmptyStateEntry(container);
 			return;
 		}
 
@@ -271,13 +270,100 @@ export class HistoryModal extends Modal {
 			this.editEntry(entry);
 		});
 
-		// Delete button
-		const deleteButton = new ButtonComponent(actionsEl);
-		deleteButton.setButtonText('Delete');
-		deleteButton.setClass('mod-warning');
-		deleteButton.onClick(() => {
-			this.deleteEntry(entry);
-		});
+		// Delete button removed as requested
+	}
+
+	private createEmptyStateEntry(container: HTMLElement): void {
+		const entryEl = container.createDiv('history-entry empty-entry');
+		entryEl.style.padding = '12px';
+		entryEl.style.borderBottom = '1px solid var(--background-modifier-border)';
+		entryEl.style.backgroundColor = 'var(--background-primary)';
+		entryEl.style.opacity = '0.7';
+
+		// Entry header
+		const headerEl = entryEl.createDiv('entry-header');
+		headerEl.style.display = 'flex';
+		headerEl.style.justifyContent = 'space-between';
+		headerEl.style.alignItems = 'center';
+		headerEl.style.marginBottom = '8px';
+
+		// File info
+		const fileInfoEl = headerEl.createDiv('file-info');
+		const fileNameEl = fileInfoEl.createSpan('file-name');
+		fileNameEl.textContent = 'Keine Einträge gefunden';
+		fileNameEl.style.fontWeight = 'bold';
+		fileNameEl.style.fontSize = '1.1em';
+		fileNameEl.style.color = 'var(--text-muted)';
+
+		const filePathEl = fileInfoEl.createDiv('file-path');
+		filePathEl.textContent = 'Es wurden noch keine Spracherkennung-Operationen durchgeführt';
+		filePathEl.style.fontSize = '0.8em';
+		filePathEl.style.color = 'var(--text-muted)';
+
+		// Status placeholder
+		const statusEl = headerEl.createDiv('entry-status');
+		statusEl.style.textAlign = 'right';
+
+		const statusBadge = statusEl.createSpan('status-badge');
+		statusBadge.textContent = '-';
+		statusBadge.style.padding = '2px 8px';
+		statusBadge.style.borderRadius = '4px';
+		statusBadge.style.fontSize = '0.8em';
+		statusBadge.style.fontWeight = 'bold';
+		statusBadge.style.backgroundColor = 'var(--background-modifier-border)';
+		statusBadge.style.color = 'var(--text-muted)';
+
+		// Detection details
+		const detailsEl = entryEl.createDiv('entry-details');
+		detailsEl.style.display = 'flex';
+		detailsEl.style.flexDirection = 'column';
+		detailsEl.style.gap = '4px';
+		detailsEl.style.marginBottom = '8px';
+		detailsEl.style.fontSize = '0.9em';
+
+		const languageEl = detailsEl.createSpan('detected-language');
+		languageEl.innerHTML = `<strong>Language:</strong> -`;
+		languageEl.style.color = 'var(--text-muted)';
+
+		const confidenceEl = detailsEl.createSpan('confidence');
+		confidenceEl.innerHTML = `<strong>Confidence:</strong> -`;
+		confidenceEl.style.color = 'var(--text-muted)';
+
+		const methodEl = detailsEl.createSpan('method');
+		methodEl.innerHTML = `<strong>Method:</strong> -`;
+		methodEl.style.color = 'var(--text-muted)';
+
+		// Code preview
+		const codePreviewEl = entryEl.createDiv('code-preview');
+		codePreviewEl.style.backgroundColor = 'var(--background-primary-alt)';
+		codePreviewEl.style.border = '1px solid var(--background-modifier-border)';
+		codePreviewEl.style.borderRadius = '4px';
+		codePreviewEl.style.padding = '8px';
+		codePreviewEl.style.fontSize = '0.85em';
+		codePreviewEl.style.fontFamily = 'var(--font-monospace)';
+		codePreviewEl.style.maxHeight = '100px';
+		codePreviewEl.style.overflowY = 'auto';
+		codePreviewEl.style.marginBottom = '8px';
+		codePreviewEl.style.color = 'var(--text-muted)';
+		codePreviewEl.textContent = '// Hier wird eine Vorschau des erkannten Codes angezeigt';
+
+		// Action buttons placeholder
+		const actionsEl = entryEl.createDiv('entry-actions');
+		actionsEl.style.display = 'flex';
+		actionsEl.style.flexDirection = 'column';
+		actionsEl.style.gap = '8px';
+		actionsEl.style.justifyContent = 'flex-end';
+		actionsEl.style.alignItems = 'flex-end';
+		actionsEl.style.width = '100px';
+
+		// Disabled placeholder buttons
+		const undoButton = new ButtonComponent(actionsEl);
+		undoButton.setButtonText('-');
+		undoButton.setDisabled(true);
+
+		const editButton = new ButtonComponent(actionsEl);
+		editButton.setButtonText('-');
+		editButton.setDisabled(true);
 	}
 
 	private createActionButtons(containerEl: HTMLElement): void {
@@ -380,14 +466,58 @@ export class HistoryModal extends Modal {
 		this.refreshEntriesList();
 	}
 
-	private editEntry(entry: HistoryEntry): void {
-		// Create a simple prompt for editing the language
-		const newLanguage = prompt(`Edit detected language for ${entry.fileName}:`, entry.detectedLanguage);
+	private async editEntry(entry: HistoryEntry): Promise<void> {
+		// Close the modal first
+		this.close();
 		
-		if (newLanguage && newLanguage !== entry.detectedLanguage) {
-			this.historyService.updateEntry(entry.id, { detectedLanguage: newLanguage });
-			this.loadEntries();
-			this.refreshEntriesList();
+		// Try to navigate to the file and codeblock
+		try {
+			// Get the file from the vault
+			const file = this.app.vault.getAbstractFileByPath(entry.filePath);
+			
+			if (!file || !(file instanceof TFile)) {
+				// If file not found, show a notice
+				new Notice(`Datei nicht gefunden: ${entry.filePath}`);
+				return;
+			}
+			
+			// Open the file
+			const leaf = this.app.workspace.getLeaf();
+			await leaf.openFile(file);
+			
+			// Wait a bit for the file to load
+			setTimeout(() => {
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+				if (view && view.editor) {
+					const editor = view.editor;
+					const content = editor.getValue();
+					
+					// Find the codeblock in the content
+					const codeBlockStart = content.indexOf(entry.codeBlock.content);
+					if (codeBlockStart !== -1) {
+						// Calculate line number
+						const beforeCodeBlock = content.substring(0, codeBlockStart);
+						const lineNumber = beforeCodeBlock.split('\n').length - 1;
+						
+						// Jump to the line
+						editor.setCursor(lineNumber, 0);
+						editor.scrollIntoView({ from: { line: lineNumber, ch: 0 }, to: { line: lineNumber, ch: 0 } }, true);
+						
+						// Focus the editor
+						editor.focus();
+						
+						new Notice(`Zu Codeblock in ${entry.fileName} gesprungen`);
+					} else {
+						new Notice(`Codeblock in ${entry.fileName} nicht gefunden`);
+					}
+				} else {
+					new Notice(`Editor für ${entry.fileName} nicht verfügbar`);
+				}
+			}, 100);
+			
+		} catch (error) {
+			console.error('Error navigating to code block:', error);
+			new Notice(`Fehler beim Öffnen der Datei: ${entry.fileName}`);
 		}
 	}
 

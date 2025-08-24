@@ -3,6 +3,16 @@ Auto Syntax Highlight Plugin Styles
 */
 
 /* History Modal Styles */
+.modal.history-modal {
+  max-width: 90vw;
+  width: 1200px;
+  min-width: 800px;
+}
+
+.modal.history-modal .modal-content {
+  max-width: none;
+  width: 100%;
+}
 .history-controls {
   margin-bottom: 16px;
   padding: 12px;
@@ -83,10 +93,10 @@ Auto Syntax Highlight Plugin Styles
 
 .entry-details {
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 8px;
   font-size: 0.9em;
-  flex-wrap: wrap;
 }
 
 .detected-language,
@@ -111,9 +121,11 @@ Auto Syntax Highlight Plugin Styles
 
 .entry-actions {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   justify-content: flex-end;
-  flex-wrap: wrap;
+  align-items: flex-end;
+  width: 100px;
 }
 
 .empty-state {
@@ -212,7 +224,19 @@ select:focus {
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .modal.history-modal {
+    width: 95vw;
+    min-width: 600px;
+  }
+}
+
 @media (max-width: 768px) {
+  .modal.history-modal {
+    width: 98vw;
+    min-width: 320px;
+  }
+  
   .entry-header {
     flex-direction: column;
     align-items: flex-start;
@@ -230,6 +254,8 @@ select:focus {
   
   .entry-actions {
     justify-content: flex-start;
+    align-items: flex-start;
+    width: auto;
   }
   
   .modal-actions {

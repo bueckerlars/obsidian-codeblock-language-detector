@@ -31,6 +31,9 @@ export interface AutoSyntaxHighlightSettings {
 	
 	// Enable notifications when language is detected
 	showNotifications: boolean;
+	
+	// Persistent history data storage
+	historyData: HistoryEntry[];
 }
 
 // Language detection result
@@ -111,6 +114,7 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	enableHistory: true,
 	maxHistoryEntries: 100,
 	showNotifications: true,
+	historyData: [],
 };
 
 // Constants

@@ -7,9 +7,45 @@ export class HistoryService implements IHistoryService {
 	private entries: Map<string, HistoryEntry> = new Map();
 	private maxEntries: number;
 	private listeners: Array<(entries: HistoryEntry[]) => void> = [];
+	private saveCallback: (() => Promise<void>) | null = null;
 
 	constructor(maxEntries: number = 100) {
 		this.maxEntries = maxEntries;
+	}
+
+	/**
+	 * Sets the callback function to save history data persistently
+	 * @param saveCallback Function that saves the history data
+	 */
+	setSaveCallback(saveCallback: () => Promise<void>): void {
+		this.saveCallback = saveCallback;
+	}
+
+	/**
+	 * Loads history entries from persistent storage
+	 * @param historyData The history data to load
+	 */
+	loadHistory(historyData: HistoryEntry[]): void {
+		this.entries.clear();
+		
+		if (Array.isArray(historyData)) {
+			for (const entry of historyData) {
+				if (this.isValidHistoryEntry(entry)) {
+					this.entries.set(entry.id, entry);
+				}
+			}
+		}
+		
+		this.enforceMaxEntries();
+		this.notifyListeners();
+	}
+
+	/**
+	 * Gets history data for persistent storage
+	 * @returns Array of history entries
+	 */
+	getHistoryData(): HistoryEntry[] {
+		return this.getEntries();
 	}
 
 	/**
@@ -34,6 +70,9 @@ export class HistoryService implements IHistoryService {
 
 		// Notify listeners
 		this.notifyListeners();
+		
+		// Save to persistent storage
+		this.saveHistory();
 
 		return id;
 	}
@@ -87,6 +126,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (removed) {
 			this.notifyListeners();
+			this.saveHistory();
 		}
 		
 		return removed;
@@ -100,15 +140,16 @@ export class HistoryService implements IHistoryService {
 	removeEntriesForFile(filePath: string): number {
 		let removedCount = 0;
 		
-		for (const [id, entry] of this.entries) {
+		this.entries.forEach((entry, id) => {
 			if (entry.filePath === filePath) {
 				this.entries.delete(id);
 				removedCount++;
 			}
-		}
+		});
 		
 		if (removedCount > 0) {
 			this.notifyListeners();
+			this.saveHistory();
 		}
 		
 		return removedCount;
@@ -120,6 +161,7 @@ export class HistoryService implements IHistoryService {
 	clearHistory(): void {
 		this.entries.clear();
 		this.notifyListeners();
+		this.saveHistory();
 	}
 
 	/**
@@ -137,6 +179,7 @@ export class HistoryService implements IHistoryService {
 		// Mark as not applied
 		entry.applied = false;
 		this.notifyListeners();
+		this.saveHistory();
 		
 		return true;
 	}
@@ -156,6 +199,7 @@ export class HistoryService implements IHistoryService {
 		// Mark as applied
 		entry.applied = true;
 		this.notifyListeners();
+		this.saveHistory();
 		
 		return true;
 	}
@@ -185,6 +229,7 @@ export class HistoryService implements IHistoryService {
 		// Apply updates
 		Object.assign(entry, updates);
 		this.notifyListeners();
+		this.saveHistory();
 		
 		return true;
 	}
@@ -271,6 +316,7 @@ export class HistoryService implements IHistoryService {
 
 			this.enforceMaxEntries();
 			this.notifyListeners();
+			this.saveHistory();
 			
 			return importedCount;
 		} catch (error) {
@@ -286,6 +332,7 @@ export class HistoryService implements IHistoryService {
 	setMaxEntries(maxEntries: number): void {
 		this.maxEntries = Math.max(1, maxEntries);
 		this.enforceMaxEntries();
+		this.saveHistory();
 	}
 
 	/**
@@ -312,6 +359,19 @@ export class HistoryService implements IHistoryService {
 		const index = this.listeners.indexOf(listener);
 		if (index > -1) {
 			this.listeners.splice(index, 1);
+		}
+	}
+
+	/**
+	 * Saves the current history to persistent storage
+	 */
+	private async saveHistory(): Promise<void> {
+		if (this.saveCallback) {
+			try {
+				await this.saveCallback();
+			} catch (error) {
+				console.error('Error saving history:', error);
+			}
 		}
 	}
 

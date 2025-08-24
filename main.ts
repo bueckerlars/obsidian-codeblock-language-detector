@@ -38,6 +38,9 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		// Initialize services
 		this.initializeServices();
 
+		// Load history data into history service
+		this.loadHistoryData();
+
 		// Register event handlers
 		this.registerEventHandlers();
 
@@ -73,6 +76,11 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		this.syntaxApplier = new SyntaxApplier();
 		
 		this.historyService = new HistoryService(this.settings.maxHistoryEntries);
+		
+		// Set up save callback for persistent history storage
+		this.historyService.setSaveCallback(async () => {
+			await this.saveHistoryData();
+		});
 	}
 
 	/**
@@ -356,6 +364,25 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	}
 
 	/**
+	 * Loads history data into the history service
+	 */
+	private loadHistoryData(): void {
+		if (this.settings.enableHistory && this.settings.historyData) {
+			this.historyService.loadHistory(this.settings.historyData);
+		}
+	}
+
+	/**
+	 * Saves current history data to settings
+	 */
+	private async saveHistoryData(): Promise<void> {
+		if (this.settings.enableHistory) {
+			this.settings.historyData = this.historyService.getHistoryData();
+			await this.saveData(this.settings);
+		}
+	}
+
+	/**
 	 * Load plugin settings
 	 */
 	async loadSettings(): Promise<void> {
@@ -366,6 +393,11 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Save plugin settings
 	 */
 	async saveSettings(): Promise<void> {
+		// Update history data before saving settings
+		if (this.settings.enableHistory && this.historyService) {
+			this.settings.historyData = this.historyService.getHistoryData();
+		}
+		
 		await this.saveData(this.settings);
 		
 		// Update detection engine settings when settings change

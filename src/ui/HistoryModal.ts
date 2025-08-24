@@ -274,96 +274,24 @@ export class HistoryModal extends Modal {
 	}
 
 	private createEmptyStateEntry(container: HTMLElement): void {
-		const entryEl = container.createDiv('history-entry empty-entry');
-		entryEl.style.padding = '12px';
-		entryEl.style.borderBottom = '1px solid var(--background-modifier-border)';
-		entryEl.style.backgroundColor = 'var(--background-primary)';
-		entryEl.style.opacity = '0.7';
+		const emptyMessageEl = container.createDiv('empty-state-message');
+		emptyMessageEl.style.padding = '40px 20px';
+		emptyMessageEl.style.textAlign = 'center';
+		emptyMessageEl.style.color = 'var(--text-muted)';
+		emptyMessageEl.style.fontSize = '1.1em';
+		emptyMessageEl.style.backgroundColor = 'var(--background-secondary)';
+		emptyMessageEl.style.borderRadius = '8px';
+		emptyMessageEl.style.border = '2px dashed var(--background-modifier-border)';
 
-		// Entry header
-		const headerEl = entryEl.createDiv('entry-header');
-		headerEl.style.display = 'flex';
-		headerEl.style.justifyContent = 'space-between';
-		headerEl.style.alignItems = 'center';
-		headerEl.style.marginBottom = '8px';
+		const messageText = emptyMessageEl.createDiv();
+		messageText.style.marginBottom = '8px';
+		messageText.style.fontWeight = 'bold';
+		messageText.textContent = 'No entries yet';
 
-		// File info
-		const fileInfoEl = headerEl.createDiv('file-info');
-		const fileNameEl = fileInfoEl.createSpan('file-name');
-		fileNameEl.textContent = 'Keine Einträge gefunden';
-		fileNameEl.style.fontWeight = 'bold';
-		fileNameEl.style.fontSize = '1.1em';
-		fileNameEl.style.color = 'var(--text-muted)';
-
-		const filePathEl = fileInfoEl.createDiv('file-path');
-		filePathEl.textContent = 'Es wurden noch keine Spracherkennung-Operationen durchgeführt';
-		filePathEl.style.fontSize = '0.8em';
-		filePathEl.style.color = 'var(--text-muted)';
-
-		// Status placeholder
-		const statusEl = headerEl.createDiv('entry-status');
-		statusEl.style.textAlign = 'right';
-
-		const statusBadge = statusEl.createSpan('status-badge');
-		statusBadge.textContent = '-';
-		statusBadge.style.padding = '2px 8px';
-		statusBadge.style.borderRadius = '4px';
-		statusBadge.style.fontSize = '0.8em';
-		statusBadge.style.fontWeight = 'bold';
-		statusBadge.style.backgroundColor = 'var(--background-modifier-border)';
-		statusBadge.style.color = 'var(--text-muted)';
-
-		// Detection details
-		const detailsEl = entryEl.createDiv('entry-details');
-		detailsEl.style.display = 'flex';
-		detailsEl.style.flexDirection = 'column';
-		detailsEl.style.gap = '4px';
-		detailsEl.style.marginBottom = '8px';
-		detailsEl.style.fontSize = '0.9em';
-
-		const languageEl = detailsEl.createSpan('detected-language');
-		languageEl.innerHTML = `<strong>Language:</strong> -`;
-		languageEl.style.color = 'var(--text-muted)';
-
-		const confidenceEl = detailsEl.createSpan('confidence');
-		confidenceEl.innerHTML = `<strong>Confidence:</strong> -`;
-		confidenceEl.style.color = 'var(--text-muted)';
-
-		const methodEl = detailsEl.createSpan('method');
-		methodEl.innerHTML = `<strong>Method:</strong> -`;
-		methodEl.style.color = 'var(--text-muted)';
-
-		// Code preview
-		const codePreviewEl = entryEl.createDiv('code-preview');
-		codePreviewEl.style.backgroundColor = 'var(--background-primary-alt)';
-		codePreviewEl.style.border = '1px solid var(--background-modifier-border)';
-		codePreviewEl.style.borderRadius = '4px';
-		codePreviewEl.style.padding = '8px';
-		codePreviewEl.style.fontSize = '0.85em';
-		codePreviewEl.style.fontFamily = 'var(--font-monospace)';
-		codePreviewEl.style.maxHeight = '100px';
-		codePreviewEl.style.overflowY = 'auto';
-		codePreviewEl.style.marginBottom = '8px';
-		codePreviewEl.style.color = 'var(--text-muted)';
-		codePreviewEl.textContent = '// Hier wird eine Vorschau des erkannten Codes angezeigt';
-
-		// Action buttons placeholder
-		const actionsEl = entryEl.createDiv('entry-actions');
-		actionsEl.style.display = 'flex';
-		actionsEl.style.flexDirection = 'column';
-		actionsEl.style.gap = '8px';
-		actionsEl.style.justifyContent = 'flex-end';
-		actionsEl.style.alignItems = 'flex-end';
-		actionsEl.style.width = '100px';
-
-		// Disabled placeholder buttons
-		const undoButton = new ButtonComponent(actionsEl);
-		undoButton.setButtonText('-');
-		undoButton.setDisabled(true);
-
-		const editButton = new ButtonComponent(actionsEl);
-		editButton.setButtonText('-');
-		editButton.setDisabled(true);
+		const subText = emptyMessageEl.createDiv();
+		subText.style.fontSize = '0.9em';
+		subText.style.opacity = '0.8';
+		subText.textContent = 'No language detection operations have been performed yet.';
 	}
 
 	private createActionButtons(containerEl: HTMLElement): void {

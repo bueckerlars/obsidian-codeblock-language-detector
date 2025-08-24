@@ -8,6 +8,9 @@ export type DetectionMethod = 'highlight-js' | 'pattern-matching';
 // Trigger behaviors for when the plugin should activate
 export type TriggerBehavior = 'auto-on-open' | 'auto-on-edit' | 'auto-on-save' | 'manual';
 
+// Processing scope for code blocks
+export type ProcessingScope = 'current-note' | 'entire-vault';
+
 // Plugin settings interface
 export interface AutoSyntaxHighlightSettings {
 	// Trigger behavior setting
@@ -34,6 +37,9 @@ export interface AutoSyntaxHighlightSettings {
 	
 	// Enabled languages for detection (only these will be detected)
 	enabledLanguages: string[];
+	
+	// Processing scope setting
+	processingScope: ProcessingScope;
 	
 	// Persistent history data storage
 	historyData: HistoryEntry[];
@@ -151,5 +157,6 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	maxHistoryEntries: 100,
 	showNotifications: true,
 	enabledLanguages: [...SUPPORTED_LANGUAGES], // All languages enabled by default
+	processingScope: 'current-note', // Default to current note only
 	historyData: [],
 };

@@ -7,7 +7,8 @@ import {
 	CodeBlock, 
 	HistoryEntry,
 	DetectionResult,
-	DetectionMethod
+	DetectionMethod,
+	ProcessingScope
 } from './src/types';
 
 import { CodeAnalyzer } from './src/core/code-analyzer';
@@ -53,7 +54,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 
 		// Add ribbon icon
 		this.addRibbonIcon('code', 'CodeBlock Language Detector', () => {
-			this.processCurrentFile();
+			this.processBasedOnScope();
 		});
 
 		console.log('CodeBlock Language Detector plugin loaded');
@@ -95,21 +96,33 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		// Editor change handler (for auto-on-edit)
 		this.editorChangeHandler = (editor: Editor, view: MarkdownView) => {
 			if (this.settings.triggerBehavior === 'auto-on-edit') {
-				this.debounceProcessFile(view.file);
+				if (this.settings.processingScope === 'current-note') {
+					this.debounceProcessFile(view.file);
+				} else {
+					this.debounceProcessAllFiles();
+				}
 			}
 		};
 
 		// File open handler (for auto-on-open)
 		this.fileOpenHandler = (file: TFile) => {
 			if (this.settings.triggerBehavior === 'auto-on-open' && file.extension === 'md') {
-				setTimeout(() => this.processFile(file), 500); // Small delay to ensure file is loaded
+				if (this.settings.processingScope === 'current-note') {
+					setTimeout(() => this.processFile(file), 500); // Small delay to ensure file is loaded
+				} else {
+					setTimeout(() => this.processAllMarkdownFiles(), 500);
+				}
 			}
 		};
 
 		// File save handler (for auto-on-save)
 		this.fileSaveHandler = (file: TFile) => {
 			if (this.settings.triggerBehavior === 'auto-on-save' && file.extension === 'md') {
-				this.processFile(file);
+				if (this.settings.processingScope === 'current-note') {
+					this.processFile(file);
+				} else {
+					this.processAllMarkdownFiles();
+				}
 			}
 		};
 
@@ -128,7 +141,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			id: 'detect-languages-manual',
 			name: 'Detect and apply language tags',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				this.processCurrentFile();
+				this.processBasedOnScope();
 			}
 		});
 
@@ -177,6 +190,17 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Process based on the configured scope setting
+	 */
+	async processBasedOnScope(): Promise<void> {
+		if (this.settings.processingScope === 'current-note') {
+			await this.processCurrentFile();
+		} else {
+			await this.processAllMarkdownFiles();
+		}
 	}
 
 	/**
@@ -294,6 +318,8 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Debounced file processing for editor changes
 	 */
 	private debounceTimer: NodeJS.Timeout | null = null;
+	private debounceAllFilesTimer: NodeJS.Timeout | null = null;
+	
 	private debounceProcessFile(file: TFile | null): void {
 		if (this.debounceTimer) {
 			clearTimeout(this.debounceTimer);
@@ -302,6 +328,16 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		this.debounceTimer = setTimeout(() => {
 			this.processFile(file);
 		}, 2000); // 2 second delay
+	}
+
+	private debounceProcessAllFiles(): void {
+		if (this.debounceAllFilesTimer) {
+			clearTimeout(this.debounceAllFilesTimer);
+		}
+		
+		this.debounceAllFilesTimer = setTimeout(() => {
+			this.processAllMarkdownFiles();
+		}, 5000); // 5 second delay for all files (longer to avoid too frequent processing)
 	}
 
 	/**

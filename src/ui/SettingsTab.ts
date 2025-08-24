@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../main';
-import { DetectionMethod, TriggerBehavior, SUPPORTED_LANGUAGES } from '../types';
+import { DetectionMethod, TriggerBehavior, ProcessingScope, SUPPORTED_LANGUAGES } from '../types';
 
 /**
  * Settings tab for the CodeBlock Language Detector plugin
@@ -22,6 +22,9 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 		// Trigger Behavior Section
 		this.createTriggerBehaviorSection(containerEl);
+
+		// Processing Scope Section
+		this.createProcessingScopeSection(containerEl);
 
 		// Detection Settings Section
 		this.createDetectionSettingsSection(containerEl);
@@ -54,6 +57,24 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.triggerBehavior)
 					.onChange(async (value: TriggerBehavior) => {
 						this.plugin.settings.triggerBehavior = value;
+						await this.plugin.saveSettings();
+					});
+			});
+	}
+
+	private createProcessingScopeSection(containerEl: HTMLElement): void {
+		containerEl.createEl('h3', { text: 'Processing Scope' });
+
+		new Setting(containerEl)
+			.setName('Code block processing scope')
+			.setDesc('Choose whether to process code blocks in the current note only or across the entire vault')
+			.addDropdown(dropdown => {
+				dropdown
+					.addOption('current-note', 'Current note only')
+					.addOption('entire-vault', 'Entire vault')
+					.setValue(this.plugin.settings.processingScope)
+					.onChange(async (value: ProcessingScope) => {
+						this.plugin.settings.processingScope = value;
 						await this.plugin.saveSettings();
 					});
 			});
@@ -411,7 +432,8 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 			typeof settings.enableHistory === 'boolean' &&
 			typeof settings.maxHistoryEntries === 'number' &&
 			typeof settings.showNotifications === 'boolean' &&
-			Array.isArray(settings.enabledLanguages)
+			Array.isArray(settings.enabledLanguages) &&
+			typeof settings.processingScope === 'string'
 		);
 	}
 }

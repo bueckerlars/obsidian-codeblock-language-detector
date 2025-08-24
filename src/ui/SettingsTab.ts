@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../main';
-import { DetectionMethod, TriggerBehavior, ProcessingScope, SUPPORTED_LANGUAGES } from '../types';
+import { DetectionMethod, TriggerBehavior, ProcessingScope } from '../types';
 
 /**
  * Settings tab for the CodeBlock Language Detector plugin
@@ -217,11 +217,11 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 	private createAdvancedSettingsSection(containerEl: HTMLElement): void {
 		containerEl.createEl('h3', { text: 'Advanced' });
 
-		// Language Selection
+		// Pattern Language Selection
 		const languageSettingContainer = containerEl.createDiv('language-selection-container');
-		languageSettingContainer.createEl('h4', { text: 'Language Detection' });
+		languageSettingContainer.createEl('h4', { text: 'Pattern Matching Languages' });
 		languageSettingContainer.createEl('p', { 
-			text: 'Select which languages should be detected and applied automatically',
+			text: 'Select which languages should be used for pattern matching detection. Highlight.js detection is not affected by this setting.',
 			cls: 'setting-item-description'
 		});
 
@@ -240,8 +240,11 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		selectAllBtn.style.border = 'none';
 		selectAllBtn.style.borderRadius = '4px';
 		selectAllBtn.style.cursor = 'pointer';
+		// Get available pattern languages from the pattern matching detector  
+		const availablePatternLanguages = this.plugin.detectionEngine.getPatternMatchingDetector().getAvailableLanguages();
+		
 		selectAllBtn.addEventListener('click', async () => {
-			this.plugin.settings.enabledLanguages = [...SUPPORTED_LANGUAGES];
+			this.plugin.settings.enabledPatternLanguages = [...availablePatternLanguages];
 			await this.plugin.saveSettings();
 			this.display(); // Refresh display
 		});
@@ -255,7 +258,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		selectNoneBtn.style.borderRadius = '4px';
 		selectNoneBtn.style.cursor = 'pointer';
 		selectNoneBtn.addEventListener('click', async () => {
-			this.plugin.settings.enabledLanguages = [];
+			this.plugin.settings.enabledPatternLanguages = [];
 			await this.plugin.saveSettings();
 			this.display(); // Refresh display
 		});
@@ -272,9 +275,9 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		languageContainer.style.border = '1px solid var(--background-modifier-border)';
 		languageContainer.style.borderRadius = '6px';
 
-		// Create language toggles
-		SUPPORTED_LANGUAGES.forEach(language => {
-			const isEnabled = this.plugin.settings.enabledLanguages.includes(language);
+		// Create language toggles (only for available pattern languages)
+		availablePatternLanguages.forEach(language => {
+			const isEnabled = this.plugin.settings.enabledPatternLanguages.includes(language);
 			
 			const languageItem = languageContainer.createDiv('language-item');
 			languageItem.style.display = 'flex';
@@ -316,14 +319,14 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 			// Click handler for toggle
 			languageItem.addEventListener('click', async () => {
-				const currentlyEnabled = this.plugin.settings.enabledLanguages.includes(language);
+				const currentlyEnabled = this.plugin.settings.enabledPatternLanguages.includes(language);
 				
 				if (currentlyEnabled) {
 					// Remove language
-					this.plugin.settings.enabledLanguages = this.plugin.settings.enabledLanguages.filter(lang => lang !== language);
+					this.plugin.settings.enabledPatternLanguages = this.plugin.settings.enabledPatternLanguages.filter(lang => lang !== language);
 				} else {
 					// Add language
-					this.plugin.settings.enabledLanguages.push(language);
+					this.plugin.settings.enabledPatternLanguages.push(language);
 				}
 				
 				await this.plugin.saveSettings();
@@ -337,7 +340,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		countInfo.style.fontSize = '0.9em';
 		countInfo.style.color = 'var(--text-muted)';
 		countInfo.style.textAlign = 'center';
-		countInfo.textContent = `${this.plugin.settings.enabledLanguages.length} von ${SUPPORTED_LANGUAGES.length} Languages enabled`;
+		countInfo.textContent = `${this.plugin.settings.enabledPatternLanguages.length} von ${availablePatternLanguages.length} Pattern Languages enabled`;
 
 		// Plugin version and info
 		new Setting(containerEl)
@@ -432,7 +435,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 			typeof settings.enableHistory === 'boolean' &&
 			typeof settings.maxHistoryEntries === 'number' &&
 			typeof settings.showNotifications === 'boolean' &&
-			Array.isArray(settings.enabledLanguages) &&
+			Array.isArray(settings.enabledPatternLanguages) &&
 			typeof settings.processingScope === 'string'
 		);
 	}

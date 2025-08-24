@@ -10,21 +10,21 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	private readonly patternMatchingDetector: PatternMatchingDetector;
 	private detectionOrder: DetectionMethod[];
 	private confidenceThreshold: number;
-	private enabledLanguages: string[];
+	private enabledPatternLanguages: string[];
 
 	constructor(
 		detectionOrder: DetectionMethod[] = ['highlight-js', 'pattern-matching'],
 		confidenceThreshold: number = 70,
-		enabledLanguages: string[] = []
+		enabledPatternLanguages: string[] = []
 	) {
 		this.detectionOrder = detectionOrder;
 		this.confidenceThreshold = confidenceThreshold;
-		this.enabledLanguages = enabledLanguages;
+		this.enabledPatternLanguages = enabledPatternLanguages;
 		
 		// Initialize detectors with threshold converted to 0-1 scale
 		const normalizedThreshold = confidenceThreshold / 100;
 		this.highlightJsDetector = new HighlightJsDetector(normalizedThreshold);
-		this.patternMatchingDetector = new PatternMatchingDetector(normalizedThreshold);
+		this.patternMatchingDetector = new PatternMatchingDetector(normalizedThreshold, enabledPatternLanguages);
 	}
 
 	/**
@@ -43,7 +43,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 				
 				if (result && 
 					result.confidence >= this.confidenceThreshold && 
-					this.isLanguageEnabled(result.language)) {
+					this.isLanguageEnabledForMethod(result.language, method)) {
 					return result;
 				}
 			} catch (error) {
@@ -185,33 +185,43 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	}
 
 	/**
-	 * Updates the list of enabled languages
-	 * @param enabledLanguages Array of language names that should be detected
+	 * Updates the list of enabled languages for pattern matching
+	 * @param enabledPatternLanguages Array of language names that should be used for pattern matching
 	 */
-	setEnabledLanguages(enabledLanguages: string[]): void {
-		this.enabledLanguages = [...enabledLanguages];
+	setEnabledPatternLanguages(enabledPatternLanguages: string[]): void {
+		this.enabledPatternLanguages = [...enabledPatternLanguages];
+		// Also update the pattern matching detector
+		this.patternMatchingDetector.setEnabledLanguages(enabledPatternLanguages);
 	}
 
 	/**
-	 * Gets the current enabled languages
-	 * @returns Array of currently enabled language names
+	 * Gets the current enabled pattern languages
+	 * @returns Array of currently enabled pattern language names
 	 */
-	getEnabledLanguages(): string[] {
-		return [...this.enabledLanguages];
+	getEnabledPatternLanguages(): string[] {
+		return [...this.enabledPatternLanguages];
 	}
 
 	/**
-	 * Checks if a language is enabled for detection
+	 * Checks if a language is enabled for a specific detection method
 	 * @param language The language to check
-	 * @returns True if the language is enabled, false otherwise
+	 * @param method The detection method
+	 * @returns True if the language is enabled for the method, false otherwise
 	 */
-	private isLanguageEnabled(language: string): boolean {
-		// If no enabled languages are specified, allow all
-		if (this.enabledLanguages.length === 0) {
-			return true;
+	private isLanguageEnabledForMethod(language: string, method: DetectionMethod): boolean {
+		switch (method) {
+			case 'highlight-js':
+				// Highlight.js is not affected by language selection - always enabled
+				return true;
+			case 'pattern-matching':
+				// Pattern matching respects the enabled pattern languages setting
+				if (this.enabledPatternLanguages.length === 0) {
+					return true; // If no specific languages are enabled, allow all
+				}
+				return this.enabledPatternLanguages.includes(language);
+			default:
+				return true;
 		}
-		
-		return this.enabledLanguages.includes(language);
 	}
 
 	/**

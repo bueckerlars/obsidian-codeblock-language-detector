@@ -25,7 +25,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	
 	// Core services
 	codeAnalyzer: CodeAnalyzer;
-	languageDetectionEngine: LanguageDetectionEngine;
+	detectionEngine: LanguageDetectionEngine;
 	syntaxApplier: SyntaxApplier;
 	historyService: HistoryService;
 
@@ -70,10 +70,10 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	private initializeServices(): void {
 		this.codeAnalyzer = new CodeAnalyzer();
 		
-		this.languageDetectionEngine = new LanguageDetectionEngine(
+		this.detectionEngine = new LanguageDetectionEngine(
 			this.settings.detectionMethodOrder,
 			this.settings.confidenceThreshold,
-			this.settings.enabledLanguages
+			this.settings.enabledPatternLanguages
 		);
 		
 		this.syntaxApplier = new SyntaxApplier();
@@ -240,7 +240,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 
 			// Process each code block
 			for (const codeBlock of codeBlocks) {
-				const detectionResult = await this.languageDetectionEngine.detectLanguage(codeBlock.content);
+				const detectionResult = await this.detectionEngine.detectLanguage(codeBlock.content);
 				
 				if (detectionResult) {
 					try {
@@ -399,10 +399,10 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 */
 	updateDetectionEngineSettings(): void {
 		// Set confidence threshold first
-		this.languageDetectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
+		this.detectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
 		
-		// Set enabled languages
-		this.languageDetectionEngine.setEnabledLanguages(this.settings.enabledLanguages);
+		// Set enabled pattern languages
+		this.detectionEngine.setEnabledPatternLanguages(this.settings.enabledPatternLanguages);
 		
 		// Build the detection order based on enabled methods and user preference
 		const enabledMethods: DetectionMethod[] = [];
@@ -417,7 +417,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		}
 		
 		// Set the final detection order (this respects the user's chosen order)
-		this.languageDetectionEngine.setDetectionOrder(enabledMethods);
+		this.detectionEngine.setDetectionOrder(enabledMethods);
 	}
 
 	/**
@@ -458,7 +458,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		await this.saveData(this.settings);
 		
 		// Update detection engine settings when settings change
-		if (this.languageDetectionEngine) {
+		if (this.detectionEngine) {
 			this.updateDetectionEngineSettings();
 		}
 		

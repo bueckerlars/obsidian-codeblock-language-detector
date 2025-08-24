@@ -35,8 +35,8 @@ export interface AutoSyntaxHighlightSettings {
 	// Enable notifications when language is detected
 	showNotifications: boolean;
 	
-	// Enabled languages for detection (only these will be detected)
-	enabledLanguages: string[];
+	// Enabled languages for pattern matching detection (only these will be used for pattern matching)
+	enabledPatternLanguages: string[];
 	
 	// Processing scope setting
 	processingScope: ProcessingScope;
@@ -156,7 +156,7 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	enableHistory: true,
 	maxHistoryEntries: 100,
 	showNotifications: true,
-	enabledLanguages: [...SUPPORTED_LANGUAGES], // All languages enabled by default
+	enabledPatternLanguages: ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash'], // All pattern-based languages enabled by default
 	processingScope: 'current-note', // Default to current note only
 	historyData: [],
 };

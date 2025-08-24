@@ -14,9 +14,11 @@ const bashPattern = require('../../data/patterns/bash.json');
 export class PatternMatchingDetector implements ILanguageDetector {
 	private readonly patterns: Map<string, LanguagePattern>;
 	private minConfidence: number;
+	private enabledLanguages: string[];
 
-	constructor(minConfidence: number = 0.6) {
+	constructor(minConfidence: number = 0.6, enabledLanguages: string[] = []) {
 		this.minConfidence = minConfidence;
+		this.enabledLanguages = enabledLanguages;
 		this.patterns = new Map();
 		this.initializePatterns();
 	}
@@ -51,8 +53,13 @@ export class PatternMatchingDetector implements ILanguageDetector {
 
 		const results: Array<{ language: string; confidence: number }> = [];
 
-		// Analyze each language pattern
+		// Analyze each language pattern (only for enabled languages)
 		for (const [languageName, pattern] of this.patterns) {
+			// Skip if language is not enabled for pattern matching
+			if (!this.isLanguageEnabled(languageName)) {
+				continue;
+			}
+			
 			const confidence = this.calculateLanguageConfidence(code, pattern);
 			if (confidence > 0) {
 				results.push({ language: languageName, confidence });
@@ -235,6 +242,36 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	 */
 	getAvailableLanguages(): string[] {
 		return Array.from(this.patterns.keys());
+	}
+
+	/**
+	 * Sets the enabled languages for pattern matching
+	 * @param enabledLanguages Array of language names to enable
+	 */
+	setEnabledLanguages(enabledLanguages: string[]): void {
+		this.enabledLanguages = [...enabledLanguages];
+	}
+
+	/**
+	 * Gets the currently enabled languages
+	 * @returns Array of enabled language names
+	 */
+	getEnabledLanguages(): string[] {
+		return [...this.enabledLanguages];
+	}
+
+	/**
+	 * Checks if a language is enabled for pattern matching
+	 * @param language The language to check
+	 * @returns True if the language is enabled
+	 */
+	private isLanguageEnabled(language: string): boolean {
+		// If no enabled languages are specified, allow all available pattern languages
+		if (this.enabledLanguages.length === 0) {
+			return true;
+		}
+		
+		return this.enabledLanguages.includes(language);
 	}
 
 	/**

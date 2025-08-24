@@ -44,8 +44,8 @@ The plugin uses two intelligent detection methods:
 5. Install and enable the plugin
 
 ### Manual Installation
-1. Download the latest version from the [Releases page](https://github.com/bueckerlars/obsidian-auto-syntax-highlight/releases)
-2. Extract files to your vault folder: `VaultFolder/.obsidian/plugins/obsidian-auto-syntax-highlight/`
+1. Download the latest version from the [Releases page](https://github.com/bueckerlars/obsidian-codeblock-language-detector/releases)
+2. Extract files to your vault folder: `VaultFolder/.obsidian/plugins/obsidian-codeblock-language-detector/`
 3. Reload Obsidian and enable the plugin in settings
 
 ## Features
@@ -191,13 +191,13 @@ The plugin supports over 70 programming languages through the combination of Hig
 
 This plugin is Open Source and available under the MIT License. Contributions are welcome!
 
-**Repository**: [GitHub](https://github.com/bueckerlars/obsidian-auto-syntax-highlight)
-**Issues & Feature Requests**: [GitHub Issues](https://github.com/bueckerlars/obsidian-auto-syntax-highlight/issues)
+**Repository**: [GitHub](https://github.com/bueckerlars/obsidian-codeblock-language-detector)
+**Issues & Feature Requests**: [GitHub Issues](https://github.com/bueckerlars/obsidian-codeblock-language-detector/issues)
 
 ### Local Development
 ```bash
-git clone https://github.com/bueckerlars/obsidian-auto-syntax-highlight.git
-cd obsidian-auto-syntax-highlight
+git clone https://github.com/bueckerlars/obsidian-codeblock-language-detector.git
+cd obsidian-codeblock-language-detector
 npm install
 npm run dev
 ```
@@ -205,7 +205,7 @@ npm run dev
 ## Support
 
 For issues or questions:
-1. Check the [known issues](https://github.com/bueckerlars/obsidian-auto-syntax-highlight/issues)
+1. Check the [known issues](https://github.com/bueckerlars/obsidian-codeblock-language-detector/issues)
 2. Create a new issue with detailed description
 3. Use the Discussion forum for general questions
 

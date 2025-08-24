@@ -1,19 +1,19 @@
 import { DetectionResult, ILanguageDetector, LanguagePattern } from '../../types';
 
 // Import pattern data
-import javascriptPattern from '../../data/patterns/javascript.json';
-import typescriptPattern from '../../data/patterns/typescript.json';
-import pythonPattern from '../../data/patterns/python.json';
-import javaPattern from '../../data/patterns/java.json';
-import cppPattern from '../../data/patterns/cpp.json';
-import bashPattern from '../../data/patterns/bash.json';
+const javascriptPattern = require('../../data/patterns/javascript.json');
+const typescriptPattern = require('../../data/patterns/typescript.json');
+const pythonPattern = require('../../data/patterns/python.json');
+const javaPattern = require('../../data/patterns/java.json');
+const cppPattern = require('../../data/patterns/cpp.json');
+const bashPattern = require('../../data/patterns/bash.json');
 
 /**
  * Language detector using pattern matching and keyword analysis
  */
 export class PatternMatchingDetector implements ILanguageDetector {
 	private readonly patterns: Map<string, LanguagePattern>;
-	private readonly minConfidence: number;
+	private minConfidence: number;
 
 	constructor(minConfidence: number = 0.6) {
 		this.minConfidence = minConfidence;

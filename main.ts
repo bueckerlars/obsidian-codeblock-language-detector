@@ -6,7 +6,8 @@ import {
 	DEFAULT_SETTINGS, 
 	CodeBlock, 
 	HistoryEntry,
-	DetectionResult
+	DetectionResult,
+	DetectionMethod
 } from './src/types';
 
 import { CodeAnalyzer } from './src/core/code-analyzer';
@@ -81,6 +82,9 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		this.historyService.setSaveCallback(async () => {
 			await this.saveHistoryData();
 		});
+		
+		// Apply current settings to detection engine
+		this.updateDetectionEngineSettings();
 	}
 
 	/**
@@ -357,10 +361,23 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Update detection engine settings
 	 */
 	updateDetectionEngineSettings(): void {
-		this.languageDetectionEngine.setDetectionOrder(this.settings.detectionMethodOrder);
+		// Set confidence threshold first
 		this.languageDetectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
-		this.languageDetectionEngine.setMethodEnabled('highlight-js', this.settings.enableHighlightJs);
-		this.languageDetectionEngine.setMethodEnabled('pattern-matching', this.settings.enablePatternMatching);
+		
+		// Build the detection order based on enabled methods and user preference
+		const enabledMethods: DetectionMethod[] = [];
+		
+		// Add methods in the order specified by user settings, but only if they're enabled
+		for (const method of this.settings.detectionMethodOrder) {
+			if (method === 'highlight-js' && this.settings.enableHighlightJs) {
+				enabledMethods.push(method);
+			} else if (method === 'pattern-matching' && this.settings.enablePatternMatching) {
+				enabledMethods.push(method);
+			}
+		}
+		
+		// Set the final detection order (this respects the user's chosen order)
+		this.languageDetectionEngine.setDetectionOrder(enabledMethods);
 	}
 
 	/**

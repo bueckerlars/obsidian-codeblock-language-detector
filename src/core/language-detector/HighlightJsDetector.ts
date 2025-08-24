@@ -5,7 +5,7 @@ import { DetectionResult, ILanguageDetector } from '../../types';
  * Language detector using highlight.js library
  */
 export class HighlightJsDetector implements ILanguageDetector {
-	private readonly minConfidence: number;
+	private minConfidence: number;
 
 	constructor(minConfidence: number = 0.5) {
 		this.minConfidence = minConfidence;

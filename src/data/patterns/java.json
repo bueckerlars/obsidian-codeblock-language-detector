@@ -1,0 +1,42 @@
+{
+  "name": "Java",
+  "extensions": [".java"],
+  "keywords": [
+    "public", "private", "protected", "static", "final", "abstract", "class", "interface", "enum", "extends", "implements",
+    "package", "import", "void", "int", "long", "short", "byte", "float", "double", "boolean", "char", "String",
+    "if", "else", "for", "while", "do", "switch", "case", "break", "continue", "return", "try", "catch", "finally",
+    "throw", "throws", "new", "this", "super", "null", "true", "false", "instanceof", "synchronized", "volatile",
+    "transient", "native", "strictfp", "assert"
+  ],
+  "patterns": [
+    "public\\s+class\\s+\\w+",
+    "public\\s+static\\s+void\\s+main",
+    "package\\s+[\\w\\.]+",
+    "import\\s+[\\w\\.]+",
+    "\\w+\\s+\\w+\\s*\\(",
+    "System\\.out\\.print",
+    "new\\s+\\w+\\s*\\(",
+    "@\\w+",
+    "\\w+\\.class",
+    "throws\\s+\\w+",
+    "catch\\s*\\(\\w+",
+    "extends\\s+\\w+",
+    "implements\\s+\\w+"
+  ],
+  "imports": [
+    "import", "package"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}, {"start": "/**", "end": "*/"}]
+  },
+  "operators": [
+    "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
+    ">>=", "<<<=", ">>>=", "instanceof"
+  ],
+  "builtins": [
+    "System", "String", "Object", "Class", "Integer", "Long", "Short", "Byte", "Float", "Double", "Boolean",
+    "Character", "Array", "List", "ArrayList", "LinkedList", "Set", "HashSet", "Map", "HashMap", "Collection",
+    "Iterator", "Exception", "RuntimeException", "Thread", "Runnable", "Math", "Random"
+  ]
+}

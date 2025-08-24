@@ -1,0 +1,45 @@
+{
+  "name": "C++",
+  "extensions": [".cpp", ".cxx", ".cc", ".hpp", ".hxx", ".h"],
+  "keywords": [
+    "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern",
+    "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static",
+    "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while", "class", "private",
+    "protected", "public", "friend", "inline", "operator", "overload", "virtual", "template", "typename",
+    "namespace", "using", "new", "delete", "this", "try", "catch", "throw", "const_cast", "dynamic_cast",
+    "reinterpret_cast", "static_cast", "typeid", "explicit", "mutable", "export"
+  ],
+  "patterns": [
+    "#include\\s*<\\w+>",
+    "#include\\s*\"\\w+\"",
+    "using\\s+namespace\\s+\\w+",
+    "class\\s+\\w+",
+    "struct\\s+\\w+",
+    "template\\s*<",
+    "std::\\w+",
+    "cout\\s*<<",
+    "cin\\s*>>",
+    "endl",
+    "new\\s+\\w+",
+    "delete\\s+\\w+",
+    "\\w+::\\w+",
+    "public:",
+    "private:",
+    "protected:"
+  ],
+  "imports": [
+    "#include", "using", "namespace"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}]
+  },
+  "operators": [
+    "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
+    ">>=", "<<=", "->", "::", ".*", "->*"
+  ],
+  "builtins": [
+    "std", "cout", "cin", "endl", "string", "vector", "map", "set", "list", "queue", "stack", "pair", "make_pair",
+    "sort", "find", "begin", "end", "size", "empty", "push_back", "pop_back", "insert", "erase", "clear"
+  ]
+}

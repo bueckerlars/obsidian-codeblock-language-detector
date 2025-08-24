@@ -1,9 +1,9 @@
 {
-	"id": "obsidian-auto-syntax-hightlight",
-	"name": "Auto Syntax Hightlight",
+	"id": "obsidian-auto-syntax-highlight",
+	"name": "Auto Syntax Highlight",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
-	"description": "This plugin hightlights codeblocks without language specified",
+	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting",
 	"author": "Lars Bücker",
 	"authorUrl": "https://github.com/bueckerlars",
 	"fundingUrl": "",

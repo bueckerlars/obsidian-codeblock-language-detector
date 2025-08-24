@@ -1,0 +1,44 @@
+{
+  "name": "Python",
+  "extensions": [".py", ".pyw", ".pyi"],
+  "keywords": [
+    "def", "class", "if", "elif", "else", "for", "while", "try", "except", "finally", "with", "as", "import", "from",
+    "return", "yield", "break", "continue", "pass", "lambda", "and", "or", "not", "in", "is", "None", "True", "False",
+    "global", "nonlocal", "assert", "del", "raise", "async", "await", "match", "case"
+  ],
+  "patterns": [
+    "def\\s+\\w+\\s*\\(",
+    "class\\s+\\w+",
+    "import\\s+\\w+",
+    "from\\s+\\w+\\s+import",
+    "if\\s+__name__\\s*==\\s*['\"]__main__['\"]",
+    "\\w+\\s*=\\s*\\[",
+    "\\w+\\s*=\\s*\\{",
+    "print\\s*\\(",
+    "len\\s*\\(",
+    "range\\s*\\(",
+    "for\\s+\\w+\\s+in",
+    "with\\s+\\w+",
+    "except\\s+\\w+",
+    "\\w+\\.\\w+\\(",
+    "self\\.",
+    "__\\w+__"
+  ],
+  "imports": [
+    "import", "from", "as"
+  ],
+  "comments": {
+    "line": ["#"],
+    "block": [{"start": "\"\"\"", "end": "\"\"\""}, {"start": "'''", "end": "'''"}]
+  },
+  "operators": [
+    "==", "!=", "<=", ">=", "<", ">", "and", "or", "not", "in", "is", "+=", "-=", "*=", "/=", "//=", "%=", "**=",
+    "&=", "|=", "^=", ">>=", "<<="
+  ],
+  "builtins": [
+    "print", "len", "range", "list", "dict", "set", "tuple", "str", "int", "float", "bool", "type", "isinstance",
+    "hasattr", "getattr", "setattr", "delattr", "dir", "vars", "locals", "globals", "eval", "exec", "open",
+    "input", "map", "filter", "reduce", "zip", "enumerate", "sorted", "reversed", "sum", "min", "max", "abs",
+    "round", "pow", "divmod", "ord", "chr", "hex", "oct", "bin", "repr", "format", "bytes", "bytearray"
+  ]
+}

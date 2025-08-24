@@ -1,0 +1,41 @@
+{
+  "name": "JavaScript",
+  "extensions": [".js", ".mjs", ".jsx"],
+  "keywords": [
+    "function", "var", "let", "const", "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+    "return", "try", "catch", "finally", "throw", "new", "this", "super", "class", "extends", "import", "export",
+    "default", "from", "as", "typeof", "instanceof", "in", "of", "async", "await", "yield", "static", "get", "set"
+  ],
+  "patterns": [
+    "function\\s+\\w+\\s*\\(",
+    "\\bvar\\s+\\w+",
+    "\\blet\\s+\\w+",
+    "\\bconst\\s+\\w+",
+    "\\w+\\s*=>",
+    "\\w+\\.\\w+\\(",
+    "import\\s+.*\\s+from",
+    "export\\s+(default\\s+)?",
+    "console\\.log\\(",
+    "document\\.",
+    "window\\.",
+    "\\$\\(",
+    "require\\s*\\(",
+    "\\.then\\s*\\(",
+    "\\.catch\\s*\\("
+  ],
+  "imports": [
+    "import", "require", "export", "from"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}]
+  },
+  "operators": [
+    "===", "!==", "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%="
+  ],
+  "builtins": [
+    "console", "document", "window", "global", "process", "module", "exports", "require", "setTimeout", "setInterval",
+    "clearTimeout", "clearInterval", "Promise", "Array", "Object", "String", "Number", "Boolean", "Date", "Math",
+    "JSON", "RegExp", "Error", "TypeError", "ReferenceError", "SyntaxError"
+  ]
+}

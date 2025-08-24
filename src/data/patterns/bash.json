@@ -1,0 +1,49 @@
+{
+  "name": "Bash",
+  "extensions": [".sh", ".bash", ".zsh"],
+  "keywords": [
+    "if", "then", "else", "elif", "fi", "case", "esac", "for", "while", "until", "do", "done", "function",
+    "return", "break", "continue", "exit", "local", "readonly", "declare", "typeset", "export", "unset",
+    "shift", "getopts", "read", "echo", "printf", "test", "eval", "exec", "source", "alias", "unalias"
+  ],
+  "patterns": [
+    "#!/bin/bash",
+    "#!/bin/sh",
+    "#!/usr/bin/env bash",
+    "\\$\\{\\w+\\}",
+    "\\$\\w+",
+    "\\$\\d+",
+    "\\$\\*",
+    "\\$@",
+    "\\$\\?",
+    "\\$\\$",
+    "if\\s+\\[",
+    "for\\s+\\w+\\s+in",
+    "while\\s+\\[",
+    "function\\s+\\w+",
+    "\\w+\\s*\\(\\s*\\)",
+    "echo\\s+",
+    "grep\\s+",
+    "sed\\s+",
+    "awk\\s+",
+    "find\\s+",
+    "chmod\\s+",
+    "chown\\s+"
+  ],
+  "imports": [
+    "source", ".", "export"
+  ],
+  "comments": {
+    "line": ["#"],
+    "block": []
+  },
+  "operators": [
+    "-eq", "-ne", "-lt", "-le", "-gt", "-ge", "-z", "-n", "-f", "-d", "-e", "-r", "-w", "-x", "&&", "||", "!",
+    "==", "!=", "=~", ">", "<", ">>", "<<", "|", "&", ";"
+  ],
+  "builtins": [
+    "echo", "printf", "read", "test", "grep", "sed", "awk", "find", "sort", "uniq", "head", "tail", "cat", "cut",
+    "tr", "wc", "ls", "cp", "mv", "rm", "mkdir", "rmdir", "chmod", "chown", "ps", "kill", "jobs", "bg", "fg",
+    "nohup", "sleep", "date", "whoami", "pwd", "cd", "pushd", "popd", "which", "whereis", "type", "alias"
+  ]
+}

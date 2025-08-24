@@ -1,8 +1,317 @@
 /*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
+Auto Syntax Highlight Plugin Styles
 */
+
+/* History Modal Styles */
+.history-controls {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--background-secondary);
+  border-radius: 8px;
+}
+
+.history-entries-container {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.history-entry {
+  padding: 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  transition: background-color 0.2s ease;
+}
+
+.history-entry:hover {
+  background-color: var(--background-modifier-hover) !important;
+}
+
+.history-entry.applied {
+  border-left: 3px solid var(--color-green);
+}
+
+.history-entry.unapplied {
+  border-left: 3px solid var(--color-orange);
+}
+
+.entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.file-name {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: var(--text-normal);
+}
+
+.file-path {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.entry-status {
+  text-align: right;
+}
+
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: white;
+}
+
+.status-badge.applied {
+  background-color: var(--color-green);
+}
+
+.status-badge.unapplied {
+  background-color: var(--color-orange);
+}
+
+.timestamp {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.entry-details {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+  flex-wrap: wrap;
+}
+
+.detected-language,
+.confidence,
+.method {
+  color: var(--text-muted);
+}
+
+.code-preview {
+  background-color: var(--background-primary-alt);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 0.85em;
+  font-family: var(--font-monospace);
+  max-height: 100px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.entry-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.results-count {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stats {
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+/* Settings Tab Styles */
+.supported-languages {
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.plugin-info {
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+/* Button Styles */
+.mod-warning {
+  background-color: var(--color-orange);
+  color: white;
+}
+
+.mod-warning:hover {
+  background-color: var(--color-red);
+}
+
+.mod-cta {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+.mod-cta:hover {
+  background-color: var(--color-accent-hover);
+}
+
+/* Search Input Styles */
+input[type="text"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-2);
+}
+
+/* Select Dropdown Styles */
+select {
+  padding: 6px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .entry-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .entry-status {
+    text-align: left;
+  }
+  
+  .entry-details {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .entry-actions {
+    justify-content: flex-start;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Dark/Light Theme Compatibility */
+.theme-dark .history-entry:nth-child(even) {
+  background-color: var(--background-secondary);
+}
+
+.theme-light .history-entry:nth-child(even) {
+  background-color: var(--background-secondary);
+}
+
+/* Animation for smooth transitions */
+.history-entry {
+  transition: all 0.2s ease;
+}
+
+.status-badge {
+  transition: background-color 0.2s ease;
+}
+
+/* Scrollbar Styling */
+.history-entries-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.history-entries-container::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+.history-entries-container::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 4px;
+}
+
+.history-entries-container::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.code-preview::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.code-preview::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 3px;
+}
+
+.code-preview::-webkit-scrollbar-thumb {
+  background: var(--background-modifier-border);
+  border-radius: 3px;
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid var(--color-accent);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

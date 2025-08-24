@@ -1,0 +1,45 @@
+{
+  "name": "TypeScript",
+  "extensions": [".ts", ".tsx"],
+  "keywords": [
+    "function", "var", "let", "const", "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+    "return", "try", "catch", "finally", "throw", "new", "this", "super", "class", "extends", "import", "export",
+    "default", "from", "as", "typeof", "instanceof", "in", "of", "async", "await", "yield", "static", "get", "set",
+    "interface", "type", "enum", "namespace", "module", "declare", "public", "private", "protected", "readonly",
+    "abstract", "implements", "keyof", "infer", "never", "unknown", "any", "void", "undefined", "null"
+  ],
+  "patterns": [
+    "interface\\s+\\w+",
+    "type\\s+\\w+\\s*=",
+    "enum\\s+\\w+",
+    "\\w+:\\s*\\w+",
+    "function\\s+\\w+\\s*\\(",
+    "\\w+\\s*=>",
+    "import\\s+.*\\s+from",
+    "export\\s+(default\\s+)?",
+    "<\\w+>",
+    "\\w+\\s*\\|\\s*\\w+",
+    "\\w+\\s*&\\s*\\w+",
+    "\\w+\\[\\]",
+    "Array<\\w+>",
+    "Promise<\\w+>",
+    "keyof\\s+\\w+",
+    "typeof\\s+\\w+"
+  ],
+  "imports": [
+    "import", "export", "from", "as", "declare", "module", "namespace"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}]
+  },
+  "operators": [
+    "===", "!==", "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=",
+    "=>", "?:", "??", "?.", "!"
+  ],
+  "builtins": [
+    "console", "document", "window", "global", "process", "module", "exports", "require", "setTimeout", "setInterval",
+    "clearTimeout", "clearInterval", "Promise", "Array", "Object", "String", "Number", "Boolean", "Date", "Math",
+    "JSON", "RegExp", "Error", "TypeError", "ReferenceError", "SyntaxError", "Record", "Partial", "Pick", "Omit"
+  ]
+}

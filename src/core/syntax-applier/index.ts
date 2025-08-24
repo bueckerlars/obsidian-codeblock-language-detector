@@ -1,0 +1,1 @@
+export { SyntaxApplier } from './SyntaxApplier';

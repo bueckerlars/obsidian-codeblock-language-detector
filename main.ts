@@ -17,7 +17,7 @@ import { HistoryService } from './src/services';
 import { AutoSyntaxHighlightSettingsTab, HistoryModal } from './src/ui';
 
 /**
- * Main plugin class for Auto Syntax Highlight
+ * Main plugin class for CodeBlock Language Detector
  */
 export default class AutoSyntaxHighlightPlugin extends Plugin {
 	settings: AutoSyntaxHighlightSettings;
@@ -52,15 +52,15 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		this.addSettingTab(new AutoSyntaxHighlightSettingsTab(this.app, this));
 
 		// Add ribbon icon
-		this.addRibbonIcon('code', 'Auto Syntax Highlight', () => {
+		this.addRibbonIcon('code', 'CodeBlock Language Detector', () => {
 			this.processCurrentFile();
 		});
 
-		console.log('Auto Syntax Highlight plugin loaded');
+		console.log('CodeBlock Language Detector plugin loaded');
 	}
 
 	onunload(): void {
-		console.log('Auto Syntax Highlight plugin unloaded');
+		console.log('CodeBlock Language Detector plugin unloaded');
 	}
 
 	/**

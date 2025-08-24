@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-auto-syntax-hightlight",
+	"name": "obsidian-codeblock-language-detector",
 	"version": "0.1.0",
-	"description": "This plugin hightlights codeblocks without language specified",
+	"description": "CodeBlock Language Detector - Automatically detects and adds language tags to code blocks",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",

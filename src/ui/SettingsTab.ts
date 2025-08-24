@@ -3,7 +3,7 @@ import AutoSyntaxHighlightPlugin from '../../main';
 import { DetectionMethod, TriggerBehavior, SUPPORTED_LANGUAGES } from '../types';
 
 /**
- * Settings tab for the Auto Syntax Highlight plugin
+ * Settings tab for the CodeBlock Language Detector plugin
  */
 export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 	plugin: AutoSyntaxHighlightPlugin;
@@ -18,7 +18,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Title
-		containerEl.createEl('h2', { text: 'Auto Syntax Highlight Settings' });
+		containerEl.createEl('h2', { text: 'CodeBlock Language Detector Settings' });
 
 		// Trigger Behavior Section
 		this.createTriggerBehaviorSection(containerEl);

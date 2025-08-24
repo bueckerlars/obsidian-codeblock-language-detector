@@ -1,6 +1,6 @@
 {
-	"id": "obsidian-auto-syntax-highlight",
-	"name": "Auto Syntax Highlight",
+	"id": "obsidian-codeblock-language-detector",
+	"name": "CodeBlock Language Detector",
 	"version": "0.1.0",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting",

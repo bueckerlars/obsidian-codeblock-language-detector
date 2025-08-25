@@ -1,2 +1,2 @@
 export { DynamicAutoSyntaxHighlightSettingsTab } from './DynamicSettingsTab';
-export { HistoryModal } from './HistoryModal';
+export { HistoryModal } from './history/HistoryModal';

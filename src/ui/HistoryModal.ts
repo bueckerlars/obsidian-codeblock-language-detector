@@ -56,24 +56,14 @@ export class HistoryModal extends Modal {
 
 	private createControls(containerEl: HTMLElement): void {
 		const controlsContainer = containerEl.createDiv('history-controls');
-		controlsContainer.style.marginBottom = '16px';
-		controlsContainer.style.padding = '12px';
-		controlsContainer.style.backgroundColor = 'var(--background-secondary)';
-		controlsContainer.style.borderRadius = '8px';
 
 		// Search input
-		const searchContainer = controlsContainer.createDiv();
-		searchContainer.style.marginBottom = '12px';
+		const searchContainer = controlsContainer.createDiv('search-container');
 		
 		const searchInput = searchContainer.createEl('input', {
 			type: 'text',
 			placeholder: 'Search by filename or language...',
 		});
-		searchInput.style.width = '100%';
-		searchInput.style.padding = '8px';
-		searchInput.style.border = '1px solid var(--background-modifier-border)';
-		searchInput.style.borderRadius = '4px';
-		searchInput.style.backgroundColor = 'var(--background-primary)';
 		
 		searchInput.addEventListener('input', (e) => {
 			this.searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
@@ -82,23 +72,16 @@ export class HistoryModal extends Modal {
 		});
 
 		// Filter and sort controls
-		const filtersContainer = controlsContainer.createDiv();
-		filtersContainer.style.display = 'flex';
-		filtersContainer.style.gap = '12px';
-		filtersContainer.style.alignItems = 'center';
+		const filtersContainer = controlsContainer.createDiv('filters-container');
 
 		// Filter dropdown
 		const filterSelect = filtersContainer.createEl('select');
-		filterSelect.style.padding = '6px';
-		filterSelect.style.border = '1px solid var(--background-modifier-border)';
-		filterSelect.style.borderRadius = '4px';
-		filterSelect.style.backgroundColor = 'var(--background-primary)';
 		
-		filterSelect.innerHTML = `
-			<option value="all">All entries</option>
-			<option value="applied">Applied only</option>
-			<option value="unapplied">Unapplied only</option>
-		`;
+		// Create filter options without innerHTML
+		const allOption = filterSelect.createEl('option', { value: 'all', text: 'All entries' });
+		const appliedOption = filterSelect.createEl('option', { value: 'applied', text: 'Applied only' });
+		const unappliedOption = filterSelect.createEl('option', { value: 'unapplied', text: 'Unapplied only' });
+		
 		filterSelect.value = this.currentFilter;
 		
 		filterSelect.addEventListener('change', (e) => {
@@ -109,16 +92,12 @@ export class HistoryModal extends Modal {
 
 		// Sort dropdown
 		const sortSelect = filtersContainer.createEl('select');
-		sortSelect.style.padding = '6px';
-		sortSelect.style.border = '1px solid var(--background-modifier-border)';
-		sortSelect.style.borderRadius = '4px';
-		sortSelect.style.backgroundColor = 'var(--background-primary)';
 		
-		sortSelect.innerHTML = `
-			<option value="newest">Newest first</option>
-			<option value="oldest">Oldest first</option>
-			<option value="confidence">By confidence</option>
-		`;
+		// Create sort options without innerHTML
+		const newestOption = sortSelect.createEl('option', { value: 'newest', text: 'Newest first' });
+		const oldestOption = sortSelect.createEl('option', { value: 'oldest', text: 'Oldest first' });
+		const confidenceOption = sortSelect.createEl('option', { value: 'confidence', text: 'By confidence' });
+		
 		sortSelect.value = this.currentSort;
 		
 		sortSelect.addEventListener('change', (e) => {
@@ -128,23 +107,13 @@ export class HistoryModal extends Modal {
 		});
 
 		// Results count
-		const resultsCount = filtersContainer.createSpan();
-		resultsCount.className = 'results-count';
-		resultsCount.style.marginLeft = 'auto';
-		resultsCount.style.color = 'var(--text-muted)';
-		resultsCount.style.fontSize = '0.9em';
+		const resultsCount = filtersContainer.createSpan('results-count');
 		
 		this.updateResultsCount(resultsCount);
 	}
 
 	private createEntriesList(containerEl: HTMLElement): void {
-		const listContainer = containerEl.createDiv('history-entries');
-		listContainer.className = 'history-entries-container';
-		listContainer.style.maxHeight = '400px';
-		listContainer.style.overflowY = 'auto';
-		listContainer.style.border = '1px solid var(--background-modifier-border)';
-		listContainer.style.borderRadius = '8px';
-		listContainer.style.marginBottom = '16px';
+		const listContainer = containerEl.createDiv('history-entries-container');
 
 		this.refreshEntriesList();
 	}
@@ -172,77 +141,48 @@ export class HistoryModal extends Modal {
 	}
 
 	private createEntryElement(container: HTMLElement, entry: HistoryEntry, index: number): void {
-		const entryEl = container.createDiv('history-entry');
-		entryEl.className = `history-entry ${entry.applied ? 'applied' : 'unapplied'}`;
-		entryEl.style.padding = '12px';
-		entryEl.style.borderBottom = '1px solid var(--background-modifier-border)';
-		entryEl.style.backgroundColor = index % 2 === 0 ? 'var(--background-primary)' : 'var(--background-secondary)';
+		const entryEl = container.createDiv(`history-entry ${entry.applied ? 'applied' : 'unapplied'}`);
 
 		// Entry header
 		const headerEl = entryEl.createDiv('entry-header');
-		headerEl.style.display = 'flex';
-		headerEl.style.justifyContent = 'space-between';
-		headerEl.style.alignItems = 'center';
-		headerEl.style.marginBottom = '8px';
 
 		// File info
 		const fileInfoEl = headerEl.createDiv('file-info');
 		const fileNameEl = fileInfoEl.createSpan('file-name');
 		fileNameEl.textContent = entry.fileName;
-		fileNameEl.style.fontWeight = 'bold';
-		fileNameEl.style.fontSize = '1.1em';
 
 		const filePathEl = fileInfoEl.createDiv('file-path');
 		filePathEl.textContent = entry.filePath;
-		filePathEl.style.fontSize = '0.8em';
-		filePathEl.style.color = 'var(--text-muted)';
 
 		// Status and timestamp
 		const statusEl = headerEl.createDiv('entry-status');
-		statusEl.style.textAlign = 'right';
 
-		const statusBadge = statusEl.createSpan('status-badge');
+		const statusBadge = statusEl.createSpan(`status-badge ${entry.applied ? 'applied' : 'unapplied'}`);
 		statusBadge.textContent = entry.applied ? 'Applied' : 'Unapplied';
-		statusBadge.style.padding = '2px 8px';
-		statusBadge.style.borderRadius = '4px';
-		statusBadge.style.fontSize = '0.8em';
-		statusBadge.style.fontWeight = 'bold';
-		statusBadge.style.backgroundColor = entry.applied ? 'var(--color-green)' : 'var(--color-orange)';
-		statusBadge.style.color = 'white';
 
 		const timestampEl = statusEl.createDiv('timestamp');
 		timestampEl.textContent = new Date(entry.timestamp).toLocaleString();
-		timestampEl.style.fontSize = '0.8em';
-		timestampEl.style.color = 'var(--text-muted)';
-		timestampEl.style.marginTop = '4px';
 
-		// Detection details
+		// Detection details - Use DOM API instead of innerHTML
 		const detailsEl = entryEl.createDiv('entry-details');
-		detailsEl.style.display = 'flex';
-		detailsEl.style.gap = '16px';
-		detailsEl.style.marginBottom = '8px';
-		detailsEl.style.fontSize = '0.9em';
 
 		const languageEl = detailsEl.createSpan('detected-language');
-		languageEl.innerHTML = `<strong>Language:</strong> ${entry.detectedLanguage}`;
+		const languageLabel = languageEl.createEl('strong');
+		languageLabel.textContent = 'Language:';
+		languageEl.appendText(` ${entry.detectedLanguage}`);
 
 		const confidenceEl = detailsEl.createSpan('confidence');
-		confidenceEl.innerHTML = `<strong>Confidence:</strong> ${entry.confidence}%`;
+		const confidenceLabel = confidenceEl.createEl('strong');
+		confidenceLabel.textContent = 'Confidence:';
+		confidenceEl.appendText(` ${entry.confidence}%`);
 
 		const methodEl = detailsEl.createSpan('method');
-		methodEl.innerHTML = `<strong>Method:</strong> ${entry.method}`;
+		const methodLabel = methodEl.createEl('strong');
+		methodLabel.textContent = 'Method:';
+		methodEl.appendText(` ${entry.method}`);
 
 		// Code preview
 		const codePreviewEl = entryEl.createDiv('code-preview');
-		codePreviewEl.style.backgroundColor = 'var(--background-primary-alt)';
-		codePreviewEl.style.border = '1px solid var(--background-modifier-border)';
-		codePreviewEl.style.borderRadius = '4px';
-		codePreviewEl.style.padding = '8px';
-		codePreviewEl.style.fontSize = '0.85em';
-		codePreviewEl.style.fontFamily = 'var(--font-monospace)';
-		codePreviewEl.style.maxHeight = '100px';
-		codePreviewEl.style.overflowY = 'auto';
-		codePreviewEl.style.marginBottom = '8px';
 
 		const truncatedCode = entry.codeBlock.content.length > 200 
 			? entry.codeBlock.content.substring(0, 200) + '...'
@@ -251,9 +191,6 @@ export class HistoryModal extends Modal {
 
 		// Action buttons
 		const actionsEl = entryEl.createDiv('entry-actions');
-		actionsEl.style.display = 'flex';
-		actionsEl.style.gap = '8px';
-		actionsEl.style.justifyContent = 'flex-end';
 
 		// Undo/Redo button
 		const toggleButton = new ButtonComponent(actionsEl);
@@ -275,46 +212,25 @@ export class HistoryModal extends Modal {
 
 	private createEmptyStateEntry(container: HTMLElement): void {
 		const emptyMessageEl = container.createDiv('empty-state-message');
-		emptyMessageEl.style.padding = '40px 20px';
-		emptyMessageEl.style.textAlign = 'center';
-		emptyMessageEl.style.color = 'var(--text-muted)';
-		emptyMessageEl.style.fontSize = '1.1em';
-		emptyMessageEl.style.backgroundColor = 'var(--background-secondary)';
-		emptyMessageEl.style.borderRadius = '8px';
-		emptyMessageEl.style.border = '2px dashed var(--background-modifier-border)';
 
-		const messageText = emptyMessageEl.createDiv();
-		messageText.style.marginBottom = '8px';
-		messageText.style.fontWeight = 'bold';
+		const messageText = emptyMessageEl.createDiv('message-text');
 		messageText.textContent = 'No entries yet';
 
-		const subText = emptyMessageEl.createDiv();
-		subText.style.fontSize = '0.9em';
-		subText.style.opacity = '0.8';
+		const subText = emptyMessageEl.createDiv('sub-text');
 		subText.textContent = 'No language detection operations have been performed yet.';
 	}
 
 	private createActionButtons(containerEl: HTMLElement): void {
 		const actionsContainer = containerEl.createDiv('modal-actions');
-		actionsContainer.style.display = 'flex';
-		actionsContainer.style.justifyContent = 'space-between';
-		actionsContainer.style.alignItems = 'center';
-		actionsContainer.style.paddingTop = '16px';
-		actionsContainer.style.borderTop = '1px solid var(--background-modifier-border)';
 
-		// Statistics
+		// Statistics - Use DOM API instead of innerHTML
 		const stats = this.historyService.getStatistics();
 		const statsEl = actionsContainer.createDiv('stats');
-		statsEl.style.fontSize = '0.9em';
-		statsEl.style.color = 'var(--text-muted)';
-		statsEl.innerHTML = `
-			<div>Total: ${stats.totalEntries} | Applied: ${stats.appliedEntries} | Avg Confidence: ${stats.avgConfidence}%</div>
-		`;
+		const statsDiv = statsEl.createDiv();
+		statsDiv.textContent = `Total: ${stats.totalEntries} | Applied: ${stats.appliedEntries} | Avg Confidence: ${stats.avgConfidence}%`;
 
 		// Action buttons
-		const buttonsContainer = actionsContainer.createDiv();
-		buttonsContainer.style.display = 'flex';
-		buttonsContainer.style.gap = '8px';
+		const buttonsContainer = actionsContainer.createDiv('buttons-container');
 
 		// Export history button
 		const exportButton = new ButtonComponent(buttonsContainer);

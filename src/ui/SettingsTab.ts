@@ -227,19 +227,8 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 		// Quick actions
 		const quickActionsContainer = languageSettingContainer.createDiv('quick-actions');
-		quickActionsContainer.style.marginBottom = '12px';
-		quickActionsContainer.style.display = 'flex';
-		quickActionsContainer.style.gap = '8px';
-		quickActionsContainer.style.flexWrap = 'wrap';
 
-		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All' });
-		selectAllBtn.style.padding = '4px 12px';
-		selectAllBtn.style.fontSize = '0.9em';
-		selectAllBtn.style.backgroundColor = 'var(--interactive-accent)';
-		selectAllBtn.style.color = 'var(--text-on-accent)';
-		selectAllBtn.style.border = 'none';
-		selectAllBtn.style.borderRadius = '4px';
-		selectAllBtn.style.cursor = 'pointer';
+		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All', cls: 'select-all-btn' });
 		// Get available pattern languages from the pattern matching detector  
 		const availablePatternLanguages = this.plugin.detectionEngine.getPatternMatchingDetector().getAvailableLanguages();
 		
@@ -249,14 +238,7 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 			this.display(); // Refresh display
 		});
 
-		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None' });
-		selectNoneBtn.style.padding = '4px 12px';
-		selectNoneBtn.style.fontSize = '0.9em';
-		selectNoneBtn.style.backgroundColor = 'var(--background-modifier-border)';
-		selectNoneBtn.style.color = 'var(--text-normal)';
-		selectNoneBtn.style.border = 'none';
-		selectNoneBtn.style.borderRadius = '4px';
-		selectNoneBtn.style.cursor = 'pointer';
+		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None', cls: 'select-none-btn' });
 		selectNoneBtn.addEventListener('click', async () => {
 			this.plugin.settings.enabledPatternLanguages = [];
 			await this.plugin.saveSettings();
@@ -265,57 +247,20 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 		// Language grid container
 		const languageContainer = languageSettingContainer.createDiv('language-toggles');
-		languageContainer.style.display = 'grid';
-		languageContainer.style.gridTemplateColumns = 'repeat(auto-fit, minmax(140px, 1fr))';
-		languageContainer.style.gap = '6px';
-		languageContainer.style.maxHeight = '300px';
-		languageContainer.style.overflowY = 'auto';
-		languageContainer.style.padding = '12px';
-		languageContainer.style.backgroundColor = 'var(--background-primary-alt)';
-		languageContainer.style.border = '1px solid var(--background-modifier-border)';
-		languageContainer.style.borderRadius = '6px';
 
 		// Create language toggles (only for available pattern languages)
 		availablePatternLanguages.forEach(language => {
 			const isEnabled = this.plugin.settings.enabledPatternLanguages.includes(language);
 			
-			const languageItem = languageContainer.createDiv('language-item');
-			languageItem.style.display = 'flex';
-			languageItem.style.alignItems = 'center';
-			languageItem.style.padding = '6px 8px';
-			languageItem.style.backgroundColor = isEnabled ? 'var(--interactive-accent)' : 'var(--background-secondary)';
-			languageItem.style.color = isEnabled ? 'var(--text-on-accent)' : 'var(--text-muted)';
-			languageItem.style.borderRadius = '4px';
-			languageItem.style.cursor = 'pointer';
-			languageItem.style.transition = 'all 0.2s ease';
-			languageItem.style.border = `1px solid ${isEnabled ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}`;
-			languageItem.style.fontSize = '0.9em';
-			languageItem.style.fontFamily = 'var(--font-monospace)';
-			
-			// Add hover effect
-			languageItem.addEventListener('mouseenter', () => {
-				if (!isEnabled) {
-					languageItem.style.backgroundColor = 'var(--background-modifier-hover)';
-				}
-			});
-			
-			languageItem.addEventListener('mouseleave', () => {
-				if (!isEnabled) {
-					languageItem.style.backgroundColor = 'var(--background-secondary)';
-				}
-			});
+			const languageItem = languageContainer.createDiv(`language-item ${isEnabled ? 'enabled' : 'disabled'}`);
 
 			// Toggle icon
 			const toggleIcon = languageItem.createSpan('toggle-icon');
 			toggleIcon.textContent = isEnabled ? '✓' : '○';
-			toggleIcon.style.marginRight = '6px';
-			toggleIcon.style.fontSize = '0.8em';
-			toggleIcon.style.fontWeight = 'bold';
 
 			// Language name
 			const languageLabel = languageItem.createSpan('language-label');
 			languageLabel.textContent = language;
-			languageLabel.style.flex = '1';
 
 			// Click handler for toggle
 			languageItem.addEventListener('click', async () => {
@@ -336,34 +281,26 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 		// Show count of enabled languages
 		const countInfo = languageSettingContainer.createDiv('enabled-count');
-		countInfo.style.marginTop = '8px';
-		countInfo.style.fontSize = '0.9em';
-		countInfo.style.color = 'var(--text-muted)';
-		countInfo.style.textAlign = 'center';
 		countInfo.textContent = `${this.plugin.settings.enabledPatternLanguages.length} von ${availablePatternLanguages.length} Pattern Languages enabled`;
 
 		// Plugin version and info
 		new Setting(containerEl)
 			.setName('Plugin information')
 			.setDesc('Current plugin version and statistics')
-			.then(setting => {
-				const infoContainer = setting.controlEl.createDiv('plugin-info');
-				infoContainer.style.marginTop = '8px';
-				infoContainer.style.fontSize = '0.9em';
-				infoContainer.style.color = 'var(--text-muted)';
+					.then(setting => {
+			const infoContainer = setting.controlEl.createDiv('plugin-info');
 
-				// Add version info
-				const versionEl = infoContainer.createDiv();
-				versionEl.textContent = `Version: ${this.plugin.manifest.version}`;
+			// Add version info
+			const versionEl = infoContainer.createDiv();
+			versionEl.textContent = `Version: ${this.plugin.manifest.version}`;
 
-				// Add statistics if history is enabled
-				if (this.plugin.settings.enableHistory) {
-					const stats = this.plugin.historyService.getStatistics();
-					const statsEl = infoContainer.createDiv();
-					statsEl.style.marginTop = '4px';
-					statsEl.textContent = `Total detections: ${stats.totalEntries}, Applied: ${stats.appliedEntries}, Avg confidence: ${stats.avgConfidence}%`;
-				}
-			});
+			// Add statistics if history is enabled
+			if (this.plugin.settings.enableHistory) {
+				const stats = this.plugin.historyService.getStatistics();
+				const statsEl = infoContainer.createDiv('stats');
+				statsEl.textContent = `Total detections: ${stats.totalEntries}, Applied: ${stats.appliedEntries}, Avg confidence: ${stats.avgConfidence}%`;
+			}
+		});
 
 		// Export/Import settings
 		new Setting(containerEl)

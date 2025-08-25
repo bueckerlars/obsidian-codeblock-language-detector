@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.0] - 2025-08-25
 
 ### Added
 - Undo Ignore Service for enhanced code block detection management
@@ -18,7 +18,7 @@
 - Fixed innerHTML issues in Statistics Modal
 - Removed redundant code for better performance
 
-## [0.1.1] - 2024-12-21
+## [0.1.1] - 2025-08-24
 
 ### Added
 - Comprehensive History Management System with entry management, storage, and validation
@@ -41,7 +41,7 @@
 ### Removed
 - Removed "obsidian" from plugin ID
 
-## [0.1.0] - 2024-12-18
+## [0.1.0] - 2025-08-24
 
 ### Added
 - **Initial complete implementation** of the CodeBlock Language Detector Plugin

@@ -156,7 +156,7 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		
 		// Drag handle
 		const dragHandle = leftSection.createSpan('detector-drag-handle');
-		dragHandle.innerHTML = '⋮⋮';
+		dragHandle.textContent = '⋮⋮';
 		dragHandle.title = 'Drag to reorder';
 		dragHandle.draggable = true;
 		
@@ -181,7 +181,7 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		// Expand/Collapse button for settings (only shown if enabled)
 		if (enabled) {
 			const expandButton = rightSection.createSpan('detector-expand-btn');
-			expandButton.innerHTML = '▶';
+			expandButton.textContent = '▶';
 			expandButton.title = 'Show settings';
 			expandButton.classList.add('collapsed');
 			
@@ -198,14 +198,14 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 					// Expanding
 					configSection.style.display = 'block';
 					configSection.classList.remove('collapsed');
-					expandButton.innerHTML = '▼';
+					expandButton.textContent = '▼';
 					expandButton.classList.remove('collapsed');
 					expandButton.classList.add('expanded');
 					expandButton.title = 'Hide settings';
 				} else {
 					// Collapsing
 					configSection.classList.add('collapsed');
-					expandButton.innerHTML = '▶';
+					expandButton.textContent = '▶';
 					expandButton.classList.remove('expanded');
 					expandButton.classList.add('collapsed');
 					expandButton.title = 'Show settings';
@@ -568,12 +568,11 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		
 		// Create new placeholder
 		const placeholder = container.createDiv('drag-placeholder');
-		placeholder.innerHTML = `
-			<div class="placeholder-content">
-				<span class="placeholder-icon">↓</span>
-				<span class="placeholder-text">Drop here</span>
-			</div>
-		`;
+		const placeholderContent = placeholder.createDiv('placeholder-content');
+		const placeholderIcon = placeholderContent.createSpan('placeholder-icon');
+		placeholderIcon.textContent = '↓';
+		const placeholderText = placeholderContent.createSpan('placeholder-text');
+		placeholderText.textContent = 'Drop here';
 		
 		// Insert placeholder
 		if (insertAfter) {

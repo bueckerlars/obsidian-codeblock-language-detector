@@ -230,7 +230,8 @@ export class AutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All', cls: 'select-all-btn' });
 		// Get available pattern languages from the pattern matching detector  
-		const availablePatternLanguages = this.plugin.detectionEngine.getPatternMatchingDetector().getAvailableLanguages();
+		const patternDetector = this.plugin.detectionEngine.getPatternMatchingDetector();
+		const availablePatternLanguages = patternDetector ? patternDetector.getAvailableLanguages() : [];
 		
 		selectAllBtn.addEventListener('click', async () => {
 			this.plugin.settings.enabledPatternLanguages = [...availablePatternLanguages];

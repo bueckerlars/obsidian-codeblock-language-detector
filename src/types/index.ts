@@ -13,20 +13,28 @@ export type TriggerBehavior = 'auto-on-open' | 'auto-on-edit' | 'auto-on-save' |
 // Processing scope for code blocks
 export type ProcessingScope = 'current-note' | 'entire-vault';
 
+// Detector configuration interface
+export interface DetectorConfiguration {
+	enabled: boolean;
+	confidenceThreshold: number;
+	order: number;
+	config: Record<string, any>;
+}
+
 // Plugin settings interface
 export interface AutoSyntaxHighlightSettings {
 	// Trigger behavior setting
 	triggerBehavior: TriggerBehavior;
 	
-	// Confidence threshold (0-100)
+	// Global confidence threshold (0-100) - fallback for detectors without specific threshold
 	confidenceThreshold: number;
 	
 	// Detection method order (first method is tried first)
 	// Legacy setting - still used for backward compatibility
 	detectionMethodOrder: DetectionMethod[];
 	
-	// New dynamic detector order (takes precedence over detectionMethodOrder)
-	detectorOrder?: string[];
+	// Dynamic detector configurations (takes precedence over legacy settings)
+	detectorConfigurations: Record<string, DetectorConfiguration>;
 	
 	// Enable/disable individual detection methods (legacy)
 	enableHighlightJs: boolean;
@@ -49,10 +57,6 @@ export interface AutoSyntaxHighlightSettings {
 	
 	// Persistent history data storage
 	historyData: HistoryEntry[];
-	
-	// New settings for dynamic detector management
-	enabledDetectors?: string[]; // List of enabled detector names
-	detectorConfigurations?: Record<string, Record<string, any>>; // Per-detector configurations
 }
 
 // Language detection result
@@ -178,6 +182,22 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	triggerBehavior: 'auto-on-edit',
 	confidenceThreshold: 70,
 	detectionMethodOrder: ['highlight-js', 'pattern-matching'],
+	detectorConfigurations: {
+		'highlight-js': {
+			enabled: true,
+			confidenceThreshold: 70,
+			order: 0,
+			config: {}
+		},
+		'pattern-matching': {
+			enabled: true,
+			confidenceThreshold: 70,
+			order: 1,
+			config: {
+				enabledLanguages: ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash']
+			}
+		}
+	},
 	enableHighlightJs: true,
 	enablePatternMatching: true,
 	enableHistory: true,

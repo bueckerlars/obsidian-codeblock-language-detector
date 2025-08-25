@@ -1,16 +1,23 @@
-import { HistoryEntry, IHistoryService } from '../types';
+import { HistoryEntry, IHistoryService } from '../../types';
+import { HistoryStorage } from './HistoryStorage';
+import { HistoryEntryManager } from './HistoryEntryManager';
+import { HistoryStatistics } from './HistoryStatistics';
+import { HistoryValidation } from './HistoryValidation';
 
 /**
- * Service for managing history of language detection and application operations
+ * Main service for managing history of language detection and application operations
+ * Coordinates between different history management components
  */
 export class HistoryService implements IHistoryService {
-	private entries: Map<string, HistoryEntry> = new Map();
-	private maxEntries: number;
+	private storage: HistoryStorage;
+	private entryManager: HistoryEntryManager;
+	private statistics: HistoryStatistics;
 	private listeners: Array<(entries: HistoryEntry[]) => void> = [];
-	private saveCallback: (() => Promise<void>) | null = null;
 
 	constructor(maxEntries: number = 100) {
-		this.maxEntries = maxEntries;
+		this.storage = new HistoryStorage();
+		this.entryManager = new HistoryEntryManager(maxEntries);
+		this.statistics = new HistoryStatistics();
 	}
 
 	/**
@@ -18,7 +25,7 @@ export class HistoryService implements IHistoryService {
 	 * @param saveCallback Function that saves the history data
 	 */
 	setSaveCallback(saveCallback: () => Promise<void>): void {
-		this.saveCallback = saveCallback;
+		this.storage.setSaveCallback(saveCallback);
 	}
 
 	/**
@@ -26,17 +33,8 @@ export class HistoryService implements IHistoryService {
 	 * @param historyData The history data to load
 	 */
 	loadHistory(historyData: HistoryEntry[]): void {
-		this.entries.clear();
-		
-		if (Array.isArray(historyData)) {
-			for (const entry of historyData) {
-				if (this.isValidHistoryEntry(entry)) {
-					this.entries.set(entry.id, entry);
-				}
-			}
-		}
-		
-		this.enforceMaxEntries();
+		const validatedData = this.storage.validateAndFilterHistoryData(historyData);
+		this.entryManager.loadEntries(validatedData);
 		this.notifyListeners();
 	}
 
@@ -45,7 +43,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Array of history entries
 	 */
 	getHistoryData(): HistoryEntry[] {
-		return this.getEntries();
+		return this.entryManager.getAllEntries();
 	}
 
 	/**
@@ -54,27 +52,15 @@ export class HistoryService implements IHistoryService {
 	 * @returns The ID of the created entry
 	 */
 	addEntry(entry: Omit<HistoryEntry, 'id' | 'timestamp'>): string {
-		const id = this.generateId();
-		const timestamp = Date.now();
-
-		const historyEntry: HistoryEntry = {
-			...entry,
-			id,
-			timestamp,
-		};
-
-		this.entries.set(id, historyEntry);
-
-		// Enforce max entries limit
-		this.enforceMaxEntries();
-
+		const historyEntry = this.entryManager.addEntry(entry);
+		
 		// Notify listeners
 		this.notifyListeners();
 		
 		// Save to persistent storage
 		this.saveHistory();
 
-		return id;
+		return historyEntry.id;
 	}
 
 	/**
@@ -82,8 +68,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Array of history entries
 	 */
 	getEntries(): HistoryEntry[] {
-		return Array.from(this.entries.values())
-			.sort((a, b) => b.timestamp - a.timestamp);
+		return this.entryManager.getAllEntries();
 	}
 
 	/**
@@ -92,7 +77,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Array of history entries for the specified file
 	 */
 	getEntriesForFile(filePath: string): HistoryEntry[] {
-		return this.getEntries().filter(entry => entry.filePath === filePath);
+		return this.entryManager.getEntriesForFile(filePath);
 	}
 
 	/**
@@ -101,7 +86,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Array of history entries for the specified method
 	 */
 	getEntriesByMethod(method: string): HistoryEntry[] {
-		return this.getEntries().filter(entry => entry.method === method);
+		return this.entryManager.getEntriesByMethod(method);
 	}
 
 	/**
@@ -111,9 +96,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Array of history entries within the time range
 	 */
 	getEntriesInTimeRange(startTime: number, endTime: number): HistoryEntry[] {
-		return this.getEntries().filter(entry => 
-			entry.timestamp >= startTime && entry.timestamp <= endTime
-		);
+		return this.entryManager.getEntriesInTimeRange(startTime, endTime);
 	}
 
 	/**
@@ -122,7 +105,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns True if the entry was removed, false if not found
 	 */
 	removeEntry(id: string): boolean {
-		const removed = this.entries.delete(id);
+		const removed = this.entryManager.removeEntry(id);
 		
 		if (removed) {
 			this.notifyListeners();
@@ -138,14 +121,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Number of entries removed
 	 */
 	removeEntriesForFile(filePath: string): number {
-		let removedCount = 0;
-		
-		this.entries.forEach((entry, id) => {
-			if (entry.filePath === filePath) {
-				this.entries.delete(id);
-				removedCount++;
-			}
-		});
+		const removedCount = this.entryManager.removeEntriesForFile(filePath);
 		
 		if (removedCount > 0) {
 			this.notifyListeners();
@@ -159,7 +135,7 @@ export class HistoryService implements IHistoryService {
 	 * Clears all history entries
 	 */
 	clearHistory(): void {
-		this.entries.clear();
+		this.entryManager.clearAllEntries();
 		this.notifyListeners();
 		this.saveHistory();
 	}
@@ -170,18 +146,14 @@ export class HistoryService implements IHistoryService {
 	 * @returns True if the entry was found and undone, false otherwise
 	 */
 	undoEntry(id: string): boolean {
-		const entry = this.entries.get(id);
+		const success = this.entryManager.undoEntry(id);
 		
-		if (!entry) {
-			return false;
+		if (success) {
+			this.notifyListeners();
+			this.saveHistory();
 		}
-
-		// Mark as not applied
-		entry.applied = false;
-		this.notifyListeners();
-		this.saveHistory();
 		
-		return true;
+		return success;
 	}
 
 	/**
@@ -190,18 +162,14 @@ export class HistoryService implements IHistoryService {
 	 * @returns True if the entry was found and reapplied, false otherwise
 	 */
 	reapplyEntry(id: string): boolean {
-		const entry = this.entries.get(id);
+		const success = this.entryManager.reapplyEntry(id);
 		
-		if (!entry) {
-			return false;
+		if (success) {
+			this.notifyListeners();
+			this.saveHistory();
 		}
-
-		// Mark as applied
-		entry.applied = true;
-		this.notifyListeners();
-		this.saveHistory();
 		
-		return true;
+		return success;
 	}
 
 	/**
@@ -210,7 +178,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns The history entry or null if not found
 	 */
 	getEntryById(id: string): HistoryEntry | null {
-		return this.entries.get(id) || null;
+		return this.entryManager.getEntryById(id);
 	}
 
 	/**
@@ -220,18 +188,14 @@ export class HistoryService implements IHistoryService {
 	 * @returns True if the entry was updated, false if not found
 	 */
 	updateEntry(id: string, updates: Partial<Omit<HistoryEntry, 'id' | 'timestamp'>>): boolean {
-		const entry = this.entries.get(id);
+		const success = this.entryManager.updateEntry(id, updates);
 		
-		if (!entry) {
-			return false;
+		if (success) {
+			this.notifyListeners();
+			this.saveHistory();
 		}
-
-		// Apply updates
-		Object.assign(entry, updates);
-		this.notifyListeners();
-		this.saveHistory();
 		
-		return true;
+		return success;
 	}
 
 	/**
@@ -245,33 +209,29 @@ export class HistoryService implements IHistoryService {
 		languageCounts: Record<string, number>;
 		avgConfidence: number;
 	} {
-		const entries = this.getEntries();
-		const totalEntries = entries.length;
-		const appliedEntries = entries.filter(e => e.applied).length;
+		const entries = this.entryManager.getAllEntries();
+		return this.statistics.getStatistics(entries);
+	}
+
+	/**
+	 * Gets detailed statistics with advanced analytics
+	 * @returns Extended statistics object
+	 */
+	getDetailedStatistics(): {
+		basic: ReturnType<HistoryStatistics['getStatistics']>;
+		methods: ReturnType<HistoryStatistics['getMethodStatistics']>;
+		languages: ReturnType<HistoryStatistics['getLanguageStatistics']>;
+		confidenceDistribution: ReturnType<HistoryStatistics['getConfidenceDistribution']>;
+		trends: ReturnType<HistoryStatistics['getPerformanceTrends']>;
+	} {
+		const entries = this.entryManager.getAllEntries();
 		
-		const methodCounts: Record<string, number> = {};
-		const languageCounts: Record<string, number> = {};
-		let totalConfidence = 0;
-
-		entries.forEach(entry => {
-			// Count methods
-			methodCounts[entry.method] = (methodCounts[entry.method] || 0) + 1;
-			
-			// Count languages
-			languageCounts[entry.detectedLanguage] = (languageCounts[entry.detectedLanguage] || 0) + 1;
-			
-			// Sum confidence
-			totalConfidence += entry.confidence;
-		});
-
-		const avgConfidence = totalEntries > 0 ? totalConfidence / totalEntries : 0;
-
 		return {
-			totalEntries,
-			appliedEntries,
-			methodCounts,
-			languageCounts,
-			avgConfidence: Math.round(avgConfidence * 100) / 100,
+			basic: this.statistics.getStatistics(entries),
+			methods: this.statistics.getMethodStatistics(entries),
+			languages: this.statistics.getLanguageStatistics(entries),
+			confidenceDistribution: this.statistics.getConfidenceDistribution(entries),
+			trends: this.statistics.getPerformanceTrends(entries)
 		};
 	}
 
@@ -280,8 +240,8 @@ export class HistoryService implements IHistoryService {
 	 * @returns JSON string representation of the history
 	 */
 	exportHistory(): string {
-		const entries = this.getEntries();
-		return JSON.stringify(entries, null, 2);
+		const entries = this.entryManager.getAllEntries();
+		return this.storage.exportHistory(entries);
 	}
 
 	/**
@@ -291,38 +251,18 @@ export class HistoryService implements IHistoryService {
 	 * @returns Number of entries imported
 	 */
 	importHistory(jsonData: string, replace: boolean = false): number {
-		try {
-			const importedEntries: HistoryEntry[] = JSON.parse(jsonData);
-			
-			if (!Array.isArray(importedEntries)) {
-				throw new Error('Invalid history data format');
-			}
-
-			if (replace) {
-				this.clearHistory();
-			}
-
-			let importedCount = 0;
-			
-			for (const entry of importedEntries) {
-				// Validate entry structure
-				if (this.isValidHistoryEntry(entry)) {
-					// Generate new ID to avoid conflicts
-					const newId = this.generateId();
-					this.entries.set(newId, { ...entry, id: newId });
-					importedCount++;
-				}
-			}
-
-			this.enforceMaxEntries();
-			this.notifyListeners();
-			this.saveHistory();
-			
-			return importedCount;
-		} catch (error) {
-			console.error('Error importing history:', error);
-			throw new Error('Failed to import history data');
+		const importedEntries = this.storage.importHistory(jsonData);
+		
+		if (replace) {
+			this.entryManager.clearAllEntries();
 		}
+
+		const importedCount = this.entryManager.importEntries(importedEntries);
+		
+		this.notifyListeners();
+		this.saveHistory();
+		
+		return importedCount;
 	}
 
 	/**
@@ -330,8 +270,7 @@ export class HistoryService implements IHistoryService {
 	 * @param maxEntries Maximum number of entries
 	 */
 	setMaxEntries(maxEntries: number): void {
-		this.maxEntries = Math.max(1, maxEntries);
-		this.enforceMaxEntries();
+		this.entryManager.setMaxEntries(maxEntries);
 		this.saveHistory();
 	}
 
@@ -340,7 +279,7 @@ export class HistoryService implements IHistoryService {
 	 * @returns Maximum number of entries
 	 */
 	getMaxEntries(): number {
-		return this.maxEntries;
+		return this.entryManager.getMaxEntries();
 	}
 
 	/**
@@ -363,47 +302,70 @@ export class HistoryService implements IHistoryService {
 	}
 
 	/**
+	 * Validates and repairs the history
+	 * @returns Summary of validation and repair operations
+	 */
+	validateAndRepairHistory(): {
+		totalEntries: number;
+		validEntries: number;
+		repairedEntries: number;
+		removedEntries: number;
+		duplicatesRemoved: number;
+	} {
+		const entries = this.entryManager.getAllEntries();
+		const validation = HistoryValidation.validateHistoryEntries(entries);
+		
+		// Attempt to repair invalid entries
+		let repairedCount = 0;
+		const repairedEntries: HistoryEntry[] = [];
+		
+		validation.invalidEntries.forEach(({ entry }) => {
+			const repaired = HistoryValidation.sanitizeHistoryEntry(entry);
+			if (repaired) {
+				repairedEntries.push(repaired);
+				repairedCount++;
+			}
+		});
+
+		// Find and remove duplicates
+		const allValidEntries = [...validation.validEntries, ...repairedEntries];
+		const duplicateGroups = HistoryValidation.findDuplicateEntries(allValidEntries);
+		
+		// Keep only the first entry from each duplicate group
+		const duplicatesRemoved = duplicateGroups.reduce((total, group) => total + group.length - 1, 0);
+		const uniqueEntries = allValidEntries.filter(entry => {
+			const duplicateGroup = duplicateGroups.find(group => group.some(e => e.id === entry.id));
+			return !duplicateGroup || duplicateGroup[0].id === entry.id;
+		});
+
+		// Replace history with validated and repaired entries
+		this.entryManager.clearAllEntries();
+		this.entryManager.loadEntries(uniqueEntries);
+		
+		this.notifyListeners();
+		this.saveHistory();
+
+		return {
+			totalEntries: entries.length,
+			validEntries: validation.validCount,
+			repairedEntries: repairedCount,
+			removedEntries: validation.invalidCount - repairedCount,
+			duplicatesRemoved
+		};
+	}
+
+	/**
 	 * Saves the current history to persistent storage
 	 */
 	private async saveHistory(): Promise<void> {
-		if (this.saveCallback) {
-			try {
-				await this.saveCallback();
-			} catch (error) {
-				console.error('Error saving history:', error);
-			}
-		}
-	}
-
-	/**
-	 * Generates a unique ID for history entries
-	 * @returns Unique ID string
-	 */
-	private generateId(): string {
-		return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-	}
-
-	/**
-	 * Enforces the maximum entries limit by removing oldest entries
-	 */
-	private enforceMaxEntries(): void {
-		if (this.entries.size <= this.maxEntries) {
-			return;
-		}
-
-		const sortedEntries = this.getEntries();
-		const entriesToRemove = sortedEntries.slice(this.maxEntries);
-		
-		entriesToRemove.forEach(entry => {
-			this.entries.delete(entry.id);
-		});
+		await this.storage.saveHistory();
 	}
 
 	/**
 	 * Notifies all listeners of history changes
 	 */
 	private notifyListeners(): void {
-		const entries = this.getEntries();
+		const entries = this.entryManager.getAllEntries();
 		this.listeners.forEach(listener => {
 			try {
 				listener(entries);
@@ -411,25 +373,5 @@ export class HistoryService implements IHistoryService {
 				console.error('Error in history listener:', error);
 			}
 		});
-	}
-
-	/**
-	 * Validates if an object is a valid history entry
-	 * @param entry The object to validate
-	 * @returns True if the object is a valid history entry
-	 */
-	private isValidHistoryEntry(entry: any): entry is HistoryEntry {
-		return (
-			typeof entry === 'object' &&
-			typeof entry.id === 'string' &&
-			typeof entry.timestamp === 'number' &&
-			typeof entry.fileName === 'string' &&
-			typeof entry.filePath === 'string' &&
-			typeof entry.codeBlock === 'object' &&
-			typeof entry.detectedLanguage === 'string' &&
-			typeof entry.confidence === 'number' &&
-			typeof entry.method === 'string' &&
-			typeof entry.applied === 'boolean'
-		);
 	}
 }

@@ -18,7 +18,7 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// Title
-		containerEl.createEl('h2', { text: 'Auto Syntax Highlight Settings' });
+		containerEl.createEl('h1', { text: 'CodeBlock Language Detector Settings' });
 
 		// Trigger Behavior Section
 		this.createTriggerBehaviorSection(containerEl);
@@ -81,16 +81,10 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 	}
 
 	private createDetectionEngineOverviewSection(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Detection Engine Overview' });
+		containerEl.createEl('h3', { text: 'Detection Engine' });
 
 		const registeredDetectors = this.plugin.detectionEngine.getRegisteredDetectors();
 		const detectionOrder = this.getDetectionOrder();
-
-		// Engine info
-		const infoContainer = containerEl.createDiv('detection-engine-info');
-		infoContainer.createEl('p', { 
-			text: `${registeredDetectors.length} detector(s) registered. ${detectionOrder.length} detector(s) enabled.` 
-		});
 
 		// Global confidence threshold
 		new Setting(containerEl)

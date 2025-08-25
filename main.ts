@@ -11,7 +11,7 @@ import {
 import { CodeAnalyzer } from './src/core/code-analyzer';
 import { LanguageDetectionEngine } from './src/core/language-detector';
 import { SyntaxApplier } from './src/core/syntax-applier';
-import { HistoryService } from './src/services';
+import { HistoryService, UndoIgnoreService } from './src/services';
 import { PluginLifecycle } from './src/core/plugin';
 
 /**
@@ -25,6 +25,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	detectionEngine: LanguageDetectionEngine;
 	syntaxApplier: SyntaxApplier;
 	historyService: HistoryService;
+	undoIgnoreService: UndoIgnoreService;
 
 	// Plugin lifecycle manager
 	private pluginLifecycle: PluginLifecycle;

@@ -60,6 +60,12 @@ export class FileProcessor {
 
 			// Process each code block
 			for (const codeBlock of codeBlocks) {
+				// Check if this code block should be ignored due to recent undo
+				if (this.plugin.undoIgnoreService.shouldIgnoreDetection(file.path, codeBlock)) {
+					console.log(`Skipping detection for code block at lines ${codeBlock.startLine}-${codeBlock.endLine} due to recent undo`);
+					continue;
+				}
+
 				const detectionResult = await this.plugin.detectionEngine.detectLanguage(codeBlock.content);
 				
 				if (detectionResult) {
@@ -146,6 +152,9 @@ export class FileProcessor {
 
 			const content = await this.plugin.app.vault.read(file);
 			const updatedContent = this.plugin.syntaxApplier.removeLanguageTag(content, entry.codeBlock);
+			
+			// Add ignore entry BEFORE modifying the file to prevent re-detection
+			this.plugin.undoIgnoreService.addIgnoreEntry(entry.filePath, entry.codeBlock);
 			
 			await this.plugin.app.vault.modify(file, updatedContent);
 			

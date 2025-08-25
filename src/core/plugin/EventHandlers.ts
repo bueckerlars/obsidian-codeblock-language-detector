@@ -16,6 +16,9 @@ export class EventHandlers {
 	// Debounce timers
 	private debounceTimer: NodeJS.Timeout | null = null;
 	private debounceAllFilesTimer: NodeJS.Timeout | null = null;
+	
+	// Cleanup timer for undo ignore entries
+	private cleanupTimer: NodeJS.Timeout | null = null;
 
 	constructor(plugin: AutoSyntaxHighlightPlugin) {
 		this.plugin = plugin;
@@ -75,6 +78,9 @@ export class EventHandlers {
 		this.plugin.registerEvent(editorChangeRef);
 		this.plugin.registerEvent(fileOpenRef);
 		this.plugin.registerEvent(fileSaveRef);
+		
+		// Start periodic cleanup of expired undo ignore entries
+		this.startCleanupTimer();
 	}
 
 	/**
@@ -94,6 +100,10 @@ export class EventHandlers {
 		if (this.debounceAllFilesTimer) {
 			clearTimeout(this.debounceAllFilesTimer);
 			this.debounceAllFilesTimer = null;
+		}
+		if (this.cleanupTimer) {
+			clearTimeout(this.cleanupTimer);
+			this.cleanupTimer = null;
 		}
 	}
 
@@ -121,5 +131,15 @@ export class EventHandlers {
 		this.debounceAllFilesTimer = setTimeout(() => {
 			this.plugin.processAllMarkdownFiles();
 		}, 5000); // 5 second delay for all files (longer to avoid too frequent processing)
+	}
+
+	/**
+	 * Starts periodic cleanup of expired undo ignore entries
+	 */
+	private startCleanupTimer(): void {
+		// Run cleanup every 30 seconds
+		this.cleanupTimer = setInterval(() => {
+			this.plugin.undoIgnoreService.cleanupExpiredEntries();
+		}, 30000);
 	}
 }

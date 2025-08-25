@@ -136,6 +136,26 @@ export interface ISyntaxApplier {
 	applyLanguageTag(content: string, codeBlock: CodeBlock, language: string): string;
 }
 
+// Interface for tracking undo ignore operations
+export interface UndoIgnoreEntry {
+	id: string;
+	filePath: string;
+	codeBlockContent: string;
+	codeBlockStartLine: number;
+	codeBlockEndLine: number;
+	timestamp: number;
+	// How long this ignore entry should remain active (in milliseconds)
+	expiryTime: number;
+}
+
+export interface IUndoIgnoreService {
+	addIgnoreEntry(filePath: string, codeBlock: CodeBlock): void;
+	shouldIgnoreDetection(filePath: string, codeBlock: CodeBlock): boolean;
+	cleanupExpiredEntries(): void;
+	clearAllIgnoreEntries(): void;
+	getActiveIgnoreEntries(): UndoIgnoreEntry[];
+}
+
 export interface IHistoryService {
 	addEntry(entry: Omit<HistoryEntry, 'id' | 'timestamp'>): string;
 	getEntries(): HistoryEntry[];

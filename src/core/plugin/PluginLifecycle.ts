@@ -2,7 +2,7 @@ import AutoSyntaxHighlightPlugin from '../../../main';
 import { CodeAnalyzer } from '../code-analyzer';
 import { LanguageDetectionEngine } from '../language-detector';
 import { SyntaxApplier } from '../syntax-applier';
-import { HistoryService } from '../../services';
+import { HistoryService, UndoIgnoreService } from '../../services';
 import { DynamicAutoSyntaxHighlightSettingsTab } from '../../ui';
 import { EventHandlers } from './EventHandlers';
 import { CommandManager } from './CommandManager';
@@ -80,6 +80,9 @@ export class PluginLifecycle {
 		this.plugin.syntaxApplier = new SyntaxApplier();
 		
 		this.plugin.historyService = new HistoryService(this.plugin.settings.maxHistoryEntries);
+		
+		// Initialize undo ignore service
+		this.plugin.undoIgnoreService = new UndoIgnoreService();
 		
 		// Set up save callback for persistent history storage
 		this.plugin.historyService.setSaveCallback(async () => {

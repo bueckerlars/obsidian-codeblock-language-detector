@@ -260,7 +260,69 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 	private createDetectorSpecificConfig(container: HTMLElement, detector: any, detectorConfig: DetectorConfiguration): void {
 		const detectorName = detector.getName();
 		
-		if (detectorName === 'pattern-matching') {
+		if (detectorName === 'vscode-ml') {
+			// VSCode ML Detector specific configuration
+			container.createEl('h5', { text: 'VSCode ML Detection Configuration' });
+			
+			const vscodeDetector = this.plugin.detectionEngine.getVSCodeDetector();
+			if (!vscodeDetector) return;
+			
+			// Model status info
+			const statusContainer = container.createDiv('detector-status');
+			const isReady = vscodeDetector.isReady();
+			
+			const statusItem = statusContainer.createDiv('status-item');
+			const statusIcon = statusItem.createSpan('status-icon');
+			statusIcon.textContent = isReady ? '✓' : '○';
+			statusIcon.style.color = isReady ? 'green' : 'orange';
+			
+			const statusLabel = statusItem.createSpan('status-label');
+			statusLabel.textContent = `Model Status: ${isReady ? 'Ready' : 'Not Initialized'}`;
+			
+			// Initialize button if not ready
+			if (!isReady) {
+				const initButton = container.createEl('button', { 
+					text: 'Initialize Model', 
+					cls: 'init-model-btn' 
+				});
+				initButton.addEventListener('click', async () => {
+					try {
+						initButton.textContent = 'Initializing...';
+						initButton.disabled = true;
+						await vscodeDetector.initialize();
+						this.display(); // Refresh display to show updated status
+					} catch (error) {
+						console.error('Failed to initialize VSCode model:', error);
+						initButton.textContent = 'Initialization Failed';
+						initButton.style.color = 'red';
+					}
+				});
+			}
+			
+			// Model info
+			const infoContainer = container.createDiv('detector-info');
+			infoContainer.createEl('p', { 
+				text: 'Powered by Microsoft\'s VSCode Language Detection using machine learning (guesslang model).',
+				cls: 'detector-description'
+			});
+			
+			// Languages supported
+			const languagesContainer = container.createDiv('supported-languages');
+			languagesContainer.createEl('h6', { text: 'Supported Languages' });
+			
+			const supportedLanguages = vscodeDetector.getAvailableLanguages();
+			const languageList = languagesContainer.createDiv('language-list');
+			supportedLanguages.slice(0, 15).forEach(lang => {
+				const langTag = languageList.createSpan('language-tag');
+				langTag.textContent = lang;
+			});
+			
+			if (supportedLanguages.length > 15) {
+				const moreInfo = languageList.createSpan('more-languages');
+				moreInfo.textContent = `... and ${supportedLanguages.length - 15} more`;
+			}
+			
+		} else if (detectorName === 'pattern-matching') {
 			// Pattern matching specific configuration
 			container.createEl('h5', { text: 'Pattern Matching Configuration' });
 			

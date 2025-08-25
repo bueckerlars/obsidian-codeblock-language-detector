@@ -5,7 +5,7 @@
 // Detection methods available for language detection
 // Note: This is now used for backward compatibility in settings
 // The actual detection system supports dynamic registration of any detector
-export type DetectionMethod = 'highlight-js' | 'pattern-matching';
+export type DetectionMethod = 'vscode-ml' | 'highlight-js' | 'pattern-matching';
 
 // Trigger behaviors for when the plugin should activate
 export type TriggerBehavior = 'auto-on-open' | 'auto-on-edit' | 'auto-on-save' | 'manual';
@@ -37,6 +37,7 @@ export interface AutoSyntaxHighlightSettings {
 	detectorConfigurations: Record<string, DetectorConfiguration>;
 	
 	// Enable/disable individual detection methods (legacy)
+	enableVSCodeML: boolean;
 	enableHighlightJs: boolean;
 	enablePatternMatching: boolean;
 	
@@ -181,23 +182,30 @@ export const SUPPORTED_LANGUAGES = [
 export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	triggerBehavior: 'auto-on-edit',
 	confidenceThreshold: 70,
-	detectionMethodOrder: ['highlight-js', 'pattern-matching'],
+	detectionMethodOrder: ['vscode-ml', 'highlight-js', 'pattern-matching'],
 	detectorConfigurations: {
-		'highlight-js': {
+		'vscode-ml': {
 			enabled: true,
 			confidenceThreshold: 70,
 			order: 0,
 			config: {}
 		},
-		'pattern-matching': {
+		'highlight-js': {
 			enabled: true,
 			confidenceThreshold: 70,
 			order: 1,
+			config: {}
+		},
+		'pattern-matching': {
+			enabled: true,
+			confidenceThreshold: 70,
+			order: 2,
 			config: {
 				enabledLanguages: ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash']
 			}
 		}
 	},
+	enableVSCodeML: true,
 	enableHighlightJs: true,
 	enablePatternMatching: true,
 	enableHistory: true,

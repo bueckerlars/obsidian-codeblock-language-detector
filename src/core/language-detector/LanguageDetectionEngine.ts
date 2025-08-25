@@ -1,6 +1,7 @@
 import { DetectionMethod, DetectionResult, ILanguageDetector } from '../../types';
 import { HighlightJsDetector } from './HighlightJsDetector';
 import { PatternMatchingDetector } from './PatternMatchingDetector';
+import { VSCodeDetector } from './VSCodeDetector';
 
 /**
  * Main language detection engine that coordinates multiple detection methods
@@ -13,7 +14,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	private enabledPatternLanguages: string[];
 
 	constructor(
-		detectionOrder: string[] = ['highlight-js', 'pattern-matching'],
+		detectionOrder: string[] = ['vscode-ml', 'highlight-js', 'pattern-matching'],
 		confidenceThreshold: number = 70,
 		enabledPatternLanguages: string[] = []
 	) {
@@ -31,6 +32,10 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 */
 	private registerDefaultDetectors(): void {
 		const normalizedThreshold = this.confidenceThreshold / 100;
+		
+		// Register VSCode ML detector
+		const vscodeDetector = new VSCodeDetector(normalizedThreshold);
+		this.registerDetector(vscodeDetector);
 		
 		// Register highlight.js detector
 		const highlightJsDetector = new HighlightJsDetector(normalizedThreshold);
@@ -260,6 +265,14 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 */
 	getPatternMatchingDetector(): PatternMatchingDetector | undefined {
 		return this.registeredDetectors.get('pattern-matching') as PatternMatchingDetector;
+	}
+
+	/**
+	 * Gets the VSCode ML detector instance for direct access
+	 * @returns VSCodeDetector instance or undefined if not registered
+	 */
+	getVSCodeDetector(): VSCodeDetector | undefined {
+		return this.registeredDetectors.get('vscode-ml') as VSCodeDetector;
 	}
 
 	/**

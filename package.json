@@ -20,6 +20,7 @@
 		"url": "https://github.com/bueckerlars/obsidian-codeblock-language-detector/issues"
 	},
 	"dependencies": {
+		"@vscode/vscode-languagedetection": "^1.0.22",
 		"highlight.js": "^11.9.0"
 	},
 	"devDependencies": {

@@ -180,7 +180,13 @@ export class StatisticsModal extends Modal {
 			const trendIndicator = card.createDiv('trend-indicator');
 			const icon = trend === 'improving' ? '↗' : trend === 'declining' ? '↘' : '→';
 			const color = trend === 'improving' ? 'green' : trend === 'declining' ? 'red' : 'gray';
-			trendIndicator.innerHTML = `<span style="color: ${color}; font-size: 1.5em;">${icon}</span> ${trend}`;
+			
+			const iconSpan = trendIndicator.createEl('span');
+			iconSpan.style.color = color;
+			iconSpan.style.fontSize = '1.5em';
+			iconSpan.textContent = icon;
+			
+			trendIndicator.appendText(` ${trend}`);
 			
 			card.createEl('div', { text: `Recent: ${recent}${unit}`, cls: 'trend-current' });
 			card.createEl('div', { text: `Overall: ${overall}${unit}`, cls: 'trend-overall' });

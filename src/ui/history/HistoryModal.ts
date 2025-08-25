@@ -41,7 +41,7 @@ export class HistoryModal extends Modal {
 			(entry) => this.handleEditEntry(entry)
 		);
 		
-		this.actions = new HistoryActions(this.app, this.plugin);
+		this.actions = new HistoryActions(this.app, this.plugin, this);
 	}
 
 	/**

@@ -215,14 +215,6 @@ export class HistoryEntryRenderer {
 		editButton.onClick(async () => {
 			await this.onEditEntry(entry);
 		});
-
-		// Info button (shows detailed entry information)
-		const infoButton = new ButtonComponent(actionsEl);
-		infoButton.setButtonText('ℹ️');
-		infoButton.setTooltip('Show detailed information');
-		infoButton.onClick(() => {
-			this.showEntryDetails(entry);
-		});
 	}
 
 	/**
@@ -250,36 +242,7 @@ export class HistoryEntryRenderer {
 		tipsList.createEl('li', { text: 'Running language detection on some code blocks' });
 	}
 
-	/**
-	 * Shows detailed information about an entry in a modal
-	 * @param entry The history entry
-	 */
-	private showEntryDetails(entry: HistoryEntry): void {
-		// Create a simple details display (could be enhanced with a proper modal)
-		const details = [
-			`ID: ${entry.id}`,
-			`File: ${entry.fileName}`,
-			`Path: ${entry.filePath}`,
-			`Language: ${entry.detectedLanguage}`,
-			`Confidence: ${entry.confidence}%`,
-			`Method: ${entry.method}`,
-			`Applied: ${entry.applied ? 'Yes' : 'No'}`,
-			`Timestamp: ${new Date(entry.timestamp).toLocaleString()}`,
-			`Code Block:`,
-			`  Start Line: ${entry.codeBlock.startLine}`,
-			`  End Line: ${entry.codeBlock.endLine}`,
-			`  Has Language: ${entry.codeBlock.hasLanguage}`,
-			entry.codeBlock.originalLanguage ? `  Original Language: ${entry.codeBlock.originalLanguage}` : '',
-			`Code Content (${entry.codeBlock.content.length} characters):`,
-			entry.codeBlock.content.substring(0, 500) + (entry.codeBlock.content.length > 500 ? '...' : '')
-		].filter(Boolean).join('\n');
 
-		// Copy to clipboard for now (could be enhanced with proper modal)
-		navigator.clipboard.writeText(details);
-		
-		// Show notification
-		console.log('Entry details copied to clipboard:', details);
-	}
 
 	/**
 	 * Gets color for confidence level

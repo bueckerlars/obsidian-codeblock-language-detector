@@ -10,11 +10,13 @@ export class HistoryActions {
 	private app: App;
 	private plugin: AutoSyntaxHighlightPlugin;
 	private historyService: HistoryService;
+	private modal?: { close: () => void };
 
-	constructor(app: App, plugin: AutoSyntaxHighlightPlugin) {
+	constructor(app: App, plugin: AutoSyntaxHighlightPlugin, modal?: { close: () => void }) {
 		this.app = app;
 		this.plugin = plugin;
 		this.historyService = plugin.historyService;
+		this.modal = modal;
 	}
 
 	/**
@@ -70,7 +72,9 @@ export class HistoryActions {
 		closeButton.setButtonText('Close');
 		closeButton.setClass('mod-cta');
 		closeButton.onClick(() => {
-			// This will be handled by the modal
+			if (this.modal) {
+				this.modal.close();
+			}
 		});
 	}
 

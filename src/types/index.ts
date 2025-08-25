@@ -3,6 +3,8 @@
  */
 
 // Detection methods available for language detection
+// Note: This is now used for backward compatibility in settings
+// The actual detection system supports dynamic registration of any detector
 export type DetectionMethod = 'highlight-js' | 'pattern-matching';
 
 // Trigger behaviors for when the plugin should activate
@@ -20,9 +22,13 @@ export interface AutoSyntaxHighlightSettings {
 	confidenceThreshold: number;
 	
 	// Detection method order (first method is tried first)
+	// Legacy setting - still used for backward compatibility
 	detectionMethodOrder: DetectionMethod[];
 	
-	// Enable/disable individual detection methods
+	// New dynamic detector order (takes precedence over detectionMethodOrder)
+	detectorOrder?: string[];
+	
+	// Enable/disable individual detection methods (legacy)
 	enableHighlightJs: boolean;
 	enablePatternMatching: boolean;
 	
@@ -43,13 +49,18 @@ export interface AutoSyntaxHighlightSettings {
 	
 	// Persistent history data storage
 	historyData: HistoryEntry[];
+	
+	// New settings for dynamic detector management
+	enabledDetectors?: string[]; // List of enabled detector names
+	detectorConfigurations?: Record<string, Record<string, any>>; // Per-detector configurations
 }
 
 // Language detection result
 export interface DetectionResult {
 	language: string;
 	confidence: number;
-	method: DetectionMethod;
+	// method is now the actual detector name (string) instead of limited DetectionMethod
+	method: string;
 }
 
 // Code block information
@@ -70,7 +81,8 @@ export interface HistoryEntry {
 	codeBlock: CodeBlock;
 	detectedLanguage: string;
 	confidence: number;
-	method: DetectionMethod;
+	// method is now the actual detector name (string) instead of limited DetectionMethod
+	method: string;
 	applied: boolean;
 }
 
@@ -91,8 +103,23 @@ export interface LanguagePattern {
 
 // Service interfaces
 export interface ILanguageDetector {
+	// Kern-Funktionalität
 	detectLanguage(code: string): Promise<DetectionResult | null>;
 	getAvailableLanguages(): string[];
+	
+	// Metadaten für die Registry
+	getName(): string;                    // Eindeutiger Name für die Registrierung
+	getDisplayName(): string;             // Benutzerfreundlicher Anzeigename
+	getDescription(): string;             // Beschreibung der Detection-Methode
+	
+	// Konfiguration
+	setMinConfidence(threshold: number): void;
+	getMinConfidence(): number;
+	
+	// Optionale erweiterte Konfiguration
+	isConfigurable?(): boolean;           // Ob erweiterte Konfiguration verfügbar ist
+	getConfiguration?(): Record<string, any>; // Aktuelle Konfiguration abrufen
+	setConfiguration?(config: Record<string, any>): void; // Konfiguration setzen
 }
 
 export interface ICodeAnalyzer {

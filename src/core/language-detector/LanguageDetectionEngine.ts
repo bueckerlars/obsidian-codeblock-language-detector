@@ -4,27 +4,89 @@ import { PatternMatchingDetector } from './PatternMatchingDetector';
 
 /**
  * Main language detection engine that coordinates multiple detection methods
+ * Now supports dynamic registration of detection methods
  */
 export class LanguageDetectionEngine implements ILanguageDetector {
-	private readonly highlightJsDetector: HighlightJsDetector;
-	private readonly patternMatchingDetector: PatternMatchingDetector;
-	private detectionOrder: DetectionMethod[];
+	private readonly registeredDetectors: Map<string, ILanguageDetector>;
+	private detectionOrder: string[];
 	private confidenceThreshold: number;
 	private enabledPatternLanguages: string[];
 
 	constructor(
-		detectionOrder: DetectionMethod[] = ['highlight-js', 'pattern-matching'],
+		detectionOrder: string[] = ['highlight-js', 'pattern-matching'],
 		confidenceThreshold: number = 70,
 		enabledPatternLanguages: string[] = []
 	) {
+		this.registeredDetectors = new Map();
 		this.detectionOrder = detectionOrder;
 		this.confidenceThreshold = confidenceThreshold;
 		this.enabledPatternLanguages = enabledPatternLanguages;
 		
-		// Initialize detectors with threshold converted to 0-1 scale
-		const normalizedThreshold = confidenceThreshold / 100;
-		this.highlightJsDetector = new HighlightJsDetector(normalizedThreshold);
-		this.patternMatchingDetector = new PatternMatchingDetector(normalizedThreshold, enabledPatternLanguages);
+		// Register default detectors
+		this.registerDefaultDetectors();
+	}
+
+	/**
+	 * Registers the default detection methods
+	 */
+	private registerDefaultDetectors(): void {
+		const normalizedThreshold = this.confidenceThreshold / 100;
+		
+		// Register highlight.js detector
+		const highlightJsDetector = new HighlightJsDetector(normalizedThreshold);
+		this.registerDetector(highlightJsDetector);
+		
+		// Register pattern matching detector
+		const patternMatchingDetector = new PatternMatchingDetector(normalizedThreshold, this.enabledPatternLanguages);
+		this.registerDetector(patternMatchingDetector);
+	}
+
+	/**
+	 * Registers a new detection method
+	 * @param detector The detector to register
+	 */
+	registerDetector(detector: ILanguageDetector): void {
+		const name = detector.getName();
+		this.registeredDetectors.set(name, detector);
+		
+		// Add to detection order if not already present
+		if (!this.detectionOrder.includes(name)) {
+			this.detectionOrder.push(name);
+		}
+	}
+
+	/**
+	 * Unregisters a detection method
+	 * @param detectorName The name of the detector to unregister
+	 */
+	unregisterDetector(detectorName: string): void {
+		this.registeredDetectors.delete(detectorName);
+		this.detectionOrder = this.detectionOrder.filter(name => name !== detectorName);
+	}
+
+	/**
+	 * Gets a registered detector by name
+	 * @param detectorName The name of the detector
+	 * @returns The detector instance or undefined if not found
+	 */
+	getDetector(detectorName: string): ILanguageDetector | undefined {
+		return this.registeredDetectors.get(detectorName);
+	}
+
+	/**
+	 * Gets all registered detectors
+	 * @returns Array of registered detector instances
+	 */
+	getRegisteredDetectors(): ILanguageDetector[] {
+		return Array.from(this.registeredDetectors.values());
+	}
+
+	/**
+	 * Gets the names of all registered detectors
+	 * @returns Array of detector names
+	 */
+	getRegisteredDetectorNames(): string[] {
+		return Array.from(this.registeredDetectors.keys());
 	}
 
 	/**
@@ -37,17 +99,23 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 			return null;
 		}
 
-		for (const method of this.detectionOrder) {
+		for (const detectorName of this.detectionOrder) {
 			try {
-				const result = await this.detectWithMethod(code, method);
+				const detector = this.registeredDetectors.get(detectorName);
+				if (!detector) {
+					console.warn(`Detector '${detectorName}' not found in registry`);
+					continue;
+				}
+
+				const result = await detector.detectLanguage(code);
 				
 				if (result && 
 					result.confidence >= this.confidenceThreshold && 
-					this.isLanguageEnabledForMethod(result.language, method)) {
+					this.isLanguageEnabledForMethod(result.language, detectorName)) {
 					return result;
 				}
 			} catch (error) {
-				console.warn(`Error in ${method} detection:`, error);
+				console.warn(`Error in ${detectorName} detection:`, error);
 				continue;
 			}
 		}
@@ -56,39 +124,42 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	}
 
 	/**
-	 * Detects language using a specific method
+	 * Detects language using a specific detector
 	 * @param code The code to analyze
-	 * @param method The detection method to use
+	 * @param detectorName The name of the detector to use
 	 * @returns Detection result or null
 	 */
-	private async detectWithMethod(code: string, method: DetectionMethod): Promise<DetectionResult | null> {
-		switch (method) {
-			case 'highlight-js':
-				return this.highlightJsDetector.detectLanguage(code);
-			case 'pattern-matching':
-				return this.patternMatchingDetector.detectLanguage(code);
-			default:
-				console.warn(`Unknown detection method: ${method}`);
-				return null;
+	async detectWithDetector(code: string, detectorName: string): Promise<DetectionResult | null> {
+		const detector = this.registeredDetectors.get(detectorName);
+		if (!detector) {
+			console.warn(`Detector '${detectorName}' not found in registry`);
+			return null;
+		}
+
+		try {
+			return await detector.detectLanguage(code);
+		} catch (error) {
+			console.warn(`Error in ${detectorName} detection:`, error);
+			return null;
 		}
 	}
 
 	/**
-	 * Attempts detection with all methods and returns all results
+	 * Attempts detection with all registered methods and returns all results
 	 * @param code The code to analyze
 	 * @returns Array of detection results from all methods
 	 */
 	async detectWithAllMethods(code: string): Promise<DetectionResult[]> {
 		const results: DetectionResult[] = [];
 
-		for (const method of ['highlight-js', 'pattern-matching'] as DetectionMethod[]) {
+		for (const [detectorName, detector] of this.registeredDetectors) {
 			try {
-				const result = await this.detectWithMethod(code, method);
+				const result = await detector.detectLanguage(code);
 				if (result) {
 					results.push(result);
 				}
 			} catch (error) {
-				console.warn(`Error in ${method} detection:`, error);
+				console.warn(`Error in ${detectorName} detection:`, error);
 			}
 		}
 
@@ -100,27 +171,32 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @returns Array of unique language names
 	 */
 	getAvailableLanguages(): string[] {
-		const highlightJsLanguages = this.highlightJsDetector.getAvailableLanguages();
-		const patternMatchingLanguages = this.patternMatchingDetector.getAvailableLanguages();
+		const allLanguages = new Set<string>();
 		
-		// Combine and deduplicate
-		const allLanguages = new Set([...highlightJsLanguages, ...patternMatchingLanguages]);
+		// Collect languages from all registered detectors
+		for (const detector of this.registeredDetectors.values()) {
+			const languages = detector.getAvailableLanguages();
+			languages.forEach(lang => allLanguages.add(lang));
+		}
+		
 		return Array.from(allLanguages).sort();
 	}
 
 	/**
 	 * Updates the detection method order
-	 * @param order New detection method order
+	 * @param order New detection method order (detector names)
 	 */
-	setDetectionOrder(order: DetectionMethod[]): void {
-		this.detectionOrder = [...order];
+	setDetectionOrder(order: string[]): void {
+		// Filter out detectors that are not registered
+		const validOrder = order.filter(name => this.registeredDetectors.has(name));
+		this.detectionOrder = [...validOrder];
 	}
 
 	/**
 	 * Gets the current detection method order
-	 * @returns Current detection method order
+	 * @returns Current detection method order (detector names)
 	 */
-	getDetectionOrder(): DetectionMethod[] {
+	getDetectionOrder(): string[] {
 		return [...this.detectionOrder];
 	}
 
@@ -132,8 +208,10 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 		this.confidenceThreshold = Math.max(0, Math.min(100, threshold));
 		const normalizedThreshold = this.confidenceThreshold / 100;
 		
-		this.highlightJsDetector.setMinConfidence(normalizedThreshold);
-		this.patternMatchingDetector.setMinConfidence(normalizedThreshold);
+		// Update threshold for all registered detectors
+		for (const detector of this.registeredDetectors.values()) {
+			detector.setMinConfidence(normalizedThreshold);
+		}
 	}
 
 	/**
@@ -146,42 +224,42 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 
 	/**
 	 * Enables or disables a specific detection method
-	 * @param method The method to enable/disable
+	 * @param detectorName The name of the detector to enable/disable
 	 * @param enabled Whether the method should be enabled
 	 */
-	setMethodEnabled(method: DetectionMethod, enabled: boolean): void {
+	setDetectorEnabled(detectorName: string, enabled: boolean): void {
 		if (enabled) {
-			if (!this.detectionOrder.includes(method)) {
-				this.detectionOrder.push(method);
+			if (!this.detectionOrder.includes(detectorName) && this.registeredDetectors.has(detectorName)) {
+				this.detectionOrder.push(detectorName);
 			}
 		} else {
-			this.detectionOrder = this.detectionOrder.filter(m => m !== method);
+			this.detectionOrder = this.detectionOrder.filter(name => name !== detectorName);
 		}
 	}
 
 	/**
 	 * Checks if a specific detection method is enabled
-	 * @param method The method to check
+	 * @param detectorName The name of the detector to check
 	 * @returns True if the method is enabled
 	 */
-	isMethodEnabled(method: DetectionMethod): boolean {
-		return this.detectionOrder.includes(method);
+	isDetectorEnabled(detectorName: string): boolean {
+		return this.detectionOrder.includes(detectorName);
 	}
 
 	/**
 	 * Gets the highlight.js detector instance for direct access
-	 * @returns HighlightJsDetector instance
+	 * @returns HighlightJsDetector instance or undefined if not registered
 	 */
-	getHighlightJsDetector(): HighlightJsDetector {
-		return this.highlightJsDetector;
+	getHighlightJsDetector(): HighlightJsDetector | undefined {
+		return this.registeredDetectors.get('highlight-js') as HighlightJsDetector;
 	}
 
 	/**
 	 * Gets the pattern matching detector instance for direct access
-	 * @returns PatternMatchingDetector instance
+	 * @returns PatternMatchingDetector instance or undefined if not registered
 	 */
-	getPatternMatchingDetector(): PatternMatchingDetector {
-		return this.patternMatchingDetector;
+	getPatternMatchingDetector(): PatternMatchingDetector | undefined {
+		return this.registeredDetectors.get('pattern-matching') as PatternMatchingDetector;
 	}
 
 	/**
@@ -190,8 +268,11 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 */
 	setEnabledPatternLanguages(enabledPatternLanguages: string[]): void {
 		this.enabledPatternLanguages = [...enabledPatternLanguages];
-		// Also update the pattern matching detector
-		this.patternMatchingDetector.setEnabledLanguages(enabledPatternLanguages);
+		// Also update the pattern matching detector if it exists
+		const patternDetector = this.getPatternMatchingDetector();
+		if (patternDetector) {
+			patternDetector.setEnabledLanguages(enabledPatternLanguages);
+		}
 	}
 
 	/**
@@ -205,23 +286,22 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	/**
 	 * Checks if a language is enabled for a specific detection method
 	 * @param language The language to check
-	 * @param method The detection method
+	 * @param detectorName The name of the detector
 	 * @returns True if the language is enabled for the method, false otherwise
 	 */
-	private isLanguageEnabledForMethod(language: string, method: DetectionMethod): boolean {
-		switch (method) {
-			case 'highlight-js':
-				// Highlight.js is not affected by language selection - always enabled
-				return true;
-			case 'pattern-matching':
-				// Pattern matching respects the enabled pattern languages setting
-				if (this.enabledPatternLanguages.length === 0) {
-					return true; // If no specific languages are enabled, allow all
-				}
-				return this.enabledPatternLanguages.includes(language);
-			default:
-				return true;
+	private isLanguageEnabledForMethod(language: string, detectorName: string): boolean {
+		// For pattern matching detector, check enabled languages
+		if (detectorName === 'pattern-matching') {
+			// Pattern matching respects the enabled pattern languages setting
+			if (this.enabledPatternLanguages.length === 0) {
+				return true; // If no specific languages are enabled, allow all
+			}
+			return this.enabledPatternLanguages.includes(language);
 		}
+		
+		// For other detectors, always enabled by default
+		// Individual detectors can implement their own language filtering
+		return true;
 	}
 
 	/**
@@ -232,5 +312,91 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 		return this.detectionOrder.length > 0 && 
 			   this.confidenceThreshold >= 0 && 
 			   this.confidenceThreshold <= 100;
+	}
+
+	// Implement ILanguageDetector interface methods for the engine itself
+	
+	/**
+	 * Gets the unique name of this detection engine
+	 * @returns Engine name
+	 */
+	getName(): string {
+		return 'detection-engine';
+	}
+
+	/**
+	 * Gets the display name of this detection engine
+	 * @returns User-friendly display name
+	 */
+	getDisplayName(): string {
+		return 'Language Detection Engine';
+	}
+
+	/**
+	 * Gets the description of this detection engine
+	 * @returns Engine description
+	 */
+	getDescription(): string {
+		return 'Coordinated language detection using multiple registered detection methods';
+	}
+
+	/**
+	 * Sets the minimum confidence threshold for the engine
+	 * @param threshold New minimum confidence (0-1)
+	 */
+	setMinConfidence(threshold: number): void {
+		// Convert to 0-100 scale and update
+		this.setConfidenceThreshold(threshold * 100);
+	}
+
+	/**
+	 * Gets the current minimum confidence threshold for the engine
+	 * @returns Current minimum confidence (0-1)
+	 */
+	getMinConfidence(): number {
+		return this.confidenceThreshold / 100;
+	}
+
+	/**
+	 * Checks if the engine supports extended configuration
+	 * @returns True as the engine supports detector management
+	 */
+	isConfigurable(): boolean {
+		return true;
+	}
+
+	/**
+	 * Gets the current engine configuration
+	 * @returns Configuration object
+	 */
+	getConfiguration(): Record<string, any> {
+		return {
+			detectionOrder: this.getDetectionOrder(),
+			confidenceThreshold: this.getConfidenceThreshold(),
+			enabledPatternLanguages: this.getEnabledPatternLanguages(),
+			registeredDetectors: this.getRegisteredDetectorNames(),
+			registeredDetectorInfo: this.getRegisteredDetectors().map(detector => ({
+				name: detector.getName(),
+				displayName: detector.getDisplayName(),
+				description: detector.getDescription(),
+				isConfigurable: detector.isConfigurable?.() ?? false
+			}))
+		};
+	}
+
+	/**
+	 * Sets the engine configuration
+	 * @param config Configuration object
+	 */
+	setConfiguration(config: Record<string, any>): void {
+		if (config.detectionOrder && Array.isArray(config.detectionOrder)) {
+			this.setDetectionOrder(config.detectionOrder);
+		}
+		if (typeof config.confidenceThreshold === 'number') {
+			this.setConfidenceThreshold(config.confidenceThreshold);
+		}
+		if (config.enabledPatternLanguages && Array.isArray(config.enabledPatternLanguages)) {
+			this.setEnabledPatternLanguages(config.enabledPatternLanguages);
+		}
 	}
 }

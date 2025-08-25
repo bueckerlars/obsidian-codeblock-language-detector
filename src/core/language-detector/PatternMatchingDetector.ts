@@ -305,4 +305,61 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	removeLanguagePattern(languageName: string): void {
 		this.patterns.delete(languageName.toLowerCase());
 	}
+
+	/**
+	 * Gets the unique name of this detector
+	 * @returns Detector name
+	 */
+	getName(): string {
+		return 'pattern-matching';
+	}
+
+	/**
+	 * Gets the display name of this detector
+	 * @returns User-friendly display name
+	 */
+	getDisplayName(): string {
+		return 'Pattern Matching Detector';
+	}
+
+	/**
+	 * Gets the description of this detector
+	 * @returns Detector description
+	 */
+	getDescription(): string {
+		return 'Language detection using keyword analysis, regex patterns, and syntax features with configurable language selection';
+	}
+
+	/**
+	 * Checks if this detector supports extended configuration
+	 * @returns True as pattern matching detector supports language selection
+	 */
+	isConfigurable(): boolean {
+		return true;
+	}
+
+	/**
+	 * Gets the current configuration
+	 * @returns Configuration object with enabled languages
+	 */
+	getConfiguration(): Record<string, any> {
+		return {
+			enabledLanguages: this.getEnabledLanguages(),
+			availableLanguages: this.getAvailableLanguages(),
+			minConfidence: this.getMinConfidence()
+		};
+	}
+
+	/**
+	 * Sets the configuration
+	 * @param config Configuration object
+	 */
+	setConfiguration(config: Record<string, any>): void {
+		if (config.enabledLanguages && Array.isArray(config.enabledLanguages)) {
+			this.setEnabledLanguages(config.enabledLanguages);
+		}
+		if (typeof config.minConfidence === 'number') {
+			this.setMinConfidence(config.minConfidence);
+		}
+	}
 }

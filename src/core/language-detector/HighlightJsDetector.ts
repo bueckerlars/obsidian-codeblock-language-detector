@@ -109,4 +109,36 @@ export class HighlightJsDetector implements ILanguageDetector {
 	getMinConfidence(): number {
 		return this.minConfidence;
 	}
+
+	/**
+	 * Gets the unique name of this detector
+	 * @returns Detector name
+	 */
+	getName(): string {
+		return 'highlight-js';
+	}
+
+	/**
+	 * Gets the display name of this detector
+	 * @returns User-friendly display name
+	 */
+	getDisplayName(): string {
+		return 'Highlight.js Detector';
+	}
+
+	/**
+	 * Gets the description of this detector
+	 * @returns Detector description
+	 */
+	getDescription(): string {
+		return 'Automatic language detection using the highlight.js library with confidence scoring based on syntax relevance';
+	}
+
+	/**
+	 * Checks if this detector supports extended configuration
+	 * @returns False as highlight.js detector has no extended configuration
+	 */
+	isConfigurable(): boolean {
+		return false;
+	}
 }

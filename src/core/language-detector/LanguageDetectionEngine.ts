@@ -1,98 +1,43 @@
-import { DetectionMethod, DetectionResult, ILanguageDetector } from '../../types';
+import { DetectionResult, ILanguageDetector } from '../../types';
 import { HighlightJsDetector } from './HighlightJsDetector';
 import { PatternMatchingDetector } from './PatternMatchingDetector';
 import { VSCodeDetector } from './VSCodeDetector';
+import { DetectorRegistry, DetectionOrchestrator, ConfigurationManager } from './engine';
 
 /**
  * Main language detection engine that coordinates multiple detection methods
- * Now supports dynamic registration of detection methods
+ * Now supports dynamic registration of detection methods with improved architecture
  */
 export class LanguageDetectionEngine implements ILanguageDetector {
-	private readonly registeredDetectors: Map<string, ILanguageDetector>;
-	private detectionOrder: string[];
-	private confidenceThreshold: number;
-	private enabledPatternLanguages: string[];
+	private registry: DetectorRegistry;
+	private orchestrator: DetectionOrchestrator;
+	private configManager: ConfigurationManager;
 
 	constructor(
 		detectionOrder: string[] = ['vscode-ml', 'highlight-js', 'pattern-matching'],
 		confidenceThreshold: number = 70,
 		enabledPatternLanguages: string[] = []
 	) {
-		this.registeredDetectors = new Map();
-		this.detectionOrder = detectionOrder;
-		this.confidenceThreshold = confidenceThreshold;
-		this.enabledPatternLanguages = enabledPatternLanguages;
+		// Initialize components
+		this.registry = new DetectorRegistry(detectionOrder);
+		this.orchestrator = new DetectionOrchestrator(this.registry, confidenceThreshold, enabledPatternLanguages);
+		this.configManager = new ConfigurationManager(this.registry, this.orchestrator);
 		
 		// Register default detectors
-		this.registerDefaultDetectors();
+		this.registerDefaultDetectors(confidenceThreshold, enabledPatternLanguages);
 	}
 
 	/**
 	 * Registers the default detection methods
 	 */
-	private registerDefaultDetectors(): void {
-		const normalizedThreshold = this.confidenceThreshold / 100;
-		
-		// Register VSCode ML detector
-		const vscodeDetector = new VSCodeDetector(normalizedThreshold);
-		this.registerDetector(vscodeDetector);
-		
-		// Register highlight.js detector
-		const highlightJsDetector = new HighlightJsDetector(normalizedThreshold);
-		this.registerDetector(highlightJsDetector);
-		
-		// Register pattern matching detector
-		const patternMatchingDetector = new PatternMatchingDetector(normalizedThreshold, this.enabledPatternLanguages);
-		this.registerDetector(patternMatchingDetector);
+	private registerDefaultDetectors(confidenceThreshold: number, enabledPatternLanguages: string[]): void {
+		const normalizedThreshold = confidenceThreshold / 100;
+		this.registry.registerDefaultDetectors(normalizedThreshold, enabledPatternLanguages);
 	}
 
-	/**
-	 * Registers a new detection method
-	 * @param detector The detector to register
-	 */
-	registerDetector(detector: ILanguageDetector): void {
-		const name = detector.getName();
-		this.registeredDetectors.set(name, detector);
-		
-		// Add to detection order if not already present
-		if (!this.detectionOrder.includes(name)) {
-			this.detectionOrder.push(name);
-		}
-	}
-
-	/**
-	 * Unregisters a detection method
-	 * @param detectorName The name of the detector to unregister
-	 */
-	unregisterDetector(detectorName: string): void {
-		this.registeredDetectors.delete(detectorName);
-		this.detectionOrder = this.detectionOrder.filter(name => name !== detectorName);
-	}
-
-	/**
-	 * Gets a registered detector by name
-	 * @param detectorName The name of the detector
-	 * @returns The detector instance or undefined if not found
-	 */
-	getDetector(detectorName: string): ILanguageDetector | undefined {
-		return this.registeredDetectors.get(detectorName);
-	}
-
-	/**
-	 * Gets all registered detectors
-	 * @returns Array of registered detector instances
-	 */
-	getRegisteredDetectors(): ILanguageDetector[] {
-		return Array.from(this.registeredDetectors.values());
-	}
-
-	/**
-	 * Gets the names of all registered detectors
-	 * @returns Array of detector names
-	 */
-	getRegisteredDetectorNames(): string[] {
-		return Array.from(this.registeredDetectors.keys());
-	}
+	// ===========================================
+	// Main Detection Interface (ILanguageDetector)
+	// ===========================================
 
 	/**
 	 * Detects the programming language using the configured detection methods in order
@@ -100,75 +45,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @returns Detection result or null if no method succeeds
 	 */
 	async detectLanguage(code: string): Promise<DetectionResult | null> {
-		if (!code || code.trim().length === 0) {
-			return null;
-		}
-
-		for (const detectorName of this.detectionOrder) {
-			try {
-				const detector = this.registeredDetectors.get(detectorName);
-				if (!detector) {
-					console.warn(`Detector '${detectorName}' not found in registry`);
-					continue;
-				}
-
-				const result = await detector.detectLanguage(code);
-				
-				if (result && 
-					result.confidence >= this.confidenceThreshold && 
-					this.isLanguageEnabledForMethod(result.language, detectorName)) {
-					return result;
-				}
-			} catch (error) {
-				console.warn(`Error in ${detectorName} detection:`, error);
-				continue;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Detects language using a specific detector
-	 * @param code The code to analyze
-	 * @param detectorName The name of the detector to use
-	 * @returns Detection result or null
-	 */
-	async detectWithDetector(code: string, detectorName: string): Promise<DetectionResult | null> {
-		const detector = this.registeredDetectors.get(detectorName);
-		if (!detector) {
-			console.warn(`Detector '${detectorName}' not found in registry`);
-			return null;
-		}
-
-		try {
-			return await detector.detectLanguage(code);
-		} catch (error) {
-			console.warn(`Error in ${detectorName} detection:`, error);
-			return null;
-		}
-	}
-
-	/**
-	 * Attempts detection with all registered methods and returns all results
-	 * @param code The code to analyze
-	 * @returns Array of detection results from all methods
-	 */
-	async detectWithAllMethods(code: string): Promise<DetectionResult[]> {
-		const results: DetectionResult[] = [];
-
-		for (const [detectorName, detector] of this.registeredDetectors) {
-			try {
-				const result = await detector.detectLanguage(code);
-				if (result) {
-					results.push(result);
-				}
-			} catch (error) {
-				console.warn(`Error in ${detectorName} detection:`, error);
-			}
-		}
-
-		return results.sort((a, b) => b.confidence - a.confidence);
+		return this.orchestrator.detectLanguage(code);
 	}
 
 	/**
@@ -176,159 +53,9 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @returns Array of unique language names
 	 */
 	getAvailableLanguages(): string[] {
-		const allLanguages = new Set<string>();
-		
-		// Collect languages from all registered detectors
-		for (const detector of this.registeredDetectors.values()) {
-			const languages = detector.getAvailableLanguages();
-			languages.forEach(lang => allLanguages.add(lang));
-		}
-		
-		return Array.from(allLanguages).sort();
+		return this.registry.getAvailableLanguages();
 	}
 
-	/**
-	 * Updates the detection method order
-	 * @param order New detection method order (detector names)
-	 */
-	setDetectionOrder(order: string[]): void {
-		// Filter out detectors that are not registered
-		const validOrder = order.filter(name => this.registeredDetectors.has(name));
-		this.detectionOrder = [...validOrder];
-	}
-
-	/**
-	 * Gets the current detection method order
-	 * @returns Current detection method order (detector names)
-	 */
-	getDetectionOrder(): string[] {
-		return [...this.detectionOrder];
-	}
-
-	/**
-	 * Updates the confidence threshold for all detectors
-	 * @param threshold New confidence threshold (0-100)
-	 */
-	setConfidenceThreshold(threshold: number): void {
-		this.confidenceThreshold = Math.max(0, Math.min(100, threshold));
-		const normalizedThreshold = this.confidenceThreshold / 100;
-		
-		// Update threshold for all registered detectors
-		for (const detector of this.registeredDetectors.values()) {
-			detector.setMinConfidence(normalizedThreshold);
-		}
-	}
-
-	/**
-	 * Gets the current confidence threshold
-	 * @returns Current confidence threshold (0-100)
-	 */
-	getConfidenceThreshold(): number {
-		return this.confidenceThreshold;
-	}
-
-	/**
-	 * Enables or disables a specific detection method
-	 * @param detectorName The name of the detector to enable/disable
-	 * @param enabled Whether the method should be enabled
-	 */
-	setDetectorEnabled(detectorName: string, enabled: boolean): void {
-		if (enabled) {
-			if (!this.detectionOrder.includes(detectorName) && this.registeredDetectors.has(detectorName)) {
-				this.detectionOrder.push(detectorName);
-			}
-		} else {
-			this.detectionOrder = this.detectionOrder.filter(name => name !== detectorName);
-		}
-	}
-
-	/**
-	 * Checks if a specific detection method is enabled
-	 * @param detectorName The name of the detector to check
-	 * @returns True if the method is enabled
-	 */
-	isDetectorEnabled(detectorName: string): boolean {
-		return this.detectionOrder.includes(detectorName);
-	}
-
-	/**
-	 * Gets the highlight.js detector instance for direct access
-	 * @returns HighlightJsDetector instance or undefined if not registered
-	 */
-	getHighlightJsDetector(): HighlightJsDetector | undefined {
-		return this.registeredDetectors.get('highlight-js') as HighlightJsDetector;
-	}
-
-	/**
-	 * Gets the pattern matching detector instance for direct access
-	 * @returns PatternMatchingDetector instance or undefined if not registered
-	 */
-	getPatternMatchingDetector(): PatternMatchingDetector | undefined {
-		return this.registeredDetectors.get('pattern-matching') as PatternMatchingDetector;
-	}
-
-	/**
-	 * Gets the VSCode ML detector instance for direct access
-	 * @returns VSCodeDetector instance or undefined if not registered
-	 */
-	getVSCodeDetector(): VSCodeDetector | undefined {
-		return this.registeredDetectors.get('vscode-ml') as VSCodeDetector;
-	}
-
-	/**
-	 * Updates the list of enabled languages for pattern matching
-	 * @param enabledPatternLanguages Array of language names that should be used for pattern matching
-	 */
-	setEnabledPatternLanguages(enabledPatternLanguages: string[]): void {
-		this.enabledPatternLanguages = [...enabledPatternLanguages];
-		// Also update the pattern matching detector if it exists
-		const patternDetector = this.getPatternMatchingDetector();
-		if (patternDetector) {
-			patternDetector.setEnabledLanguages(enabledPatternLanguages);
-		}
-	}
-
-	/**
-	 * Gets the current enabled pattern languages
-	 * @returns Array of currently enabled pattern language names
-	 */
-	getEnabledPatternLanguages(): string[] {
-		return [...this.enabledPatternLanguages];
-	}
-
-	/**
-	 * Checks if a language is enabled for a specific detection method
-	 * @param language The language to check
-	 * @param detectorName The name of the detector
-	 * @returns True if the language is enabled for the method, false otherwise
-	 */
-	private isLanguageEnabledForMethod(language: string, detectorName: string): boolean {
-		// For pattern matching detector, check enabled languages
-		if (detectorName === 'pattern-matching') {
-			// Pattern matching respects the enabled pattern languages setting
-			if (this.enabledPatternLanguages.length === 0) {
-				return true; // If no specific languages are enabled, allow all
-			}
-			return this.enabledPatternLanguages.includes(language);
-		}
-		
-		// For other detectors, always enabled by default
-		// Individual detectors can implement their own language filtering
-		return true;
-	}
-
-	/**
-	 * Validates the detection configuration
-	 * @returns True if the configuration is valid
-	 */
-	isConfigurationValid(): boolean {
-		return this.detectionOrder.length > 0 && 
-			   this.confidenceThreshold >= 0 && 
-			   this.confidenceThreshold <= 100;
-	}
-
-	// Implement ILanguageDetector interface methods for the engine itself
-	
 	/**
 	 * Gets the unique name of this detection engine
 	 * @returns Engine name
@@ -359,7 +86,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 */
 	setMinConfidence(threshold: number): void {
 		// Convert to 0-100 scale and update
-		this.setConfidenceThreshold(threshold * 100);
+		this.configManager.setConfidenceThreshold(threshold * 100);
 	}
 
 	/**
@@ -367,7 +94,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @returns Current minimum confidence (0-1)
 	 */
 	getMinConfidence(): number {
-		return this.confidenceThreshold / 100;
+		return this.configManager.getConfidenceThreshold() / 100;
 	}
 
 	/**
@@ -383,18 +110,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @returns Configuration object
 	 */
 	getConfiguration(): Record<string, any> {
-		return {
-			detectionOrder: this.getDetectionOrder(),
-			confidenceThreshold: this.getConfidenceThreshold(),
-			enabledPatternLanguages: this.getEnabledPatternLanguages(),
-			registeredDetectors: this.getRegisteredDetectorNames(),
-			registeredDetectorInfo: this.getRegisteredDetectors().map(detector => ({
-				name: detector.getName(),
-				displayName: detector.getDisplayName(),
-				description: detector.getDescription(),
-				isConfigurable: detector.isConfigurable?.() ?? false
-			}))
-		};
+		return this.configManager.getConfiguration();
 	}
 
 	/**
@@ -402,14 +118,231 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * @param config Configuration object
 	 */
 	setConfiguration(config: Record<string, any>): void {
-		if (config.detectionOrder && Array.isArray(config.detectionOrder)) {
-			this.setDetectionOrder(config.detectionOrder);
-		}
-		if (typeof config.confidenceThreshold === 'number') {
-			this.setConfidenceThreshold(config.confidenceThreshold);
-		}
-		if (config.enabledPatternLanguages && Array.isArray(config.enabledPatternLanguages)) {
-			this.setEnabledPatternLanguages(config.enabledPatternLanguages);
-		}
+		this.configManager.setConfiguration(config);
+	}
+
+	// ===========================================
+	// Registry Management
+	// ===========================================
+
+	/**
+	 * Registers a new detection method
+	 * @param detector The detector to register
+	 */
+	registerDetector(detector: ILanguageDetector): void {
+		this.registry.registerDetector(detector);
+	}
+
+	/**
+	 * Unregisters a detection method
+	 * @param detectorName The name of the detector to unregister
+	 */
+	unregisterDetector(detectorName: string): void {
+		this.registry.unregisterDetector(detectorName);
+	}
+
+	/**
+	 * Gets a registered detector by name
+	 * @param detectorName The name of the detector
+	 * @returns The detector instance or undefined if not found
+	 */
+	getDetector(detectorName: string): ILanguageDetector | undefined {
+		return this.registry.getDetector(detectorName);
+	}
+
+	/**
+	 * Gets all registered detectors
+	 * @returns Array of registered detector instances
+	 */
+	getRegisteredDetectors(): ILanguageDetector[] {
+		return this.registry.getAllDetectors();
+	}
+
+	/**
+	 * Gets the names of all registered detectors
+	 * @returns Array of detector names
+	 */
+	getRegisteredDetectorNames(): string[] {
+		return this.registry.getDetectorNames();
+	}
+
+	// ===========================================
+	// Detection Operations
+	// ===========================================
+
+	/**
+	 * Detects language using a specific detector
+	 * @param code The code to analyze
+	 * @param detectorName The name of the detector to use
+	 * @returns Detection result or null
+	 */
+	async detectWithDetector(code: string, detectorName: string): Promise<DetectionResult | null> {
+		return this.orchestrator.detectWithDetector(code, detectorName);
+	}
+
+	/**
+	 * Attempts detection with all registered methods and returns all results
+	 * @param code The code to analyze
+	 * @returns Array of detection results from all methods
+	 */
+	async detectWithAllMethods(code: string): Promise<DetectionResult[]> {
+		return this.orchestrator.detectWithAllMethods(code);
+	}
+
+	/**
+	 * Detects language with detailed analysis including fallback options
+	 * @param code The code to analyze
+	 * @param options Detection options
+	 * @returns Detailed detection result
+	 */
+	async detectWithAnalysis(code: string, options?: {
+		includeAllResults?: boolean;
+		includeFallbacks?: boolean;
+		minConfidence?: number;
+	}) {
+		return this.orchestrator.detectWithAnalysis(code, options);
+	}
+
+	// ===========================================
+	// Configuration Management
+	// ===========================================
+
+	/**
+	 * Updates the detection method order
+	 * @param order New detection method order (detector names)
+	 */
+	setDetectionOrder(order: string[]): void {
+		this.configManager.setDetectionOrder(order);
+	}
+
+	/**
+	 * Gets the current detection method order
+	 * @returns Current detection method order (detector names)
+	 */
+	getDetectionOrder(): string[] {
+		return this.configManager.getDetectionOrder();
+	}
+
+	/**
+	 * Updates the confidence threshold for all detectors
+	 * @param threshold New confidence threshold (0-100)
+	 */
+	setConfidenceThreshold(threshold: number): void {
+		this.configManager.setConfidenceThreshold(threshold);
+	}
+
+	/**
+	 * Gets the current confidence threshold
+	 * @returns Current confidence threshold (0-100)
+	 */
+	getConfidenceThreshold(): number {
+		return this.configManager.getConfidenceThreshold();
+	}
+
+	/**
+	 * Enables or disables a specific detection method
+	 * @param detectorName The name of the detector to enable/disable
+	 * @param enabled Whether the method should be enabled
+	 */
+	setDetectorEnabled(detectorName: string, enabled: boolean): void {
+		this.configManager.setDetectorEnabled(detectorName, enabled);
+	}
+
+	/**
+	 * Checks if a specific detection method is enabled
+	 * @param detectorName The name of the detector to check
+	 * @returns True if the method is enabled
+	 */
+	isDetectorEnabled(detectorName: string): boolean {
+		return this.configManager.isDetectorEnabled(detectorName);
+	}
+
+	/**
+	 * Updates the list of enabled languages for pattern matching
+	 * @param enabledPatternLanguages Array of language names that should be used for pattern matching
+	 */
+	setEnabledPatternLanguages(enabledPatternLanguages: string[]): void {
+		this.configManager.setEnabledPatternLanguages(enabledPatternLanguages);
+	}
+
+	/**
+	 * Gets the current enabled pattern languages
+	 * @returns Array of currently enabled pattern language names
+	 */
+	getEnabledPatternLanguages(): string[] {
+		return this.configManager.getEnabledPatternLanguages();
+	}
+
+	// ===========================================
+	// Backward Compatibility Methods
+	// ===========================================
+
+	/**
+	 * Gets the highlight.js detector instance for direct access
+	 * @returns HighlightJsDetector instance or undefined if not registered
+	 */
+	getHighlightJsDetector(): HighlightJsDetector | undefined {
+		return this.registry.getHighlightJsDetector();
+	}
+
+	/**
+	 * Gets the pattern matching detector instance for direct access
+	 * @returns PatternMatchingDetector instance or undefined if not registered
+	 */
+	getPatternMatchingDetector(): PatternMatchingDetector | undefined {
+		return this.registry.getPatternMatchingDetector();
+	}
+
+	/**
+	 * Gets the VSCode ML detector instance for direct access
+	 * @returns VSCodeDetector instance or undefined if not registered
+	 */
+	getVSCodeDetector(): VSCodeDetector | undefined {
+		return this.registry.getVSCodeDetector();
+	}
+
+	// ===========================================
+	// Validation and Diagnostics
+	// ===========================================
+
+	/**
+	 * Validates the detection configuration
+	 * @returns True if the configuration is valid
+	 */
+	isConfigurationValid(): boolean {
+		return this.configManager.validateConfiguration().isValid;
+	}
+
+	/**
+	 * Gets detailed validation results
+	 * @returns Validation result with details
+	 */
+	validateConfiguration() {
+		return this.configManager.validateConfiguration();
+	}
+
+	/**
+	 * Gets performance metrics
+	 * @returns Performance metrics
+	 */
+	getPerformanceMetrics() {
+		return this.orchestrator.getPerformanceMetrics();
+	}
+
+	/**
+	 * Gets configuration summary
+	 * @returns Configuration summary
+	 */
+	getConfigurationSummary() {
+		return this.configManager.getConfigurationSummary();
+	}
+
+	/**
+	 * Validates code before detection
+	 * @param code The code to validate
+	 * @returns Validation result
+	 */
+	validateCode(code: string) {
+		return this.orchestrator.validateCode(code);
 	}
 }

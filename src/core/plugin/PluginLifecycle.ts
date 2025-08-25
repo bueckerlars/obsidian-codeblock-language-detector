@@ -71,8 +71,11 @@ export class PluginLifecycle {
 	private initializeServices(): void {
 		this.plugin.codeAnalyzer = new CodeAnalyzer();
 		
+		// Get detection order from detector configurations
+		const detectionOrder = this.getDetectionOrderFromConfigurations();
+		
 		this.plugin.detectionEngine = new LanguageDetectionEngine(
-			this.plugin.settings.detectionMethodOrder,
+			detectionOrder,
 			this.plugin.settings.confidenceThreshold,
 			this.plugin.settings.enabledPatternLanguages
 		);
@@ -126,5 +129,23 @@ export class PluginLifecycle {
 			this.plugin.settings.historyData = this.plugin.historyService.getHistoryData();
 			await this.plugin.saveData(this.plugin.settings);
 		}
+	}
+
+	/**
+	 * Get detection order from detector configurations
+	 */
+	private getDetectionOrderFromConfigurations(): string[] {
+		const configs = this.plugin.settings.detectorConfigurations || {};
+		
+		// If no configurations exist, use default order
+		if (Object.keys(configs).length === 0) {
+			return ['vscode-ml', 'highlight-js', 'pattern-matching'];
+		}
+		
+		// Get enabled detectors sorted by order
+		return Object.entries(configs)
+			.filter(([_, config]) => config.enabled)
+			.sort((a, b) => a[1].order - b[1].order)
+			.map(([name, _]) => name);
 	}
 }

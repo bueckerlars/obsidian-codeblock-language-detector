@@ -56,8 +56,10 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Update detection engine settings
 	 */
 	updateDetectionEngineSettings(): void {
-		// Ensure detectorConfigurations exists, migrate from legacy settings if needed
-		this.migrateToDetectorConfigurations();
+		// Ensure detectorConfigurations exists
+		if (!this.settings.detectorConfigurations) {
+			this.settings.detectorConfigurations = {};
+		}
 		
 		// Apply configurations to each registered detector
 		const registeredDetectors = this.detectionEngine.getRegisteredDetectors();
@@ -89,39 +91,8 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		// Set global confidence threshold as fallback
 		this.detectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
 		
-		// Backward compatibility: still update pattern languages for legacy support
+		// Update pattern languages for pattern-matching detector
 		this.detectionEngine.setEnabledPatternLanguages(this.settings.enabledPatternLanguages);
-	}
-	
-	/**
-	 * Migrate legacy settings to new detector configurations format
-	 */
-	private migrateToDetectorConfigurations(): void {
-		if (!this.settings.detectorConfigurations) {
-			this.settings.detectorConfigurations = {};
-		}
-		
-		// Migrate highlight-js settings
-		if (!this.settings.detectorConfigurations['highlight-js']) {
-			this.settings.detectorConfigurations['highlight-js'] = {
-				enabled: this.settings.enableHighlightJs,
-				confidenceThreshold: this.settings.confidenceThreshold,
-				order: this.settings.detectionMethodOrder.indexOf('highlight-js'),
-				config: {}
-			};
-		}
-		
-		// Migrate pattern-matching settings
-		if (!this.settings.detectorConfigurations['pattern-matching']) {
-			this.settings.detectorConfigurations['pattern-matching'] = {
-				enabled: this.settings.enablePatternMatching,
-				confidenceThreshold: this.settings.confidenceThreshold,
-				order: this.settings.detectionMethodOrder.indexOf('pattern-matching'),
-				config: {
-					enabledLanguages: this.settings.enabledPatternLanguages
-				}
-			};
-		}
 	}
 	
 	/**
@@ -141,7 +112,11 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Load plugin settings
 	 */
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const loadedData = await this.loadData();
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
+		
+		// Perform migration if needed
+		await this.migrateSettingsIfNeeded(loadedData);
 	}
 
 	/**
@@ -163,6 +138,82 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		// Update history service max entries
 		if (this.historyService) {
 			this.historyService.setMaxEntries(this.settings.maxHistoryEntries);
+		}
+	}
+
+	/**
+	 * Migrate settings from older versions if needed
+	 * @param loadedData The raw loaded settings data
+	 */
+	private async migrateSettingsIfNeeded(loadedData: any): Promise<void> {
+		if (!loadedData || typeof loadedData !== 'object') {
+			return;
+		}
+		
+		const currentVersion = loadedData.version || 0;
+		const targetVersion = DEFAULT_SETTINGS.version;
+		
+		if (currentVersion >= targetVersion) {
+			return; // No migration needed
+		}
+		
+		console.log(`Migrating settings from version ${currentVersion} to ${targetVersion}`);
+		
+		// Migrate from version 0 (legacy) to version 1
+		if (currentVersion === 0) {
+			await this.migrateFromLegacySettings(loadedData);
+		}
+		
+		// Set the new version
+		this.settings.version = targetVersion;
+		await this.saveSettings();
+		
+		console.log('Settings migration completed');
+	}
+
+	/**
+	 * Migrate from legacy settings format (version 0) to new format
+	 * @param legacyData The legacy settings data
+	 */
+	private async migrateFromLegacySettings(legacyData: any): Promise<void> {
+		// Only migrate if legacy settings exist and new format doesn't
+		if (!this.settings.detectorConfigurations || Object.keys(this.settings.detectorConfigurations).length === 0) {
+			this.settings.detectorConfigurations = {};
+			
+			// Migrate legacy enable flags and detection order
+			const legacyOrder = legacyData.detectionMethodOrder || ['vscode-ml', 'highlight-js', 'pattern-matching'];
+			
+			// Migrate vscode-ml
+			if (legacyData.hasOwnProperty('enableVSCodeML')) {
+				this.settings.detectorConfigurations['vscode-ml'] = {
+					enabled: legacyData.enableVSCodeML !== false,
+					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					order: legacyOrder.indexOf('vscode-ml') !== -1 ? legacyOrder.indexOf('vscode-ml') : 0,
+					config: {}
+				};
+			}
+			
+			// Migrate highlight-js
+			if (legacyData.hasOwnProperty('enableHighlightJs')) {
+				this.settings.detectorConfigurations['highlight-js'] = {
+					enabled: legacyData.enableHighlightJs !== false,
+					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					order: legacyOrder.indexOf('highlight-js') !== -1 ? legacyOrder.indexOf('highlight-js') : 1,
+					config: {}
+				};
+			}
+			
+			// Migrate pattern-matching
+			if (legacyData.hasOwnProperty('enablePatternMatching')) {
+				this.settings.detectorConfigurations['pattern-matching'] = {
+					enabled: legacyData.enablePatternMatching !== false,
+					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					order: legacyOrder.indexOf('pattern-matching') !== -1 ? legacyOrder.indexOf('pattern-matching') : 2,
+					config: {
+						enabledLanguages: legacyData.enabledPatternLanguages || ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash']
+					}
+				};
+			}
 		}
 	}
 

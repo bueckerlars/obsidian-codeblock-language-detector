@@ -2,10 +2,8 @@
  * Core types and interfaces for the Auto Syntax Highlight plugin
  */
 
-// Detection methods available for language detection
-// Note: This is now used for backward compatibility in settings
-// The actual detection system supports dynamic registration of any detector
-export type DetectionMethod = 'vscode-ml' | 'highlight-js' | 'pattern-matching';
+// Note: The detection system supports dynamic registration of detectors
+// No fixed detection methods are required anymore
 
 // Trigger behaviors for when the plugin should activate
 export type TriggerBehavior = 'auto-on-open' | 'auto-on-edit' | 'auto-on-save' | 'manual';
@@ -23,23 +21,17 @@ export interface DetectorConfiguration {
 
 // Plugin settings interface
 export interface AutoSyntaxHighlightSettings {
+	// Settings schema version for migration purposes
+	version: number;
+	
 	// Trigger behavior setting
 	triggerBehavior: TriggerBehavior;
 	
 	// Global confidence threshold (0-100) - fallback for detectors without specific threshold
 	confidenceThreshold: number;
 	
-	// Detection method order (first method is tried first)
-	// Legacy setting - still used for backward compatibility
-	detectionMethodOrder: DetectionMethod[];
-	
-	// Dynamic detector configurations (takes precedence over legacy settings)
+	// Dynamic detector configurations
 	detectorConfigurations: Record<string, DetectorConfiguration>;
-	
-	// Enable/disable individual detection methods (legacy)
-	enableVSCodeML: boolean;
-	enableHighlightJs: boolean;
-	enablePatternMatching: boolean;
 	
 	// Enable/disable history tracking
 	enableHistory: boolean;
@@ -165,44 +157,13 @@ export interface IHistoryService {
 	getEntryById(id: string): HistoryEntry | null;
 }
 
-// Constants
-export const SUPPORTED_LANGUAGES = [
-	'javascript',
-	'typescript',
-	'python',
-	'java',
-	'cpp',
-	'c',
-	'csharp',
-	'php',
-	'ruby',
-	'go',
-	'rust',
-	'swift',
-	'kotlin',
-	'scala',
-	'r',
-	'sql',
-	'html',
-	'css',
-	'scss',
-	'sass',
-	'json',
-	'yaml',
-	'xml',
-	'markdown',
-	'bash',
-	'shell',
-	'powershell',
-	'dockerfile',
-	'makefile',
-];
+// Note: Available languages are dynamically determined by registered detectors
 
 // Default settings
 export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
+	version: 1, // Current settings schema version
 	triggerBehavior: 'auto-on-edit',
 	confidenceThreshold: 70,
-	detectionMethodOrder: ['vscode-ml', 'highlight-js', 'pattern-matching'],
 	detectorConfigurations: {
 		'vscode-ml': {
 			enabled: true,
@@ -225,9 +186,6 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 			}
 		}
 	},
-	enableVSCodeML: true,
-	enableHighlightJs: true,
-	enablePatternMatching: true,
 	enableHistory: true,
 	maxHistoryEntries: 100,
 	showNotifications: true,

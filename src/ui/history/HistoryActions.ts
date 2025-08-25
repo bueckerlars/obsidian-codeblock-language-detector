@@ -25,8 +25,8 @@ export class HistoryActions {
 	createActionButtons(container: HTMLElement, onRefresh: () => void): void {
 		const actionsContainer = container.createDiv('modal-actions');
 
-		// Statistics display
-		this.createStatisticsDisplay(actionsContainer);
+		// Basic statistics display
+		this.createBasicStatisticsDisplay(actionsContainer);
 
 		// Action buttons
 		const buttonsContainer = actionsContainer.createDiv('buttons-container');
@@ -34,10 +34,10 @@ export class HistoryActions {
 	}
 
 	/**
-	 * Creates the statistics display
+	 * Creates the basic statistics display
 	 * @param container The container element
 	 */
-	private createStatisticsDisplay(container: HTMLElement): void {
+	private createBasicStatisticsDisplay(container: HTMLElement): void {
 		const stats = this.historyService.getStatistics();
 		const statsEl = container.createDiv('stats');
 		
@@ -45,57 +45,18 @@ export class HistoryActions {
 		const basicStatsDiv = statsEl.createDiv('basic-stats');
 		basicStatsDiv.textContent = `Total: ${stats.totalEntries} | Applied: ${stats.appliedEntries} | Avg Confidence: ${stats.avgConfidence}%`;
 
-		// Detailed stats (expandable)
-		const detailedStats = this.historyService.getDetailedStatistics();
-		if (detailedStats.basic.totalEntries > 0) {
-			const expandableStats = statsEl.createDiv('expandable-stats');
-			const toggleStatsBtn = expandableStats.createEl('button', {
-				text: 'Show Details',
-				cls: 'toggle-stats-btn'
+		// Show detailed statistics button
+		const showStatsBtn = statsEl.createEl('button', {
+			text: 'Show Detailed Statistics',
+			cls: 'show-detailed-stats-btn'
+		});
+		
+		showStatsBtn.addEventListener('click', () => {
+			// Import here to avoid circular dependency
+			import('./StatisticsModal').then(({ StatisticsModal }) => {
+				new StatisticsModal(this.app, this.plugin).open();
 			});
-			
-			const detailedStatsDiv = expandableStats.createDiv('detailed-stats-content');
-			detailedStatsDiv.style.display = 'none';
-			
-			// Method breakdown
-			const methodsDiv = detailedStatsDiv.createDiv('methods-breakdown');
-			methodsDiv.createEl('h4', { text: 'Detection Methods:' });
-			Object.entries(detailedStats.methods).forEach(([method, stats]) => {
-				const methodRow = methodsDiv.createDiv('method-row');
-				methodRow.textContent = `${method}: ${stats.count} detections (${stats.successRate}% success, ${stats.avgConfidence}% avg confidence)`;
-			});
-
-			// Language breakdown
-			const languagesDiv = detailedStatsDiv.createDiv('languages-breakdown');
-			languagesDiv.createEl('h4', { text: 'Top Languages:' });
-			const topLanguages = Object.entries(detailedStats.languages)
-				.sort(([,a], [,b]) => b.count - a.count)
-				.slice(0, 5);
-			
-			topLanguages.forEach(([language, stats]) => {
-				const langRow = languagesDiv.createDiv('language-row');
-				langRow.textContent = `${language}: ${stats.count} detections (${stats.avgConfidence}% avg confidence)`;
-			});
-
-			// Trends
-			if (detailedStats.trends) {
-				const trendsDiv = detailedStatsDiv.createDiv('trends');
-				trendsDiv.createEl('h4', { text: 'Trends:' });
-				const trendsText = trendsDiv.createDiv();
-				trendsText.innerHTML = `
-					Confidence: ${detailedStats.trends.confidenceTrend} 
-					(Recent: ${detailedStats.trends.recentAvgConfidence}%, Overall: ${detailedStats.trends.overallAvgConfidence}%)<br>
-					Application Rate: ${detailedStats.trends.applicationRateTrend} 
-					(Recent: ${detailedStats.trends.recentApplicationRate}%, Overall: ${detailedStats.trends.overallApplicationRate}%)
-				`;
-			}
-
-			toggleStatsBtn.addEventListener('click', () => {
-				const isHidden = detailedStatsDiv.style.display === 'none';
-				detailedStatsDiv.style.display = isHidden ? 'block' : 'none';
-				toggleStatsBtn.textContent = isHidden ? 'Hide Details' : 'Show Details';
-			});
-		}
+		});
 	}
 
 	/**
@@ -104,39 +65,6 @@ export class HistoryActions {
 	 * @param onRefresh Callback to refresh the modal content
 	 */
 	private createActionButtonsRow(container: HTMLElement, onRefresh: () => void): void {
-		// Export history button
-		const exportButton = new ButtonComponent(container);
-		exportButton.setButtonText('Export History');
-		exportButton.setTooltip('Export history to clipboard as JSON');
-		exportButton.onClick(() => {
-			this.exportHistory();
-		});
-
-		// Import history button
-		const importButton = new ButtonComponent(container);
-		importButton.setButtonText('Import History');
-		importButton.setTooltip('Import history from clipboard');
-		importButton.onClick(async () => {
-			await this.importHistory(onRefresh);
-		});
-
-		// Validate and repair button
-		const validateButton = new ButtonComponent(container);
-		validateButton.setButtonText('Validate & Repair');
-		validateButton.setTooltip('Check and repair history data integrity');
-		validateButton.onClick(() => {
-			this.validateAndRepairHistory(onRefresh);
-		});
-
-		// Clear all button
-		const clearButton = new ButtonComponent(container);
-		clearButton.setButtonText('Clear All');
-		clearButton.setClass('mod-warning');
-		clearButton.setTooltip('Remove all history entries');
-		clearButton.onClick(() => {
-			this.clearAllHistory(onRefresh);
-		});
-
 		// Close button
 		const closeButton = new ButtonComponent(container);
 		closeButton.setButtonText('Close');
@@ -253,94 +181,7 @@ export class HistoryActions {
 		}
 	}
 
-	/**
-	 * Exports history to clipboard
-	 */
-	private exportHistory(): void {
-		try {
-			const historyJson = this.historyService.exportHistory();
-			navigator.clipboard.writeText(historyJson).then(() => {
-				new Notice('History exported to clipboard');
-			});
-		} catch (error) {
-			console.error('Error exporting history:', error);
-			new Notice('Error exporting history');
-		}
-	}
 
-	/**
-	 * Imports history from clipboard
-	 * @param onRefresh Callback to refresh the modal
-	 */
-	private async importHistory(onRefresh: () => void): Promise<void> {
-		try {
-			const clipboardText = await navigator.clipboard.readText();
-			
-			if (!clipboardText.trim()) {
-				new Notice('Clipboard is empty');
-				return;
-			}
-
-			const replace = confirm('Replace existing history? Click OK to replace, Cancel to merge.');
-			const importedCount = this.historyService.importHistory(clipboardText, replace);
-			
-			new Notice(`Imported ${importedCount} history entries`);
-			onRefresh();
-		} catch (error) {
-			console.error('Error importing history:', error);
-			new Notice('Error importing history: Invalid format or clipboard access denied');
-		}
-	}
-
-	/**
-	 * Validates and repairs history data
-	 * @param onRefresh Callback to refresh the modal
-	 */
-	private validateAndRepairHistory(onRefresh: () => void): void {
-		try {
-			const result = this.historyService.validateAndRepairHistory();
-			
-			let message = `Validation complete:\n`;
-			message += `Total entries: ${result.totalEntries}\n`;
-			message += `Valid entries: ${result.validEntries}\n`;
-			
-			if (result.repairedEntries > 0) {
-				message += `Repaired entries: ${result.repairedEntries}\n`;
-			}
-			
-			if (result.removedEntries > 0) {
-				message += `Removed invalid entries: ${result.removedEntries}\n`;
-			}
-			
-			if (result.duplicatesRemoved > 0) {
-				message += `Removed duplicates: ${result.duplicatesRemoved}\n`;
-			}
-
-			if (result.repairedEntries > 0 || result.removedEntries > 0 || result.duplicatesRemoved > 0) {
-				message += `\nHistory has been cleaned up.`;
-				onRefresh();
-			} else {
-				message += `\nNo issues found.`;
-			}
-
-			new Notice(message);
-		} catch (error) {
-			console.error('Error validating history:', error);
-			new Notice('Error validating history');
-		}
-	}
-
-	/**
-	 * Clears all history entries
-	 * @param onRefresh Callback to refresh the modal
-	 */
-	private clearAllHistory(onRefresh: () => void): void {
-		if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
-			this.historyService.clearHistory();
-			new Notice('History cleared');
-			onRefresh();
-		}
-	}
 
 	/**
 	 * Bulk operations on multiple entries

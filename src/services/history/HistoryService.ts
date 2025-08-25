@@ -236,6 +236,53 @@ export class HistoryService implements IHistoryService {
 	}
 
 	/**
+	 * Gets confidence distribution statistics
+	 * @param entries Optional entries array, defaults to all entries
+	 * @param bucketSize Size of confidence buckets (default: 10)
+	 * @returns Distribution of confidence values
+	 */
+	getConfidenceDistribution(entries?: HistoryEntry[], bucketSize: number = 10): Record<string, number> {
+		const targetEntries = entries || this.entryManager.getAllEntries();
+		return this.statistics.getConfidenceDistribution(targetEntries, bucketSize);
+	}
+
+	/**
+	 * Gets time-based statistics
+	 * @param entries Optional entries array, defaults to all entries
+	 * @param timeRangeMs Time range in milliseconds for grouping
+	 * @returns Statistics grouped by time periods
+	 */
+	getTimeBasedStatistics(entries?: HistoryEntry[], timeRangeMs: number = 24 * 60 * 60 * 1000): Record<string, {
+		count: number;
+		appliedCount: number;
+		avgConfidence: number;
+		languages: string[];
+		methods: string[];
+	}> {
+		const targetEntries = entries || this.entryManager.getAllEntries();
+		const rawStats = this.statistics.getTimeBasedStatistics(targetEntries, timeRangeMs);
+		
+		// Convert the result to have string arrays instead of sets
+		const convertedStats: Record<string, {
+			count: number;
+			appliedCount: number;
+			avgConfidence: number;
+			languages: string[];
+			methods: string[];
+		}> = {};
+		
+		Object.entries(rawStats).forEach(([key, stats]) => {
+			convertedStats[key] = {
+				...stats,
+				languages: Array.from(stats.languages),
+				methods: Array.from(stats.methods)
+			};
+		});
+		
+		return convertedStats;
+	}
+
+	/**
 	 * Exports history to JSON
 	 * @returns JSON string representation of the history
 	 */

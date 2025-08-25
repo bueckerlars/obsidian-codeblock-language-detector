@@ -1,4 +1,4 @@
-import { Setting } from 'obsidian';
+import { Setting, Notice } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
 
 /**
@@ -50,6 +50,42 @@ export class HistorySettingsSection {
 				desc.createSpan({ text: ` (Current: ${this.plugin.settings.maxHistoryEntries})` });
 			});
 
+		// Export history button
+		new Setting(containerEl)
+			.setName('Export history')
+			.setDesc('Export history data to clipboard as JSON')
+			.addButton(button => {
+				button
+					.setButtonText('Export to Clipboard')
+					.onClick(() => {
+						this.exportHistory();
+					});
+			});
+
+		// Import history button
+		new Setting(containerEl)
+			.setName('Import history')
+			.setDesc('Import history data from clipboard (JSON format)')
+			.addButton(button => {
+				button
+					.setButtonText('Import from Clipboard')
+					.onClick(async () => {
+						await this.importHistory();
+					});
+			});
+
+		// Validate and repair button
+		new Setting(containerEl)
+			.setName('Validate & repair history')
+			.setDesc('Check history data integrity and repair if necessary')
+			.addButton(button => {
+				button
+					.setButtonText('Validate & Repair')
+					.onClick(() => {
+						this.validateAndRepairHistory();
+					});
+			});
+
 		// Clear history button
 		new Setting(containerEl)
 			.setName('Clear history')
@@ -61,8 +97,82 @@ export class HistorySettingsSection {
 					.onClick(async () => {
 						if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
 							this.plugin.historyService.clearHistory();
+							new Notice('History cleared');
 						}
 					});
 			});
+	}
+
+	/**
+	 * Exports history to clipboard
+	 */
+	private exportHistory(): void {
+		try {
+			const historyJson = this.plugin.historyService.exportHistory();
+			navigator.clipboard.writeText(historyJson).then(() => {
+				new Notice('History exported to clipboard');
+			});
+		} catch (error) {
+			console.error('Error exporting history:', error);
+			new Notice('Error exporting history');
+		}
+	}
+
+	/**
+	 * Imports history from clipboard
+	 */
+	private async importHistory(): Promise<void> {
+		try {
+			const clipboardText = await navigator.clipboard.readText();
+			
+			if (!clipboardText.trim()) {
+				new Notice('Clipboard is empty');
+				return;
+			}
+
+			const replace = confirm('Replace existing history? Click OK to replace, Cancel to merge.');
+			const importedCount = this.plugin.historyService.importHistory(clipboardText, replace);
+			
+			new Notice(`Imported ${importedCount} history entries`);
+		} catch (error) {
+			console.error('Error importing history:', error);
+			new Notice('Error importing history: Invalid format or clipboard access denied');
+		}
+	}
+
+	/**
+	 * Validates and repairs history data
+	 */
+	private validateAndRepairHistory(): void {
+		try {
+			const result = this.plugin.historyService.validateAndRepairHistory();
+			
+			let message = `Validation complete:\n`;
+			message += `Total entries: ${result.totalEntries}\n`;
+			message += `Valid entries: ${result.validEntries}\n`;
+			
+			if (result.repairedEntries > 0) {
+				message += `Repaired entries: ${result.repairedEntries}\n`;
+			}
+			
+			if (result.removedEntries > 0) {
+				message += `Removed invalid entries: ${result.removedEntries}\n`;
+			}
+			
+			if (result.duplicatesRemoved > 0) {
+				message += `Removed duplicates: ${result.duplicatesRemoved}\n`;
+			}
+
+			if (result.repairedEntries > 0 || result.removedEntries > 0 || result.duplicatesRemoved > 0) {
+				message += `\nHistory has been cleaned up.`;
+			} else {
+				message += `\nNo issues found.`;
+			}
+
+			new Notice(message);
+		} catch (error) {
+			console.error('Error validating history:', error);
+			new Notice('Error validating history');
+		}
 	}
 }

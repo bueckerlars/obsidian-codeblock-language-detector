@@ -1,6 +1,6 @@
 import { Editor, MarkdownView, Notice } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../main';
-import { HistoryModal } from '../../ui';
+import { HistoryModal, StatisticsModal } from '../../ui';
 
 /**
  * Manages plugin commands
@@ -68,6 +68,15 @@ export class CommandManager {
 					this.plugin.historyService.clearHistory();
 					new Notice('Detection history cleared');
 				}
+			}
+		});
+
+		// Open statistics modal command
+		this.plugin.addCommand({
+			id: 'open-statistics-modal',
+			name: 'Show detection statistics',
+			callback: () => {
+				new StatisticsModal(this.plugin.app, this.plugin).open();
 			}
 		});
 	}

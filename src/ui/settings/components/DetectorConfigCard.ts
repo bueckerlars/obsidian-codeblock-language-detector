@@ -68,18 +68,29 @@ export class DetectorConfigCard {
 		// Expand/Collapse button for settings (only shown if enabled)
 		if (enabled) {
 			const expandButton = rightSection.createSpan('detector-expand-btn');
-			expandButton.textContent = '▶';
-			expandButton.title = 'Show settings';
-			expandButton.classList.add('collapsed');
 			
-			// Configuration section (initially hidden)
+			// Check if this detector card should be expanded based on saved UI state
+			const isExpanded = this.plugin.settings.uiState?.expandedDetectorCards?.[detectorName] || false;
+			
+			expandButton.textContent = isExpanded ? '▼' : '▶';
+			expandButton.title = isExpanded ? 'Hide settings' : 'Show settings';
+			expandButton.classList.add(isExpanded ? 'expanded' : 'collapsed');
+			
+			// Configuration section
 			const configSection = card.createDiv('detector-config-section');
-			configSection.style.display = 'none';
-			configSection.classList.add('collapsed');
+			if (isExpanded) {
+				configSection.style.display = 'block';
+				configSection.classList.remove('collapsed');
+				// Mark as pre-expanded to prevent animation on re-render
+				configSection.classList.add('pre-expanded');
+			} else {
+				configSection.style.display = 'none';
+				configSection.classList.add('collapsed');
+			}
 			
 			// Expand/collapse functionality
 			expandButton.addEventListener('click', () => {
-				this.toggleConfigSection(configSection, expandButton);
+				this.toggleConfigSection(configSection, expandButton, detectorName);
 			});
 			
 			// Confidence threshold
@@ -99,25 +110,34 @@ export class DetectorConfigCard {
 	 * Toggles the configuration section visibility
 	 * @param configSection The configuration section element
 	 * @param expandButton The expand button element
+	 * @param detectorName The name of the detector for state persistence
 	 */
-	private toggleConfigSection(configSection: HTMLElement, expandButton: HTMLElement): void {
+	private async toggleConfigSection(configSection: HTMLElement, expandButton: HTMLElement, detectorName: string): Promise<void> {
 		const isCollapsed = configSection.style.display === 'none';
 		
 		if (isCollapsed) {
-			// Expanding
+			// Expanding - remove pre-expanded class to allow animation
+			configSection.classList.remove('pre-expanded');
 			configSection.style.display = 'block';
 			configSection.classList.remove('collapsed');
 			expandButton.textContent = '▼';
 			expandButton.classList.remove('collapsed');
 			expandButton.classList.add('expanded');
 			expandButton.title = 'Hide settings';
+			
+			// Save expanded state
+			await this.saveDetectorExpandState(detectorName, true);
 		} else {
-			// Collapsing
+			// Collapsing - remove pre-expanded class to allow animation
+			configSection.classList.remove('pre-expanded');
 			configSection.classList.add('collapsed');
 			expandButton.textContent = '▶';
 			expandButton.classList.remove('expanded');
 			expandButton.classList.add('collapsed');
 			expandButton.title = 'Show settings';
+			
+			// Save collapsed state
+			await this.saveDetectorExpandState(detectorName, false);
 			
 			// Hide after animation completes
 			setTimeout(() => {
@@ -126,6 +146,30 @@ export class DetectorConfigCard {
 				}
 			}, 300);
 		}
+	}
+
+	/**
+	 * Saves the expand/collapse state of a detector card
+	 * @param detectorName The name of the detector
+	 * @param isExpanded Whether the detector card is expanded
+	 */
+	private async saveDetectorExpandState(detectorName: string, isExpanded: boolean): Promise<void> {
+		// Initialize uiState if it doesn't exist
+		if (!this.plugin.settings.uiState) {
+			this.plugin.settings.uiState = {
+				expandedDetectorCards: {}
+			};
+		}
+		
+		if (!this.plugin.settings.uiState.expandedDetectorCards) {
+			this.plugin.settings.uiState.expandedDetectorCards = {};
+		}
+		
+		// Update the state
+		this.plugin.settings.uiState.expandedDetectorCards[detectorName] = isExpanded;
+		
+		// Save settings
+		await this.plugin.saveSettings();
 	}
 
 	/**

@@ -841,17 +841,22 @@ select:focus {
 
 /* Configuration Section Transitions */
 .detector-config-section {
-  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-  overflow: hidden;
-  max-height: 1000px;
-  opacity: 1;
+	transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+	overflow: hidden;
+	max-height: 1000px;
+	opacity: 1;
 }
 
 .detector-config-section.collapsed {
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  opacity: 0;
+	max-height: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	opacity: 0;
+}
+
+/* Prevent animation on re-render for pre-expanded sections */
+.detector-config-section.pre-expanded {
+	transition: none !important;
 }
 
 /* Enhanced Drag and Drop Styles */
@@ -1036,18 +1041,18 @@ select:focus {
 
 /* Animation for smooth expand/collapse */
 @keyframes expandCollapse {
-  from {
-    max-height: 0;
-    opacity: 0;
-  }
-  to {
-    max-height: 500px;
-    opacity: 1;
-  }
+	from {
+		max-height: 0;
+		opacity: 0;
+	}
+	to {
+		max-height: 500px;
+		opacity: 1;
+	}
 }
 
-.detector-config-section:not(.collapsed) {
-  animation: expandCollapse 0.3s ease-out;
+.detector-config-section:not(.collapsed):not(.pre-expanded) {
+	animation: expandCollapse 0.3s ease-out;
 }
 
 /* Statistics Modal Styles */

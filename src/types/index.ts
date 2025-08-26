@@ -50,6 +50,11 @@ export interface AutoSyntaxHighlightSettings {
 	
 	// Persistent history data storage
 	historyData: HistoryEntry[];
+	
+	// UI state for settings (expanded/collapsed detector cards)
+	uiState: {
+		expandedDetectorCards: Record<string, boolean>;
+	};
 }
 
 // Language detection result
@@ -192,4 +197,7 @@ export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
 	enabledPatternLanguages: ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash'], // All pattern-based languages enabled by default
 	processingScope: 'current-note', // Default to current note only
 	historyData: [],
+	uiState: {
+		expandedDetectorCards: {}
+	},
 };

@@ -115,6 +115,13 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		const loadedData = await this.loadData();
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 		
+		// Ensure uiState is initialized for backward compatibility
+		if (!this.settings.uiState) {
+			this.settings.uiState = {
+				expandedDetectorCards: {}
+			};
+		}
+		
 		// Perform migration if needed
 		await this.migrateSettingsIfNeeded(loadedData);
 	}

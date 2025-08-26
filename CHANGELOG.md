@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Added patters for jsx, tsx and vue
+- UI state persistence for detector configuration cards (expanded/collapsed state)
+
+### Fixed
+- Fixed detector configuration cards collapsing on settings changes
+- Eliminated unwanted expand animations during UI re-rendering
+- Improved visual stability of settings interface
+
+### Changed
+- Detection Patters are getting loaded dynamic on build time
+
 ## [0.2.0] - 2025-08-25
 
 ### Added

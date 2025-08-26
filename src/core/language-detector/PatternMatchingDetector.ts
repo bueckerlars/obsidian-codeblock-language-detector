@@ -1,15 +1,5 @@
 import { DetectionResult, ILanguageDetector, LanguagePattern } from '../../types';
-
-// Import pattern data
-const javascriptPattern = require('../../data/patterns/javascript.json');
-const typescriptPattern = require('../../data/patterns/typescript.json');
-const jsxPattern = require('../../data/patterns/jsx.json');
-const tsxPattern = require('../../data/patterns/tsx.json');
-const vuePattern = require('../../data/patterns/vue.json');
-const pythonPattern = require('../../data/patterns/python.json');
-const javaPattern = require('../../data/patterns/java.json');
-const cppPattern = require('../../data/patterns/cpp.json');
-const bashPattern = require('../../data/patterns/bash.json');
+import { PatternLoader } from './PatternLoader';
 
 /**
  * Language detector using pattern matching and keyword analysis
@@ -27,24 +17,18 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	}
 
 	/**
-	 * Initializes the language patterns
+	 * Initializes the language patterns using the PatternLoader
 	 */
 	private initializePatterns(): void {
-		const patterns = [
-			javascriptPattern as LanguagePattern,
-			typescriptPattern as LanguagePattern,
-			jsxPattern as LanguagePattern,
-			tsxPattern as LanguagePattern,
-			vuePattern as LanguagePattern,
-			pythonPattern as LanguagePattern,
-			javaPattern as LanguagePattern,
-			cppPattern as LanguagePattern,
-			bashPattern as LanguagePattern,
-		];
-
-		patterns.forEach(pattern => {
-			this.patterns.set(pattern.name.toLowerCase(), pattern);
+		// Load patterns using the static PatternLoader
+		const loadedPatterns = PatternLoader.loadPatterns();
+		
+		// Copy patterns to our internal map
+		loadedPatterns.forEach((pattern, key) => {
+			this.patterns.set(key, pattern);
 		});
+		
+		console.log(`🎯 PatternMatchingDetector initialized with ${this.patterns.size} patterns: ${Array.from(this.patterns.keys()).join(', ')}`);
 	}
 
 	/**
@@ -302,6 +286,15 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	 */
 	addLanguagePattern(pattern: LanguagePattern): void {
 		this.patterns.set(pattern.name.toLowerCase(), pattern);
+	}
+
+	/**
+	 * Reloads all patterns from the PatternLoader
+	 * Note: In the bundled version, this will reload the same patterns
+	 */
+	reloadPatterns(): void {
+		this.patterns.clear();
+		this.initializePatterns();
 	}
 
 	/**

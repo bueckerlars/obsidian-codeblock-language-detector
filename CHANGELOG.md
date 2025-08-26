@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.1] - 2025-08-26
 
 ### Added
 - Added patters for jsx, tsx and vue

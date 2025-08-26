@@ -3,6 +3,9 @@ import { DetectionResult, ILanguageDetector, LanguagePattern } from '../../types
 // Import pattern data
 const javascriptPattern = require('../../data/patterns/javascript.json');
 const typescriptPattern = require('../../data/patterns/typescript.json');
+const jsxPattern = require('../../data/patterns/jsx.json');
+const tsxPattern = require('../../data/patterns/tsx.json');
+const vuePattern = require('../../data/patterns/vue.json');
 const pythonPattern = require('../../data/patterns/python.json');
 const javaPattern = require('../../data/patterns/java.json');
 const cppPattern = require('../../data/patterns/cpp.json');
@@ -30,6 +33,9 @@ export class PatternMatchingDetector implements ILanguageDetector {
 		const patterns = [
 			javascriptPattern as LanguagePattern,
 			typescriptPattern as LanguagePattern,
+			jsxPattern as LanguagePattern,
+			tsxPattern as LanguagePattern,
+			vuePattern as LanguagePattern,
 			pythonPattern as LanguagePattern,
 			javaPattern as LanguagePattern,
 			cppPattern as LanguagePattern,

@@ -1,0 +1,72 @@
+{
+  "name": "TSX",
+  "extensions": [".tsx"],
+  "keywords": [
+    "function", "var", "let", "const", "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+    "return", "try", "catch", "finally", "throw", "new", "this", "super", "class", "extends", "import", "export",
+    "default", "from", "as", "typeof", "instanceof", "in", "of", "async", "await", "yield", "static", "get", "set",
+    "interface", "type", "enum", "namespace", "module", "declare", "public", "private", "protected", "readonly",
+    "abstract", "implements", "keyof", "infer", "never", "unknown", "any", "void", "undefined", "null",
+    "React", "Component", "useState", "useEffect", "useContext", "useReducer", "useMemo", "useCallback"
+  ],
+  "patterns": [
+    "<\\w+[^>]*>",
+    "</\\w+>",
+    "<\\w+[^>]*/?>",
+    "\\{[^}]*\\}",
+    "interface\\s+\\w+",
+    "type\\s+\\w+\\s*=",
+    "enum\\s+\\w+",
+    "\\w+:\\s*\\w+",
+    "\\w+:\\s*React\\.",
+    "React\\.FC<",
+    "React\\.Component<",
+    "className\\s*=",
+    "onClick\\s*=",
+    "onChange\\s*=",
+    "onSubmit\\s*=",
+    "React\\.\\w+",
+    "useState<\\w+>",
+    "useEffect\\s*\\(",
+    "useContext<\\w+>",
+    "return\\s*\\(",
+    "return\\s*<",
+    "\\w+\\s*=>\\s*\\(",
+    "\\w+\\s*=>\\s*<",
+    "function\\s+\\w+\\s*\\(",
+    "import\\s+.*\\s+from\\s+['\"]react['\"]",
+    "export\\s+default\\s+\\w+",
+    "props\\.",
+    "state\\.",
+    "\\.map\\s*\\(",
+    "\\.filter\\s*\\(",
+    "key\\s*=",
+    "ref\\s*=",
+    "<\\w+>",
+    "\\w+\\s*\\|\\s*\\w+",
+    "\\w+\\s*&\\s*\\w+",
+    "\\w+\\[\\]",
+    "Array<\\w+>",
+    "Promise<\\w+>",
+    "keyof\\s+\\w+",
+    "typeof\\s+\\w+"
+  ],
+  "imports": [
+    "import", "export", "from", "as", "declare", "module", "namespace", "React", "Component"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}]
+  },
+  "operators": [
+    "===", "!==", "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=",
+    "=>", "?:", "??", "?.", "!"
+  ],
+  "builtins": [
+    "React", "Component", "PureComponent", "Fragment", "useState", "useEffect", "useContext", "useReducer", 
+    "useMemo", "useCallback", "useRef", "useImperativeHandle", "useLayoutEffect", "useDebugValue",
+    "createElement", "cloneElement", "isValidElement", "Children", "PropTypes", "ReactDOM",
+    "render", "hydrate", "unmountComponentAtNode", "findDOMNode", "createPortal",
+    "Record", "Partial", "Pick", "Omit", "Exclude", "Extract", "NonNullable", "ReturnType", "InstanceType"
+  ]
+}

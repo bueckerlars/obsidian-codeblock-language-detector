@@ -1,0 +1,72 @@
+{
+  "name": "Vue",
+  "extensions": [".vue"],
+  "keywords": [
+    "template", "script", "style", "setup", "lang", "scoped", "module",
+    "export", "default", "import", "from", "as", "const", "let", "var",
+    "function", "return", "if", "else", "for", "while", "do", "switch", "case",
+    "data", "computed", "methods", "watch", "props", "components", "mixins",
+    "mounted", "created", "updated", "destroyed", "beforeMount", "beforeCreate",
+    "beforeUpdate", "beforeDestroy", "activated", "deactivated", "errorCaptured",
+    "ref", "reactive", "computed", "watch", "onMounted", "onUnmounted", "onUpdated"
+  ],
+  "patterns": [
+    "<template[^>]*>",
+    "</template>",
+    "<script[^>]*>",
+    "</script>",
+    "<style[^>]*>",
+    "</style>",
+    "\\{\\{[^}]*\\}\\}",
+    "v-if\\s*=",
+    "v-else",
+    "v-else-if\\s*=",
+    "v-for\\s*=",
+    "v-show\\s*=",
+    "v-model\\s*=",
+    "v-bind:\\w+",
+    "v-on:\\w+",
+    "@\\w+\\s*=",
+    ":\\w+\\s*=",
+    "\\.\\w+\\s*=",
+    "export\\s+default\\s*\\{",
+    "data\\s*\\(\\s*\\)\\s*\\{",
+    "computed:\\s*\\{",
+    "methods:\\s*\\{",
+    "watch:\\s*\\{",
+    "props:\\s*\\[",
+    "props:\\s*\\{",
+    "components:\\s*\\{",
+    "mounted\\s*\\(\\s*\\)\\s*\\{",
+    "created\\s*\\(\\s*\\)\\s*\\{",
+    "\\$\\w+",
+    "this\\.",
+    "defineComponent\\s*\\(",
+    "ref\\s*\\(",
+    "reactive\\s*\\(",
+    "computed\\s*\\(",
+    "watch\\s*\\(",
+    "onMounted\\s*\\(",
+    "onUnmounted\\s*\\(",
+    "setup\\s*\\("
+  ],
+  "imports": [
+    "import", "export", "from", "defineComponent", "ref", "reactive", "computed", "watch"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}],
+    "template": [{"start": "<!--", "end": "-->"}]
+  },
+  "operators": [
+    "===", "!==", "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=",
+    "=>", "?:", "??"
+  ],
+  "builtins": [
+    "Vue", "defineComponent", "ref", "reactive", "computed", "watch", "watchEffect", "readonly", "isRef", "unref",
+    "toRef", "toRefs", "customRef", "shallowRef", "triggerRef", "shallowReactive", "shallowReadonly",
+    "onMounted", "onUnmounted", "onUpdated", "onBeforeMount", "onBeforeUnmount", "onBeforeUpdate",
+    "onActivated", "onDeactivated", "onErrorCaptured", "provide", "inject", "getCurrentInstance",
+    "nextTick", "defineProps", "defineEmits", "defineExpose", "withDefaults"
+  ]
+}

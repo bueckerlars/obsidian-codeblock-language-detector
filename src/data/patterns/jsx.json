@@ -1,0 +1,54 @@
+{
+  "name": "JSX",
+  "extensions": [".jsx"],
+  "keywords": [
+    "function", "var", "let", "const", "if", "else", "for", "while", "do", "switch", "case", "break", "continue",
+    "return", "try", "catch", "finally", "throw", "new", "this", "super", "class", "extends", "import", "export",
+    "default", "from", "as", "typeof", "instanceof", "in", "of", "async", "await", "yield", "static", "get", "set",
+    "React", "Component", "useState", "useEffect", "useContext", "useReducer", "useMemo", "useCallback"
+  ],
+  "patterns": [
+    "<\\w+[^>]*>",
+    "</\\w+>",
+    "<\\w+[^>]*/?>",
+    "\\{[^}]*\\}",
+    "className\\s*=",
+    "onClick\\s*=",
+    "onChange\\s*=",
+    "onSubmit\\s*=",
+    "React\\.\\w+",
+    "useState\\s*\\(",
+    "useEffect\\s*\\(",
+    "useContext\\s*\\(",
+    "return\\s*\\(",
+    "return\\s*<",
+    "\\w+\\s*=>\\s*\\(",
+    "\\w+\\s*=>\\s*<",
+    "function\\s+\\w+\\s*\\(",
+    "import\\s+.*\\s+from\\s+['\"]react['\"]",
+    "export\\s+default\\s+\\w+",
+    "props\\.",
+    "state\\.",
+    "\\.map\\s*\\(",
+    "\\.filter\\s*\\(",
+    "key\\s*=",
+    "ref\\s*="
+  ],
+  "imports": [
+    "import", "export", "from", "React", "Component"
+  ],
+  "comments": {
+    "line": ["//"],
+    "block": [{"start": "/*", "end": "*/"}]
+  },
+  "operators": [
+    "===", "!==", "==", "!=", "<=", ">=", "<", ">", "&&", "||", "!", "++", "--", "+=", "-=", "*=", "/=", "%=",
+    "=>", "?:", "??"
+  ],
+  "builtins": [
+    "React", "Component", "PureComponent", "Fragment", "useState", "useEffect", "useContext", "useReducer", 
+    "useMemo", "useCallback", "useRef", "useImperativeHandle", "useLayoutEffect", "useDebugValue",
+    "createElement", "cloneElement", "isValidElement", "Children", "PropTypes", "ReactDOM",
+    "render", "hydrate", "unmountComponentAtNode", "findDOMNode", "createPortal"
+  ]
+}

@@ -77,14 +77,12 @@ export class DetectorConfigCard {
 			expandButton.classList.add(isExpanded ? 'expanded' : 'collapsed');
 			
 			// Configuration section
-			const configSection = card.createDiv('detector-config-section');
+			const configSection = card.createDiv('detector-config-section config-section');
 			if (isExpanded) {
-				configSection.style.display = 'block';
 				configSection.classList.remove('collapsed');
 				// Mark as pre-expanded to prevent animation on re-render
 				configSection.classList.add('pre-expanded');
 			} else {
-				configSection.style.display = 'none';
 				configSection.classList.add('collapsed');
 			}
 			
@@ -113,12 +111,11 @@ export class DetectorConfigCard {
 	 * @param detectorName The name of the detector for state persistence
 	 */
 	private async toggleConfigSection(configSection: HTMLElement, expandButton: HTMLElement, detectorName: string): Promise<void> {
-		const isCollapsed = configSection.style.display === 'none';
+		const isCollapsed = configSection.classList.contains('collapsed');
 		
 		if (isCollapsed) {
 			// Expanding - remove pre-expanded class to allow animation
 			configSection.classList.remove('pre-expanded');
-			configSection.style.display = 'block';
 			configSection.classList.remove('collapsed');
 			expandButton.textContent = '▼';
 			expandButton.classList.remove('collapsed');
@@ -138,13 +135,6 @@ export class DetectorConfigCard {
 			
 			// Save collapsed state
 			await this.saveDetectorExpandState(detectorName, false);
-			
-			// Hide after animation completes
-			setTimeout(() => {
-				if (configSection.classList.contains('collapsed')) {
-					configSection.style.display = 'none';
-				}
-			}, 300);
 		}
 	}
 
@@ -241,7 +231,7 @@ export class DetectorConfigCard {
 		const statusItem = statusContainer.createDiv('status-item');
 		const statusIcon = statusItem.createSpan('status-icon');
 		statusIcon.textContent = isReady ? '✓' : '○';
-		statusIcon.style.color = isReady ? 'green' : 'orange';
+		statusIcon.classList.add(isReady ? 'ready' : 'not-ready');
 		
 		const statusLabel = statusItem.createSpan('status-label');
 		statusLabel.textContent = `Model Status: ${isReady ? 'Ready' : 'Not Initialized'}`;
@@ -261,7 +251,7 @@ export class DetectorConfigCard {
 				} catch (error) {
 					console.error('Failed to initialize VSCode model:', error);
 					initButton.textContent = 'Initialization Failed';
-					initButton.style.color = 'red';
+					initButton.classList.add('error');
 				}
 			});
 		}

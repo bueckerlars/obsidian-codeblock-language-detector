@@ -629,6 +629,27 @@ select:focus {
   max-width: 100%;
 }
 
+/* Dynamic styles for detector config */
+.config-section {
+  display: block;
+}
+
+.config-section.collapsed {
+  display: none;
+}
+
+.status-icon.ready {
+  color: var(--color-green);
+}
+
+.status-icon.not-ready {
+  color: var(--color-orange);
+}
+
+.init-button.error {
+  color: var(--color-red);
+}
+
 
 
 .order-controls {
@@ -959,6 +980,18 @@ select:focus {
   cursor: not-allowed;
 }
 
+/* Dynamic styles for drag and drop */
+.drag-image {
+  position: absolute;
+  top: -1000px;
+  opacity: 0.8;
+  transform: rotate(2deg);
+}
+
+.placeholder-hidden {
+  display: none;
+}
+
 .detector-config-card.disabled .detector-drag-handle:hover {
   background-color: transparent;
 }
@@ -1126,6 +1159,34 @@ select:focus {
 .stat-description {
   font-size: 0.8em;
   color: var(--text-muted);
+}
+
+/* Dynamic styles for statistics */
+.stat-icon {
+  font-size: 1.5em;
+}
+
+.stat-icon.success {
+  color: var(--color-green);
+}
+
+.stat-icon.warning {
+  color: var(--color-orange);
+}
+
+.stat-icon.error {
+  color: var(--color-red);
+}
+
+.stat-bar-fill {
+  transition: width 0.3s ease;
+}
+
+.stat-button-container {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--background-modifier-border);
 }
 
 /* Statistics Tables */
@@ -1348,4 +1409,21 @@ select:focus {
     padding: 6px 8px;
     font-size: 0.8em;
   }
+}
+
+/* Dynamic styles for history entries */
+.confidence-progress {
+  transition: width 0.3s ease;
+}
+
+.confidence-progress.high {
+  background-color: var(--color-green);
+}
+
+.confidence-progress.medium {
+  background-color: var(--color-red);
+}
+
+.confidence-progress.low {
+  background-color: var(--color-orange);
 }

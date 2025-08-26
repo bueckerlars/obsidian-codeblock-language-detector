@@ -62,11 +62,8 @@ export class DragDropHandler {
 				
 				// Create drag image of the entire card
 				const dragImage = card.cloneNode(true) as HTMLElement;
-				dragImage.style.position = 'absolute';
-				dragImage.style.top = '-1000px';
+				dragImage.classList.add('drag-image');
 				dragImage.style.width = card.offsetWidth + 'px';
-				dragImage.style.opacity = '0.8';
-				dragImage.style.transform = 'rotate(2deg)';
 				document.body.appendChild(dragImage);
 				
 				e.dataTransfer.setDragImage(dragImage, e.offsetX, e.offsetY);
@@ -195,9 +192,8 @@ export class DragDropHandler {
 		}
 		
 		// Create placeholder element
-		const placeholder = container.createDiv('drag-placeholder');
+		const placeholder = container.createDiv('drag-placeholder placeholder-hidden');
 		placeholder.textContent = `Drop ${draggedDetectorName} here`;
-		placeholder.style.display = 'none';
 	}
 
 	/**

@@ -126,7 +126,7 @@ export class HistoryEntryRenderer {
 		const confidenceBar = confidenceEl.createDiv('confidence-bar');
 		const confidenceProgress = confidenceBar.createDiv('confidence-progress');
 		confidenceProgress.style.width = `${entry.confidence}%`;
-		confidenceProgress.style.backgroundColor = this.getConfidenceColor(entry.confidence);
+		confidenceProgress.classList.add(this.getConfidenceClass(entry.confidence));
 
 		// Method
 		const methodEl = detailsEl.createSpan('method');
@@ -254,6 +254,17 @@ export class HistoryEntryRenderer {
 		if (confidence >= 60) return '#ff9800'; // Orange
 		if (confidence >= 40) return '#f44336'; // Red
 		return '#9e9e9e'; // Gray
+	}
+
+	/**
+	 * Gets CSS class for confidence level
+	 * @param confidence Confidence percentage
+	 * @returns CSS class name
+	 */
+	private getConfidenceClass(confidence: number): string {
+		if (confidence >= 80) return 'high';
+		if (confidence >= 60) return 'medium';
+		return 'low';
 	}
 
 	/**

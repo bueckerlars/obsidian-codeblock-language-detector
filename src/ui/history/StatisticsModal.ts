@@ -181,9 +181,8 @@ export class StatisticsModal extends Modal {
 			const icon = trend === 'improving' ? '↗' : trend === 'declining' ? '↘' : '→';
 			const color = trend === 'improving' ? 'green' : trend === 'declining' ? 'red' : 'gray';
 			
-			const iconSpan = trendIndicator.createEl('span');
-			iconSpan.style.color = color;
-			iconSpan.style.fontSize = '1.5em';
+			const iconSpan = trendIndicator.createEl('span', { cls: 'stat-icon' });
+			iconSpan.classList.add(trend === 'improving' ? 'success' : trend === 'declining' ? 'error' : 'warning');
 			iconSpan.textContent = icon;
 			
 			trendIndicator.appendText(` ${trend}`);
@@ -225,7 +224,7 @@ export class StatisticsModal extends Modal {
 				const percentage = (count / entries.length) * 100;
 				
 				bar.createEl('div', { text: range, cls: 'bar-label' });
-				const barFill = bar.createEl('div', { cls: 'bar-fill' });
+				const barFill = bar.createEl('div', { cls: 'bar-fill stat-bar-fill' });
 				barFill.style.width = `${Math.max(percentage, 2)}%`;  // Minimum 2% for visibility
 				bar.createEl('div', { text: count.toString(), cls: 'bar-count' });
 			}
@@ -278,11 +277,7 @@ export class StatisticsModal extends Modal {
 	 * @param container The container element
 	 */
 	private createCloseButton(container: HTMLElement): void {
-		const buttonContainer = container.createDiv('modal-actions');
-		buttonContainer.style.display = 'flex';
-		buttonContainer.style.justifyContent = 'flex-end';
-		buttonContainer.style.paddingTop = '16px';
-		buttonContainer.style.borderTop = '1px solid var(--background-modifier-border)';
+		const buttonContainer = container.createDiv('modal-actions stat-button-container');
 		
 		const closeButton = new ButtonComponent(buttonContainer);
 		closeButton.setButtonText('Close');

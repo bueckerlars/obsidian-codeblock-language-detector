@@ -1,7 +1,7 @@
 {
 	"id": "codeblock-language-detector",
 	"name": "CodeBlock Language Detector",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"minAppVersion": "0.15.0",
 	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting",
 	"author": "Lars Bücker",

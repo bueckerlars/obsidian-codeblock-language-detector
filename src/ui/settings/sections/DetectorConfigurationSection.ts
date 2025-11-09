@@ -1,3 +1,4 @@
+import { Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
 import { DetectorConfigCard } from '../components/DetectorConfigCard';
 import { DragDropHandler } from '../components/DragDropHandler';
@@ -22,7 +23,9 @@ export class DetectorConfigurationSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Detector Configuration' });
+		new Setting(containerEl)
+			.setName('Detector Configuration')
+			.setHeading();
 		
 		const descEl = containerEl.createEl('p', { 
 			cls: 'setting-item-description',

@@ -16,14 +16,16 @@ export class AdvancedSettingsSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Advanced' });
+		new Setting(containerEl)
+			.setName('Advanced')
+			.setHeading();
 
 		// Plugin version and info
 		new Setting(containerEl)
 			.setName('Plugin information')
 			.setDesc('Current plugin version and statistics')
 			.then(setting => {
-				const infoContainer = setting.controlEl.createDiv('plugin-info');
+				const infoContainer = setting.controlEl.createDiv('aslh-plugin-info');
 
 				// Add version info
 				const versionEl = infoContainer.createDiv();
@@ -32,7 +34,7 @@ export class AdvancedSettingsSection {
 				// Add statistics if history is enabled
 				if (this.plugin.settings.enableHistory) {
 					const stats = this.plugin.historyService.getStatistics();
-					const statsEl = infoContainer.createDiv('stats');
+					const statsEl = infoContainer.createDiv('aslh-stats');
 					statsEl.textContent = `Total detections: ${stats.totalEntries}, Applied: ${stats.appliedEntries}, Avg confidence: ${stats.avgConfidence}%`;
 				}
 			});

@@ -25,13 +25,13 @@ export class HistoryActions {
 	 * @param onRefresh Callback to refresh the modal content
 	 */
 	createActionButtons(container: HTMLElement, onRefresh: () => void): void {
-		const actionsContainer = container.createDiv('modal-actions');
+		const actionsContainer = container.createDiv('aslh-modal-actions');
 
 		// Basic statistics display
 		this.createBasicStatisticsDisplay(actionsContainer);
 
 		// Action buttons
-		const buttonsContainer = actionsContainer.createDiv('buttons-container');
+		const buttonsContainer = actionsContainer.createDiv('aslh-buttons-container');
 		this.createActionButtonsRow(buttonsContainer, onRefresh);
 	}
 
@@ -41,16 +41,16 @@ export class HistoryActions {
 	 */
 	private createBasicStatisticsDisplay(container: HTMLElement): void {
 		const stats = this.historyService.getStatistics();
-		const statsEl = container.createDiv('stats');
+		const statsEl = container.createDiv('aslh-stats');
 		
 		// Basic stats
-		const basicStatsDiv = statsEl.createDiv('basic-stats');
+		const basicStatsDiv = statsEl.createDiv('aslh-basic-stats');
 		basicStatsDiv.textContent = `Total: ${stats.totalEntries} | Applied: ${stats.appliedEntries} | Avg Confidence: ${stats.avgConfidence}%`;
 
 		// Show detailed statistics button
 		const showStatsBtn = statsEl.createEl('button', {
 			text: 'Show Detailed Statistics',
-			cls: 'show-detailed-stats-btn'
+			cls: 'aslh-show-detailed-stats-btn'
 		});
 		
 		showStatsBtn.addEventListener('click', () => {

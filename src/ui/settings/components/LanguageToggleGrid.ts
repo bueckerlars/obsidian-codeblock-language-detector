@@ -23,9 +23,9 @@ export class LanguageToggleGrid {
 	 */
 	create(container: HTMLElement, availableLanguages: string[], enabledLanguages: string[]): void {
 		// Quick actions
-		const quickActionsContainer = container.createDiv('quick-actions');
-		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All', cls: 'select-all-btn' });
-		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None', cls: 'select-none-btn' });
+		const quickActionsContainer = container.createDiv('aslh-quick-actions');
+		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All', cls: 'aslh-select-all-btn' });
+		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None', cls: 'aslh-select-none-btn' });
 		
 		selectAllBtn.addEventListener('click', async () => {
 			await this.updateEnabledLanguages([...availableLanguages]);
@@ -36,14 +36,14 @@ export class LanguageToggleGrid {
 		});
 		
 		// Language grid
-		const languageContainer = container.createDiv('language-toggles');
+		const languageContainer = container.createDiv('aslh-language-toggles');
 		
 		availableLanguages.forEach(language => {
 			this.createLanguageToggle(languageContainer, language, enabledLanguages);
 		});
 		
 		// Show count
-		const countInfo = container.createDiv('enabled-count');
+		const countInfo = container.createDiv('aslh-enabled-count');
 		countInfo.textContent = `${enabledLanguages.length} von ${availableLanguages.length} languages enabled`;
 	}
 
@@ -56,14 +56,14 @@ export class LanguageToggleGrid {
 	private createLanguageToggle(container: HTMLElement, language: string, enabledLanguages: string[]): void {
 		const isEnabled = enabledLanguages.includes(language);
 		
-		const languageItem = container.createDiv(`language-item ${isEnabled ? 'enabled' : 'disabled'}`);
+		const languageItem = container.createDiv(`aslh-language-item ${isEnabled ? 'enabled' : 'disabled'}`);
 		
 		// Toggle icon
-		const toggleIcon = languageItem.createSpan('toggle-icon');
+		const toggleIcon = languageItem.createSpan('aslh-toggle-icon');
 		toggleIcon.textContent = isEnabled ? '✓' : '○';
 		
 		// Language name
-		const languageLabel = languageItem.createSpan('language-label');
+		const languageLabel = languageItem.createSpan('aslh-language-label');
 		languageLabel.textContent = language;
 		
 		// Click handler

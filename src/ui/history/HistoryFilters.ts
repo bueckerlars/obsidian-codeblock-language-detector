@@ -23,7 +23,7 @@ export class HistoryFilters {
 		container: HTMLElement, 
 		onFilterChange: () => void
 	): void {
-		const controlsContainer = container.createDiv('history-controls');
+		const controlsContainer = container.createDiv('aslh-history-controls');
 
 		// Create search input
 		this.createSearchInput(controlsContainer, onFilterChange);
@@ -32,7 +32,7 @@ export class HistoryFilters {
 		this.createFilterAndSortControls(controlsContainer, onFilterChange);
 
 		// Create results count display
-		const resultsCount = controlsContainer.createSpan('results-count');
+		const resultsCount = controlsContainer.createSpan('aslh-results-count');
 		this.resultsCountElement = resultsCount;
 	}
 

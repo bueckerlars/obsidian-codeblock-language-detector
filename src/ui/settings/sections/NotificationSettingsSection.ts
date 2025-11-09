@@ -16,7 +16,9 @@ export class NotificationSettingsSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Notifications' });
+		new Setting(containerEl)
+			.setName('Notifications')
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName('Show notifications')

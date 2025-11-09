@@ -13,14 +13,14 @@ Auto Syntax Highlight Plugin Styles
   max-width: none;
   width: 100%;
 }
-.history-controls {
+.aslh-history-controls {
   margin-bottom: 16px;
   padding: 12px;
   background-color: var(--background-secondary);
   border-radius: 8px;
 }
 
-.history-entries-container {
+.aslh-history-entries-container {
   max-height: 400px;
   overflow-y: auto;
   border: 1px solid var(--background-modifier-border);
@@ -28,7 +28,7 @@ Auto Syntax Highlight Plugin Styles
   margin-bottom: 16px;
 }
 
-.history-entry {
+.aslh-history-entry {
   display: grid;
   grid-template-columns: 2fr 1.5fr 3fr 120px;
   grid-template-areas: "header details preview actions";
@@ -40,19 +40,19 @@ Auto Syntax Highlight Plugin Styles
   min-height: 100px;
 }
 
-.history-entry:hover {
+.aslh-history-entry:hover {
   background-color: var(--background-modifier-hover) !important;
 }
 
-.history-entry.applied {
+.aslh-history-entry.applied {
   border-left: 3px solid var(--color-green);
 }
 
-.history-entry.unapplied {
+.aslh-history-entry.unapplied {
   border-left: 3px solid var(--color-orange);
 }
 
-.entry-header {
+.aslh-entry-header {
   grid-area: header;
   display: flex;
   flex-direction: column;
@@ -60,26 +60,26 @@ Auto Syntax Highlight Plugin Styles
   margin-bottom: 0;
 }
 
-.file-name {
+.aslh-file-name {
   font-weight: bold;
   font-size: 1.1em;
   color: var(--text-normal);
 }
 
-.file-path {
+.aslh-file-path {
   font-size: 0.8em;
   color: var(--text-muted);
   margin-top: 2px;
 }
 
-.entry-status {
+.aslh-entry-status {
   display: flex;
   flex-direction: column;
   gap: 4px;
   align-items: flex-start;
 }
 
-.status-badge {
+.aslh-status-badge {
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.8em;
@@ -87,21 +87,21 @@ Auto Syntax Highlight Plugin Styles
   color: white;
 }
 
-.status-badge.applied {
+.aslh-status-badge.applied {
   background-color: var(--color-green);
 }
 
-.status-badge.unapplied {
+.aslh-status-badge.unapplied {
   background-color: var(--color-orange);
 }
 
-.timestamp {
+.aslh-timestamp {
   font-size: 0.8em;
   color: var(--text-muted);
   margin-top: 0;
 }
 
-.entry-details {
+.aslh-entry-details {
   grid-area: details;
   display: flex;
   flex-direction: column;
@@ -110,9 +110,9 @@ Auto Syntax Highlight Plugin Styles
   font-size: 0.9em;
 }
 
-.detected-language,
-.confidence,
-.method {
+.aslh-detected-language,
+.aslh-confidence,
+.aslh-method {
   color: var(--text-muted);
   text-align: left;
   display: flex;
@@ -120,12 +120,12 @@ Auto Syntax Highlight Plugin Styles
   gap: 8px;
 }
 
-.confidence-bar,
-.method-badge {
+.aslh-confidence-bar,
+.aslh-method-badge {
   margin-left: auto;
 }
 
-.confidence-bar {
+.aslh-confidence-bar {
   width: 60px;
   height: 8px;
   background-color: var(--background-modifier-border);
@@ -133,13 +133,13 @@ Auto Syntax Highlight Plugin Styles
   overflow: hidden;
 }
 
-.confidence-progress {
+.aslh-confidence-progress {
   height: 100%;
   border-radius: 4px;
   transition: width 0.3s ease;
 }
 
-.method-badge {
+.aslh-method-badge {
   font-size: 0.7em;
   padding: 2px 6px;
   border-radius: 3px;
@@ -149,7 +149,7 @@ Auto Syntax Highlight Plugin Styles
 
 
 
-.code-preview {
+.aslh-code-preview {
   grid-area: preview;
   background-color: var(--background-primary-alt);
   border: 1px solid var(--background-modifier-border);
@@ -167,7 +167,7 @@ Auto Syntax Highlight Plugin Styles
   text-align: left;
 }
 
-.code-preview .language-indicator {
+.aslh-code-preview .aslh-language-indicator {
   font-size: 0.7em;
   color: var(--text-muted);
   background: var(--background-secondary);
@@ -177,17 +177,17 @@ Auto Syntax Highlight Plugin Styles
   display: inline-block;
 }
 
-.code-preview pre {
+.aslh-code-preview pre {
   margin: 0;
   text-align: left;
 }
 
-.code-preview code {
+.aslh-code-preview code {
   text-align: left;
   display: block;
 }
 
-.entry-actions {
+.aslh-entry-actions {
   grid-area: actions;
   display: flex;
   flex-direction: column;
@@ -197,21 +197,21 @@ Auto Syntax Highlight Plugin Styles
   width: 120px;
 }
 
-.empty-state {
+.aslh-empty-state {
   padding: 32px;
   text-align: center;
   color: var(--text-muted);
   font-style: italic;
 }
 
-.results-count {
+.aslh-results-count {
   margin-left: auto;
   color: var(--text-muted);
   font-size: 0.9em;
 }
 
 /* Modal Actions */
-.modal-actions {
+.aslh-modal-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -221,13 +221,13 @@ Auto Syntax Highlight Plugin Styles
   gap: 16px;
 }
 
-.stats {
+.aslh-stats {
   font-size: 0.9em;
   color: var(--text-muted);
 }
 
 /* Settings Tab Styles */
-.supported-languages {
+.aslh-supported-languages {
   margin-top: 8px;
   font-size: 0.9em;
   color: var(--text-muted);
@@ -235,33 +235,37 @@ Auto Syntax Highlight Plugin Styles
   word-wrap: break-word;
 }
 
-.plugin-info {
+.aslh-plugin-info {
   margin-top: 8px;
   font-size: 0.9em;
   color: var(--text-muted);
 }
 
-/* Button Styles */
-.mod-warning {
+/* Button Styles - Scoped to plugin modals */
+.history-modal .mod-warning,
+.statistics-modal .mod-warning {
   background-color: var(--color-orange);
   color: white;
 }
 
-.mod-warning:hover {
+.history-modal .mod-warning:hover,
+.statistics-modal .mod-warning:hover {
   background-color: var(--color-red);
 }
 
-.mod-cta {
+.history-modal .mod-cta,
+.statistics-modal .mod-cta {
   background-color: var(--color-accent);
   color: white;
 }
 
-.mod-cta:hover {
+.history-modal .mod-cta:hover,
+.statistics-modal .mod-cta:hover {
   background-color: var(--color-accent-hover);
 }
 
-/* Search Input Styles */
-input[type="text"] {
+/* Search Input Styles - Scoped to plugin modals */
+.history-modal input[type="text"] {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--background-modifier-border);
@@ -271,14 +275,14 @@ input[type="text"] {
   font-size: 0.9em;
 }
 
-input[type="text"]:focus {
+.history-modal input[type="text"]:focus {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 2px var(--color-accent-2);
 }
 
-/* Select Dropdown Styles */
-select {
+/* Select Dropdown Styles - Scoped to plugin modals */
+.history-modal select {
   padding: 6px;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
@@ -287,7 +291,7 @@ select {
   font-size: 0.9em;
 }
 
-select:focus {
+.history-modal select:focus {
   outline: none;
   border-color: var(--color-accent);
 }
@@ -300,7 +304,7 @@ select:focus {
     min-width: 600px;
   }
   
-  .history-entry {
+  .aslh-history-entry {
     grid-template-columns: 1.5fr 1fr 2fr 100px;
     gap: 10px;
     min-height: 90px;
@@ -314,7 +318,7 @@ select:focus {
     min-width: 320px;
   }
   
-  .history-entry {
+  .aslh-history-entry {
     grid-template-columns: 1fr;
     grid-template-areas: 
       "header"
@@ -325,77 +329,77 @@ select:focus {
     min-height: auto;
   }
   
-  .entry-header {
+  .aslh-entry-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
   
-  .entry-status {
+  .aslh-entry-status {
     align-items: flex-start;
   }
   
-  .entry-actions {
+  .aslh-entry-actions {
     justify-content: flex-start;
     align-items: flex-start;
     width: auto;
     flex-direction: row;
   }
   
-  .modal-actions {
+  .aslh-modal-actions {
     flex-direction: column;
     align-items: flex-start;
   }
 }
 
 /* Dark/Light Theme Compatibility */
-.theme-dark .history-entry:nth-child(even) {
+.theme-dark .aslh-history-entry:nth-child(even) {
   background-color: var(--background-secondary);
 }
 
-.theme-light .history-entry:nth-child(even) {
+.theme-light .aslh-history-entry:nth-child(even) {
   background-color: var(--background-secondary);
 }
 
 /* Animation for smooth transitions */
-.history-entry {
+.aslh-history-entry {
   transition: all 0.2s ease;
 }
 
-.status-badge {
+.aslh-status-badge {
   transition: background-color 0.2s ease;
 }
 
 /* Scrollbar Styling */
-.history-entries-container::-webkit-scrollbar {
+.aslh-history-entries-container::-webkit-scrollbar {
   width: 8px;
 }
 
-.history-entries-container::-webkit-scrollbar-track {
+.aslh-history-entries-container::-webkit-scrollbar-track {
   background: var(--background-secondary);
   border-radius: 4px;
 }
 
-.history-entries-container::-webkit-scrollbar-thumb {
+.aslh-history-entries-container::-webkit-scrollbar-thumb {
   background: var(--background-modifier-border);
   border-radius: 4px;
 }
 
-.history-entries-container::-webkit-scrollbar-thumb:hover {
+.aslh-history-entries-container::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
 
-.code-preview::-webkit-scrollbar {
+.aslh-code-preview::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.code-preview::-webkit-scrollbar-track {
+.aslh-code-preview::-webkit-scrollbar-track {
   background: var(--background-secondary);
   border-radius: 3px;
 }
 
-.code-preview::-webkit-scrollbar-thumb {
+.aslh-code-preview::-webkit-scrollbar-thumb {
   background: var(--background-modifier-border);
   border-radius: 3px;
 }
@@ -429,14 +433,14 @@ select:focus {
 
 
 /* Settings Tab Styles */
-.quick-actions {
+.aslh-quick-actions {
   margin-bottom: 12px;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.quick-actions button {
+.aslh-quick-actions button {
   padding: 4px 12px;
   font-size: 0.9em;
   border: none;
@@ -444,17 +448,17 @@ select:focus {
   cursor: pointer;
 }
 
-.quick-actions .select-all-btn {
+.aslh-quick-actions .aslh-select-all-btn {
   background-color: var(--interactive-accent);
   color: var(--text-on-accent);
 }
 
-.quick-actions .select-none-btn {
+.aslh-quick-actions .aslh-select-none-btn {
   background-color: var(--background-modifier-border);
   color: var(--text-normal);
 }
 
-.language-toggles {
+.aslh-language-toggles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 6px;
@@ -466,7 +470,7 @@ select:focus {
   border-radius: 6px;
 }
 
-.language-item {
+.aslh-language-item {
   display: flex;
   align-items: center;
   padding: 6px 8px;
@@ -478,46 +482,46 @@ select:focus {
   border: 1px solid;
 }
 
-.language-item.enabled {
+.aslh-language-item.enabled {
   background-color: var(--interactive-accent);
   color: var(--text-on-accent);
   border-color: var(--interactive-accent);
 }
 
-.language-item.disabled {
+.aslh-language-item.disabled {
   background-color: var(--background-secondary);
   color: var(--text-muted);
   border-color: var(--background-modifier-border);
 }
 
-.language-item.disabled:hover {
+.aslh-language-item.disabled:hover {
   background-color: var(--background-modifier-hover);
 }
 
-.toggle-icon {
+.aslh-toggle-icon {
   margin-right: 6px;
   font-size: 0.8em;
   font-weight: bold;
 }
 
-.language-label {
+.aslh-language-label {
   flex: 1;
 }
 
-.enabled-count {
+.aslh-enabled-count {
   margin-top: 8px;
   font-size: 0.9em;
   color: var(--text-muted);
   text-align: center;
 }
 
-.plugin-info {
+.aslh-plugin-info {
   margin-top: 8px;
   font-size: 0.9em;
   color: var(--text-muted);
 }
 
-.plugin-info .stats {
+.aslh-plugin-info .aslh-stats {
   margin-top: 4px;
 }
 
@@ -707,7 +711,7 @@ select:focus {
   color: var(--text-normal);
 }
 
-.confidence-value {
+.aslh-confidence-value {
   font-weight: 600;
   color: var(--interactive-accent);
 }
@@ -730,26 +734,26 @@ select:focus {
 }
 
 /* Enhanced Language Toggles for Pattern Matching */
-.detector-config-section .language-toggles {
+.detector-config-section .aslh-language-toggles {
   margin-top: 12px;
   background-color: var(--background-primary);
 }
 
-.detector-config-section .language-item {
+.detector-config-section .aslh-language-item {
   font-size: 0.85em;
   padding: 4px 6px;
 }
 
-.detector-config-section .quick-actions {
+.detector-config-section .aslh-quick-actions {
   margin-bottom: 8px;
 }
 
-.detector-config-section .quick-actions button {
+.detector-config-section .aslh-quick-actions button {
   font-size: 0.8em;
   padding: 3px 8px;
 }
 
-.detector-config-section .enabled-count {
+.detector-config-section .aslh-enabled-count {
   margin-top: 6px;
   font-size: 0.8em;
 }
@@ -1121,14 +1125,14 @@ select:focus {
 }
 
 /* Basic Statistics Grid */
-.stats-grid {
+.aslh-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
 }
 
-.stat-card {
+.aslh-stat-card {
   background-color: var(--background-primary);
   padding: 16px;
   border-radius: 6px;
@@ -1137,52 +1141,52 @@ select:focus {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.stat-card:hover {
+.aslh-stat-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.stat-title {
+.aslh-stat-title {
   font-size: 0.9em;
   color: var(--text-muted);
   margin-bottom: 8px;
   font-weight: 500;
 }
 
-.stat-value {
+.aslh-stat-value {
   font-size: 1.8em;
   font-weight: bold;
   color: var(--interactive-accent);
   margin-bottom: 4px;
 }
 
-.stat-description {
+.aslh-stat-description {
   font-size: 0.8em;
   color: var(--text-muted);
 }
 
 /* Dynamic styles for statistics */
-.stat-icon {
+.aslh-stat-icon {
   font-size: 1.5em;
 }
 
-.stat-icon.success {
+.aslh-stat-icon.success {
   color: var(--color-green);
 }
 
-.stat-icon.warning {
+.aslh-stat-icon.warning {
   color: var(--color-orange);
 }
 
-.stat-icon.error {
+.aslh-stat-icon.error {
   color: var(--color-red);
 }
 
-.stat-bar-fill {
+.aslh-stat-bar-fill {
   transition: width 0.3s ease;
 }
 
-.stat-button-container {
+.aslh-stat-button-container {
   display: flex;
   justify-content: flex-end;
   padding-top: 16px;
@@ -1190,7 +1194,7 @@ select:focus {
 }
 
 /* Statistics Tables */
-.stats-table {
+.aslh-stats-table {
   width: 100%;
   border-collapse: collapse;
   background-color: var(--background-primary);
@@ -1199,7 +1203,7 @@ select:focus {
   border: 1px solid var(--background-modifier-border);
 }
 
-.stats-table th {
+.aslh-stats-table th {
   background-color: var(--background-primary-alt);
   color: var(--text-normal);
   font-weight: 600;
@@ -1208,32 +1212,32 @@ select:focus {
   border-bottom: 2px solid var(--background-modifier-border);
 }
 
-.stats-table td {
+.aslh-stats-table td {
   padding: 10px 16px;
   border-bottom: 1px solid var(--background-modifier-border);
   color: var(--text-normal);
 }
 
-.stats-table tr:last-child td {
+.aslh-stats-table tr:last-child td {
   border-bottom: none;
 }
 
-.stats-table tr:nth-child(even) {
+.aslh-stats-table tr:nth-child(even) {
   background-color: var(--background-secondary);
 }
 
-.stats-table tr:hover {
+.aslh-stats-table tr:hover {
   background-color: var(--background-modifier-hover);
 }
 
 /* Trends Grid */
-.trends-grid {
+.aslh-trends-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 16px;
 }
 
-.trend-card {
+.aslh-trend-card {
   background-color: var(--background-primary);
   padding: 16px;
   border-radius: 6px;
@@ -1241,19 +1245,19 @@ select:focus {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.trend-card:hover {
+.aslh-trend-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.trend-title {
+.aslh-trend-title {
   font-size: 1.1em;
   font-weight: 600;
   color: var(--text-normal);
   margin-bottom: 12px;
 }
 
-.trend-indicator {
+.aslh-trend-indicator {
   font-size: 1.2em;
   margin-bottom: 8px;
   display: flex;
@@ -1261,40 +1265,40 @@ select:focus {
   gap: 8px;
 }
 
-.trend-current, .trend-overall {
+.aslh-trend-current, .aslh-trend-overall {
   font-size: 0.9em;
   color: var(--text-muted);
   margin: 4px 0;
 }
 
-.trend-current {
+.aslh-trend-current {
   font-weight: 600;
   color: var(--text-normal);
 }
 
 /* Confidence Distribution Chart */
-.confidence-chart {
+.aslh-confidence-chart {
   background-color: var(--background-primary);
   padding: 16px;
   border-radius: 6px;
   border: 1px solid var(--background-modifier-border);
 }
 
-.confidence-bar {
+.aslh-confidence-bar {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
   gap: 12px;
 }
 
-.bar-label {
+.aslh-bar-label {
   min-width: 80px;
   font-size: 0.9em;
   color: var(--text-muted);
   font-family: var(--font-monospace);
 }
 
-.bar-fill {
+.aslh-bar-fill {
   height: 20px;
   background-color: var(--interactive-accent);
   border-radius: 4px;
@@ -1303,7 +1307,7 @@ select:focus {
   position: relative;
 }
 
-.bar-count {
+.aslh-bar-count {
   min-width: 30px;
   text-align: right;
   font-size: 0.9em;
@@ -1312,7 +1316,7 @@ select:focus {
 }
 
 /* No Data State */
-.no-data {
+.aslh-no-data {
   text-align: center;
   padding: 40px 20px;
   color: var(--text-muted);
@@ -1323,7 +1327,7 @@ select:focus {
 }
 
 /* Show Detailed Statistics Button */
-.show-detailed-stats-btn {
+.aslh-show-detailed-stats-btn {
   margin-top: 8px;
   padding: 6px 12px;
   font-size: 0.9em;
@@ -1335,7 +1339,7 @@ select:focus {
   transition: all 0.2s ease;
 }
 
-.show-detailed-stats-btn:hover {
+.aslh-show-detailed-stats-btn:hover {
   background-color: var(--interactive-accent);
   color: var(--text-on-accent);
 }
@@ -1347,12 +1351,12 @@ select:focus {
     min-width: 600px;
   }
   
-  .stats-grid {
+  .aslh-stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 12px;
   }
   
-  .trends-grid {
+  .aslh-trends-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -1367,63 +1371,63 @@ select:focus {
     padding: 16px;
   }
   
-  .stats-grid {
+  .aslh-stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
   
-  .stat-card {
+  .aslh-stat-card {
     padding: 12px;
   }
   
-  .stat-value {
+  .aslh-stat-value {
     font-size: 1.4em;
   }
   
-  .stats-table {
+  .aslh-stats-table {
     font-size: 0.9em;
   }
   
-  .stats-table th,
-  .stats-table td {
+  .aslh-stats-table th,
+  .aslh-stats-table td {
     padding: 8px 10px;
   }
   
-  .confidence-bar {
+  .aslh-confidence-bar {
     gap: 8px;
   }
   
-  .bar-label {
+  .aslh-bar-label {
     min-width: 60px;
     font-size: 0.8em;
   }
 }
 
 @media (max-width: 480px) {
-  .stats-grid {
+  .aslh-stats-grid {
     grid-template-columns: 1fr;
   }
   
-  .stats-table th,
-  .stats-table td {
+  .aslh-stats-table th,
+  .aslh-stats-table td {
     padding: 6px 8px;
     font-size: 0.8em;
   }
 }
 
 /* Dynamic styles for history entries */
-.confidence-progress {
+.aslh-confidence-progress {
   transition: width 0.3s ease;
 }
 
-.confidence-progress.high {
+.aslh-confidence-progress.high {
   background-color: var(--color-green);
 }
 
-.confidence-progress.medium {
+.aslh-confidence-progress.medium {
   background-color: var(--color-red);
 }
 
-.confidence-progress.low {
+.aslh-confidence-progress.low {
   background-color: var(--color-orange);
 }

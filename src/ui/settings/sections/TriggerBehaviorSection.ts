@@ -17,7 +17,9 @@ export class TriggerBehaviorSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Trigger Behavior' });
+		new Setting(containerEl)
+			.setName('Trigger Behavior')
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName('When to detect language')

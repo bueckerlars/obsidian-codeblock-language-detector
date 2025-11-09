@@ -17,7 +17,9 @@ export class ProcessingScopeSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Processing Scope' });
+		new Setting(containerEl)
+			.setName('Processing Scope')
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName('Code block processing scope')

@@ -73,18 +73,18 @@ export class StatisticsModal extends Modal {
 	 * @param entries The history entries
 	 */
 	private createBasicStatistics(container: HTMLElement, entries: HistoryEntry[]): void {
-		const section = container.createDiv('statistics-section basic-stats');
+		const section = container.createDiv('statistics-section aslh-basic-stats');
 		section.createEl('h3', { text: 'Overview' });
 
 		const stats = this.historyService.getStatistics();
-		const basicStatsGrid = section.createDiv('stats-grid');
+		const basicStatsGrid = section.createDiv('aslh-stats-grid');
 
 		const createStatCard = (title: string, value: string | number, description?: string) => {
-			const card = basicStatsGrid.createDiv('stat-card');
-			card.createEl('div', { text: title, cls: 'stat-title' });
-			card.createEl('div', { text: value.toString(), cls: 'stat-value' });
+			const card = basicStatsGrid.createDiv('aslh-stat-card');
+			card.createEl('div', { text: title, cls: 'aslh-stat-title' });
+			card.createEl('div', { text: value.toString(), cls: 'aslh-stat-value' });
 			if (description) {
-				card.createEl('div', { text: description, cls: 'stat-description' });
+				card.createEl('div', { text: description, cls: 'aslh-stat-description' });
 			}
 		};
 
@@ -104,7 +104,7 @@ export class StatisticsModal extends Modal {
 		section.createEl('h3', { text: 'Detection Methods' });
 
 		const detailedStats = this.historyService.getDetailedStatistics();
-		const methodsTable = section.createEl('table', { cls: 'stats-table' });
+		const methodsTable = section.createEl('table', { cls: 'aslh-stats-table' });
 		
 		// Header
 		const headerRow = methodsTable.createEl('tr');
@@ -133,7 +133,7 @@ export class StatisticsModal extends Modal {
 		section.createEl('h3', { text: 'Top Languages' });
 
 		const detailedStats = this.historyService.getDetailedStatistics();
-		const languagesTable = section.createEl('table', { cls: 'stats-table' });
+		const languagesTable = section.createEl('table', { cls: 'aslh-stats-table' });
 		
 		// Header
 		const headerRow = languagesTable.createEl('tr');
@@ -167,28 +167,28 @@ export class StatisticsModal extends Modal {
 		const detailedStats = this.historyService.getDetailedStatistics();
 		
 		if (!detailedStats.trends) {
-			section.createDiv('no-data').textContent = 'Not enough data for trend analysis';
+			section.createDiv('aslh-no-data').textContent = 'Not enough data for trend analysis';
 			return;
 		}
 
-		const trendsGrid = section.createDiv('trends-grid');
+		const trendsGrid = section.createDiv('aslh-trends-grid');
 
 		const createTrendCard = (title: string, trend: string, recent: number, overall: number, unit: string = '%') => {
-			const card = trendsGrid.createDiv('trend-card');
-			card.createEl('div', { text: title, cls: 'trend-title' });
+			const card = trendsGrid.createDiv('aslh-trend-card');
+			card.createEl('div', { text: title, cls: 'aslh-trend-title' });
 			
-			const trendIndicator = card.createDiv('trend-indicator');
+			const trendIndicator = card.createDiv('aslh-trend-indicator');
 			const icon = trend === 'improving' ? '↗' : trend === 'declining' ? '↘' : '→';
 			const color = trend === 'improving' ? 'green' : trend === 'declining' ? 'red' : 'gray';
 			
-			const iconSpan = trendIndicator.createEl('span', { cls: 'stat-icon' });
+			const iconSpan = trendIndicator.createEl('span', { cls: 'aslh-stat-icon' });
 			iconSpan.classList.add(trend === 'improving' ? 'success' : trend === 'declining' ? 'error' : 'warning');
 			iconSpan.textContent = icon;
 			
 			trendIndicator.appendText(` ${trend}`);
 			
-			card.createEl('div', { text: `Recent: ${recent}${unit}`, cls: 'trend-current' });
-			card.createEl('div', { text: `Overall: ${overall}${unit}`, cls: 'trend-overall' });
+			card.createEl('div', { text: `Recent: ${recent}${unit}`, cls: 'aslh-trend-current' });
+			card.createEl('div', { text: `Overall: ${overall}${unit}`, cls: 'aslh-trend-overall' });
 		};
 
 		createTrendCard(
@@ -216,17 +216,17 @@ export class StatisticsModal extends Modal {
 		section.createEl('h3', { text: 'Confidence Distribution' });
 
 		const distribution = this.historyService.getConfidenceDistribution(entries);
-		const chartContainer = section.createDiv('confidence-chart');
+		const chartContainer = section.createDiv('aslh-confidence-chart');
 
 		Object.entries(distribution).forEach(([range, count]) => {
 			if (count > 0) {
-				const bar = chartContainer.createDiv('confidence-bar');
+				const bar = chartContainer.createDiv('aslh-confidence-bar');
 				const percentage = (count / entries.length) * 100;
 				
-				bar.createEl('div', { text: range, cls: 'bar-label' });
-				const barFill = bar.createEl('div', { cls: 'bar-fill stat-bar-fill' });
+				bar.createEl('div', { text: range, cls: 'aslh-bar-label' });
+				const barFill = bar.createEl('div', { cls: 'aslh-bar-fill aslh-stat-bar-fill' });
 				barFill.style.width = `${Math.max(percentage, 2)}%`;  // Minimum 2% for visibility
-				bar.createEl('div', { text: count.toString(), cls: 'bar-count' });
+				bar.createEl('div', { text: count.toString(), cls: 'aslh-bar-count' });
 			}
 		});
 	}
@@ -241,7 +241,7 @@ export class StatisticsModal extends Modal {
 		section.createEl('h3', { text: 'Time Distribution (Last 7 Days)' });
 
 		const timeStats = this.historyService.getTimeBasedStatistics(entries);
-		const timeTable = section.createEl('table', { cls: 'stats-table' });
+		const timeTable = section.createEl('table', { cls: 'aslh-stats-table' });
 		
 		// Header
 		const headerRow = timeTable.createEl('tr');
@@ -268,7 +268,7 @@ export class StatisticsModal extends Modal {
 
 		if (sortedTimeStats.length === 0) {
 			timeTable.remove();
-			section.createDiv('no-data').textContent = 'No data for the last 7 days';
+			section.createDiv('aslh-no-data').textContent = 'No data for the last 7 days';
 		}
 	}
 
@@ -277,7 +277,7 @@ export class StatisticsModal extends Modal {
 	 * @param container The container element
 	 */
 	private createCloseButton(container: HTMLElement): void {
-		const buttonContainer = container.createDiv('modal-actions stat-button-container');
+		const buttonContainer = container.createDiv('aslh-modal-actions aslh-stat-button-container');
 		
 		const closeButton = new ButtonComponent(buttonContainer);
 		closeButton.setButtonText('Close');

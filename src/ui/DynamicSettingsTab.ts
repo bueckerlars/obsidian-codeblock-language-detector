@@ -55,9 +55,6 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// Title
-		containerEl.createEl('h1', { text: 'CodeBlock Language Detector Settings' });
-
 		// Create all sections using the refactored components
 		this.triggerBehaviorSection.create(containerEl);
 		this.processingScopeSection.create(containerEl);

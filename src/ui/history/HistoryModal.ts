@@ -102,7 +102,7 @@ export class HistoryModal extends Modal {
 	 * @param container The container element
 	 */
 	private createEntriesSection(container: HTMLElement): void {
-		const listContainer = container.createDiv('history-entries-container');
+		const listContainer = container.createDiv('aslh-history-entries-container');
 		this.refreshEntriesList(listContainer);
 	}
 
@@ -132,7 +132,7 @@ export class HistoryModal extends Modal {
 		this.filters.updateResultsCount(this.filteredEntries.length, this.entries.length);
 		
 		// Refresh the entries list
-		const container = this.contentEl.querySelector('.history-entries-container') as HTMLElement;
+		const container = this.contentEl.querySelector('.aslh-history-entries-container') as HTMLElement;
 		if (container) {
 			this.refreshEntriesList(container);
 		}
@@ -153,10 +153,10 @@ export class HistoryModal extends Modal {
 		this.loadEntries();
 		
 		// Update statistics display
-		const statsElement = this.contentEl.querySelector('.stats');
+		const statsElement = this.contentEl.querySelector('.aslh-stats');
 		if (statsElement) {
 			// Re-create the actions section to update statistics
-			const actionsContainer = this.contentEl.querySelector('.modal-actions');
+			const actionsContainer = this.contentEl.querySelector('.aslh-modal-actions');
 			if (actionsContainer) {
 				actionsContainer.remove();
 				this.createActionsSection(this.contentEl);

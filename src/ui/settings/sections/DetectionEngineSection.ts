@@ -16,7 +16,9 @@ export class DetectionEngineSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'Detection Engine' });
+		new Setting(containerEl)
+			.setName('Detection Engine')
+			.setHeading();
 
 		const registeredDetectors = this.plugin.detectionEngine.getRegisteredDetectors();
 		const detectionOrder = this.getDetectionOrder();

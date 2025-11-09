@@ -32,7 +32,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 
 	// File processing methods (injected by PluginLifecycle)
 	processBasedOnScope: () => Promise<void>;
-	processFile: (file: TFile | null) => Promise<void>;
+	processFile: (file: TFile | null) => Promise<number>;
 	processAllMarkdownFiles: () => Promise<void>;
 	undoLanguageApplication: (entry: HistoryEntry) => Promise<boolean>;
 	reapplyLanguageDetection: (entry: HistoryEntry) => Promise<boolean>;

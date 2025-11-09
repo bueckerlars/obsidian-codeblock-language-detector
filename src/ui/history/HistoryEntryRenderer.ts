@@ -41,7 +41,7 @@ export class HistoryEntryRenderer {
 	 * @param index The entry index
 	 */
 	private renderSingleEntry(container: HTMLElement, entry: HistoryEntry, index: number): void {
-		const entryEl = container.createDiv(`history-entry ${entry.applied ? 'applied' : 'unapplied'}`);
+		const entryEl = container.createDiv(`aslh-history-entry ${entry.applied ? 'applied' : 'unapplied'}`);
 
 		// Entry header
 		this.renderEntryHeader(entryEl, entry);
@@ -62,14 +62,14 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderEntryHeader(entryEl: HTMLElement, entry: HistoryEntry): void {
-		const headerEl = entryEl.createDiv('entry-header');
+		const headerEl = entryEl.createDiv('aslh-entry-header');
 
 		// File info
-		const fileInfoEl = headerEl.createDiv('file-info');
+		const fileInfoEl = headerEl.createDiv('aslh-file-info');
 		this.renderFileInfo(fileInfoEl, entry);
 
 		// Status and timestamp
-		const statusEl = headerEl.createDiv('entry-status');
+		const statusEl = headerEl.createDiv('aslh-entry-status');
 		this.renderStatusAndTimestamp(statusEl, entry);
 	}
 
@@ -79,10 +79,10 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderFileInfo(container: HTMLElement, entry: HistoryEntry): void {
-		const fileNameEl = container.createSpan('file-name');
+		const fileNameEl = container.createSpan('aslh-file-name');
 		fileNameEl.textContent = entry.fileName;
 
-		const filePathEl = container.createDiv('file-path');
+		const filePathEl = container.createDiv('aslh-file-path');
 		filePathEl.textContent = entry.filePath;
 		filePathEl.title = entry.filePath; // Tooltip for full path
 	}
@@ -93,10 +93,10 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderStatusAndTimestamp(container: HTMLElement, entry: HistoryEntry): void {
-		const statusBadge = container.createSpan(`status-badge ${entry.applied ? 'applied' : 'unapplied'}`);
+		const statusBadge = container.createSpan(`aslh-status-badge ${entry.applied ? 'applied' : 'unapplied'}`);
 		statusBadge.textContent = entry.applied ? 'Applied' : 'Unapplied';
 
-		const timestampEl = container.createDiv('timestamp');
+		const timestampEl = container.createDiv('aslh-timestamp');
 		const date = new Date(entry.timestamp);
 		timestampEl.textContent = date.toLocaleString();
 		timestampEl.title = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
@@ -108,36 +108,36 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderDetectionDetails(entryEl: HTMLElement, entry: HistoryEntry): void {
-		const detailsEl = entryEl.createDiv('entry-details');
+		const detailsEl = entryEl.createDiv('aslh-entry-details');
 
 		// Language
-		const languageEl = detailsEl.createSpan('detected-language');
+		const languageEl = detailsEl.createSpan('aslh-detected-language');
 		const languageLabel = languageEl.createEl('strong');
 		languageLabel.textContent = 'Language:';
 		languageEl.appendText(` ${entry.detectedLanguage}`);
 
 		// Confidence with visual indicator
-		const confidenceEl = detailsEl.createSpan('confidence');
+		const confidenceEl = detailsEl.createSpan('aslh-confidence');
 		const confidenceLabel = confidenceEl.createEl('strong');
 		confidenceLabel.textContent = 'Confidence:';
 		confidenceEl.appendText(` ${entry.confidence}%`);
 		
 		// Add confidence bar
-		const confidenceBar = confidenceEl.createDiv('confidence-bar');
-		const confidenceProgress = confidenceBar.createDiv('confidence-progress');
+		const confidenceBar = confidenceEl.createDiv('aslh-confidence-bar');
+		const confidenceProgress = confidenceBar.createDiv('aslh-confidence-progress');
 		confidenceProgress.style.width = `${entry.confidence}%`;
 		confidenceProgress.classList.add(this.getConfidenceClass(entry.confidence));
 
 		// Method
-		const methodEl = detailsEl.createSpan('method');
+		const methodEl = detailsEl.createSpan('aslh-method');
 		const methodLabel = methodEl.createEl('strong');
 		methodLabel.textContent = 'Method:';
 		methodEl.appendText(` ${entry.method}`);
 
 		// Add method badge
-		const methodBadge = methodEl.createSpan('method-badge');
+		const methodBadge = methodEl.createSpan('aslh-method-badge');
 		methodBadge.textContent = entry.method;
-		methodBadge.className = `method-badge method-${entry.method.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
+		methodBadge.className = `aslh-method-badge aslh-method-${entry.method.replace(/[^a-z0-9]/gi, '-').toLowerCase()}`;
 	}
 
 	/**
@@ -146,10 +146,10 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderCodePreview(entryEl: HTMLElement, entry: HistoryEntry): void {
-		const codePreviewEl = entryEl.createDiv('code-preview');
+		const codePreviewEl = entryEl.createDiv('aslh-code-preview');
 
 		// Add language indicator
-		const languageIndicator = codePreviewEl.createDiv('language-indicator');
+		const languageIndicator = codePreviewEl.createDiv('aslh-language-indicator');
 		languageIndicator.textContent = entry.detectedLanguage;
 
 		// Code content
@@ -161,7 +161,7 @@ export class HistoryEntryRenderer {
 
 		// Add copy button
 		const copyButton = codePreviewEl.createEl('button', { 
-			cls: 'copy-code-btn',
+			cls: 'aslh-copy-code-btn',
 			text: '📋'
 		});
 		copyButton.title = 'Copy code to clipboard';
@@ -176,7 +176,7 @@ export class HistoryEntryRenderer {
 		// Add expand button if code is truncated
 		if (entry.codeBlock.content.length > 200) {
 			const expandButton = codePreviewEl.createEl('button', {
-				cls: 'expand-code-btn',
+				cls: 'aslh-expand-code-btn',
 				text: 'Show more'
 			});
 			expandButton.addEventListener('click', () => {
@@ -197,7 +197,7 @@ export class HistoryEntryRenderer {
 	 * @param entry The history entry
 	 */
 	private renderActionButtons(entryEl: HTMLElement, entry: HistoryEntry): void {
-		const actionsEl = entryEl.createDiv('entry-actions');
+		const actionsEl = entryEl.createDiv('aslh-entry-actions');
 
 		// Undo/Redo button
 		const toggleButton = new ButtonComponent(actionsEl);
@@ -222,19 +222,19 @@ export class HistoryEntryRenderer {
 	 * @param container The container element
 	 */
 	private renderEmptyState(container: HTMLElement): void {
-		const emptyMessageEl = container.createDiv('empty-state-message');
+		const emptyMessageEl = container.createDiv('aslh-empty-state-message');
 
-		const iconEl = emptyMessageEl.createDiv('empty-state-icon');
+		const iconEl = emptyMessageEl.createDiv('aslh-empty-state-icon');
 		iconEl.textContent = '📝';
 
-		const messageText = emptyMessageEl.createDiv('message-text');
+		const messageText = emptyMessageEl.createDiv('aslh-message-text');
 		messageText.textContent = 'No history entries found';
 
-		const subText = emptyMessageEl.createDiv('sub-text');
+		const subText = emptyMessageEl.createDiv('aslh-sub-text');
 		subText.textContent = 'No language detection operations match the current filters.';
 
 		// Add helpful tips
-		const tipsEl = emptyMessageEl.createDiv('empty-state-tips');
+		const tipsEl = emptyMessageEl.createDiv('aslh-empty-state-tips');
 		tipsEl.createEl('p', { text: 'Try:' });
 		const tipsList = tipsEl.createEl('ul');
 		tipsList.createEl('li', { text: 'Clearing search filters' });

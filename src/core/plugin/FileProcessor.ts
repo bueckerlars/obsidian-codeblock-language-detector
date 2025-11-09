@@ -38,27 +38,28 @@ export class FileProcessor {
 
 	/**
 	 * Process a specific file for language detection
+	 * @returns The number of detections applied
 	 */
-	async processFile(file: TFile | null): Promise<void> {
+	async processFile(file: TFile | null): Promise<number> {
 		if (!file || file.extension !== 'md') {
-			return;
+			return 0;
 		}
 
 		try {
-			// Read file content
+			// Read file content first to check if there are code blocks to process
 			const content = await this.plugin.app.vault.read(file);
 			
 			// Find code blocks without language tags
 			const codeBlocks = this.plugin.codeAnalyzer.findCodeBlocksWithoutLanguage(content);
 			
 			if (codeBlocks.length === 0) {
-				return; // No code blocks to process
+				return 0; // No code blocks to process
 			}
 
-			let updatedContent = content;
 			let detectionsApplied = 0;
+			const codeBlocksToProcess: Array<{ codeBlock: any; detectionResult: any }> = [];
 
-			// Process each code block
+			// Process each code block to detect languages
 			for (const codeBlock of codeBlocks) {
 				// Check if this code block should be ignored due to recent undo
 				if (this.plugin.undoIgnoreService.shouldIgnoreDetection(file.path, codeBlock)) {
@@ -69,44 +70,55 @@ export class FileProcessor {
 				const detectionResult = await this.plugin.detectionEngine.detectLanguage(codeBlock.content);
 				
 				if (detectionResult) {
-					try {
-						// Apply the language tag
-						updatedContent = this.plugin.syntaxApplier.applyLanguageTag(updatedContent, codeBlock, detectionResult.language);
-						
-						// Add to history if enabled
-						if (this.plugin.settings.enableHistory) {
-							const historyEntry: Omit<HistoryEntry, 'id' | 'timestamp'> = {
-								fileName: file.name,
-								filePath: file.path,
-								codeBlock,
-								detectedLanguage: detectionResult.language,
-								confidence: detectionResult.confidence,
-								method: detectionResult.method,
-								applied: true
-							};
-							
-							this.plugin.historyService.addEntry(historyEntry);
-						}
-						
-						detectionsApplied++;
-					} catch (error) {
-						console.error('Error applying language tag:', error);
-					}
+					codeBlocksToProcess.push({ codeBlock, detectionResult });
 				}
 			}
 
-			// Write updated content back to file if changes were made
-			if (detectionsApplied > 0) {
-				await this.plugin.app.vault.modify(file, updatedContent);
+			// Apply changes using vault.process if there are detections
+			if (codeBlocksToProcess.length > 0) {
+				await this.plugin.app.vault.process(file, (data: string) => {
+					let updatedContent = data;
+					
+					// Apply language tags for all detected code blocks
+					for (const { codeBlock, detectionResult } of codeBlocksToProcess) {
+						try {
+							// Apply the language tag
+							updatedContent = this.plugin.syntaxApplier.applyLanguageTag(updatedContent, codeBlock, detectionResult.language);
+							
+							// Add to history if enabled
+							if (this.plugin.settings.enableHistory) {
+								const historyEntry: Omit<HistoryEntry, 'id' | 'timestamp'> = {
+									fileName: file.name,
+									filePath: file.path,
+									codeBlock,
+									detectedLanguage: detectionResult.language,
+									confidence: detectionResult.confidence,
+									method: detectionResult.method,
+									applied: true
+								};
+								
+								this.plugin.historyService.addEntry(historyEntry);
+							}
+							
+							detectionsApplied++;
+						} catch (error) {
+							console.error('Error applying language tag:', error);
+						}
+					}
+					
+					return updatedContent;
+				});
 				
 				if (this.plugin.settings.showNotifications) {
 					new Notice(`Applied ${detectionsApplied} language tag(s) to ${file.name}`);
 				}
 			}
 
+			return detectionsApplied;
 		} catch (error) {
 			console.error('Error processing file:', error);
 			new Notice(`Error processing ${file.name}: ${error.message}`);
+			return 0;
 		}
 	}
 
@@ -126,7 +138,8 @@ export class FileProcessor {
 				const codeBlocks = this.plugin.codeAnalyzer.findCodeBlocksWithoutLanguage(content);
 				
 				if (codeBlocks.length > 0) {
-					await this.processFile(file);
+					const detections = await this.processFile(file);
+					totalDetections += detections;
 					filesProcessed++;
 				}
 			}
@@ -150,13 +163,12 @@ export class FileProcessor {
 				return false;
 			}
 
-			const content = await this.plugin.app.vault.read(file);
-			const updatedContent = this.plugin.syntaxApplier.removeLanguageTag(content, entry.codeBlock);
-			
 			// Add ignore entry BEFORE modifying the file to prevent re-detection
 			this.plugin.undoIgnoreService.addIgnoreEntry(entry.filePath, entry.codeBlock);
 			
-			await this.plugin.app.vault.modify(file, updatedContent);
+			await this.plugin.app.vault.process(file, (data: string) => {
+				return this.plugin.syntaxApplier.removeLanguageTag(data, entry.codeBlock);
+			});
 			
 			if (this.plugin.settings.showNotifications) {
 				new Notice(`Removed language tag from ${entry.fileName}`);
@@ -180,10 +192,9 @@ export class FileProcessor {
 				return false;
 			}
 
-			const content = await this.plugin.app.vault.read(file);
-			const updatedContent = this.plugin.syntaxApplier.applyLanguageTag(content, entry.codeBlock, entry.detectedLanguage);
-			
-			await this.plugin.app.vault.modify(file, updatedContent);
+			await this.plugin.app.vault.process(file, (data: string) => {
+				return this.plugin.syntaxApplier.applyLanguageTag(data, entry.codeBlock, entry.detectedLanguage);
+			});
 			
 			if (this.plugin.settings.showNotifications) {
 				new Notice(`Reapplied language tag to ${entry.fileName}`);

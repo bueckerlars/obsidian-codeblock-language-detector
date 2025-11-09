@@ -1,4 +1,4 @@
-import { Editor, MarkdownView, TFile, EventRef } from 'obsidian';
+import { Editor, MarkdownView, TFile } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../main';
 
 /**
@@ -6,7 +6,6 @@ import AutoSyntaxHighlightPlugin from '../../../main';
  */
 export class EventHandlers {
 	private plugin: AutoSyntaxHighlightPlugin;
-	private eventRefs: EventRef[] = [];
 
 	// Event handlers
 	private editorChangeHandler: (editor: Editor, view: MarkdownView) => void;
@@ -14,11 +13,11 @@ export class EventHandlers {
 	private fileSaveHandler: (file: TFile) => void;
 
 	// Debounce timers
-	private debounceTimer: NodeJS.Timeout | null = null;
-	private debounceAllFilesTimer: NodeJS.Timeout | null = null;
+	private debounceTimer: number | null = null;
+	private debounceAllFilesTimer: number | null = null;
 	
 	// Cleanup timer for undo ignore entries
-	private cleanupTimer: NodeJS.Timeout | null = null;
+	private cleanupTimer: number | null = null;
 
 	constructor(plugin: AutoSyntaxHighlightPlugin) {
 		this.plugin = plugin;
@@ -44,9 +43,9 @@ export class EventHandlers {
 		this.fileOpenHandler = (file: TFile) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-open' && file.extension === 'md') {
 				if (this.plugin.settings.processingScope === 'current-note') {
-					setTimeout(() => this.plugin.processFile(file), 500); // Small delay to ensure file is loaded
+					window.setTimeout(() => this.plugin.processFile(file), 500); // Small delay to ensure file is loaded
 				} else {
-					setTimeout(() => this.plugin.processAllMarkdownFiles(), 500);
+					window.setTimeout(() => this.plugin.processAllMarkdownFiles(), 500);
 				}
 			}
 		};
@@ -71,10 +70,6 @@ export class EventHandlers {
 		const fileOpenRef = this.plugin.app.workspace.on('file-open', this.fileOpenHandler);
 		const fileSaveRef = this.plugin.app.vault.on('modify', this.fileSaveHandler);
 		
-		this.eventRefs.push(editorChangeRef);
-		this.eventRefs.push(fileOpenRef);
-		this.eventRefs.push(fileSaveRef);
-		
 		this.plugin.registerEvent(editorChangeRef);
 		this.plugin.registerEvent(fileOpenRef);
 		this.plugin.registerEvent(fileSaveRef);
@@ -87,22 +82,17 @@ export class EventHandlers {
 	 * Unregister all event handlers
 	 */
 	unregisterEventHandlers(): void {
-		this.eventRefs.forEach(ref => {
-			this.plugin.app.workspace.offref(ref);
-		});
-		this.eventRefs = [];
-
 		// Clear any pending timers
 		if (this.debounceTimer) {
-			clearTimeout(this.debounceTimer);
+			window.clearTimeout(this.debounceTimer);
 			this.debounceTimer = null;
 		}
 		if (this.debounceAllFilesTimer) {
-			clearTimeout(this.debounceAllFilesTimer);
+			window.clearTimeout(this.debounceAllFilesTimer);
 			this.debounceAllFilesTimer = null;
 		}
 		if (this.cleanupTimer) {
-			clearTimeout(this.cleanupTimer);
+			window.clearInterval(this.cleanupTimer);
 			this.cleanupTimer = null;
 		}
 	}
@@ -112,10 +102,10 @@ export class EventHandlers {
 	 */
 	private debounceProcessFile(file: TFile | null): void {
 		if (this.debounceTimer) {
-			clearTimeout(this.debounceTimer);
+			window.clearTimeout(this.debounceTimer);
 		}
 		
-		this.debounceTimer = setTimeout(() => {
+		this.debounceTimer = window.setTimeout(() => {
 			this.plugin.processFile(file);
 		}, 2000); // 2 second delay
 	}
@@ -125,10 +115,10 @@ export class EventHandlers {
 	 */
 	private debounceProcessAllFiles(): void {
 		if (this.debounceAllFilesTimer) {
-			clearTimeout(this.debounceAllFilesTimer);
+			window.clearTimeout(this.debounceAllFilesTimer);
 		}
 		
-		this.debounceAllFilesTimer = setTimeout(() => {
+		this.debounceAllFilesTimer = window.setTimeout(() => {
 			this.plugin.processAllMarkdownFiles();
 		}, 5000); // 5 second delay for all files (longer to avoid too frequent processing)
 	}
@@ -138,8 +128,11 @@ export class EventHandlers {
 	 */
 	private startCleanupTimer(): void {
 		// Run cleanup every 30 seconds
-		this.cleanupTimer = setInterval(() => {
+		this.cleanupTimer = window.setInterval(() => {
 			this.plugin.undoIgnoreService.cleanupExpiredEntries();
 		}, 30000);
+		
+		// Register the interval with the plugin for proper cleanup
+		this.plugin.registerInterval(this.cleanupTimer);
 	}
 }

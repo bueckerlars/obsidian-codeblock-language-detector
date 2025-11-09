@@ -264,7 +264,7 @@ export class DetectorConfigCard {
 		});
 		
 		// Languages supported
-		const languagesContainer = container.createDiv('supported-languages');
+		const languagesContainer = container.createDiv('aslh-supported-languages');
 		languagesContainer.createEl('h6', { text: 'Supported Languages' });
 		
 		const supportedLanguages = vscodeDetector.getAvailableLanguages();

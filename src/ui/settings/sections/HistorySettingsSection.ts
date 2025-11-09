@@ -16,7 +16,9 @@ export class HistorySettingsSection {
 	 * @param containerEl The container element to add settings to
 	 */
 	create(containerEl: HTMLElement): void {
-		containerEl.createEl('h3', { text: 'History & Undo' });
+		new Setting(containerEl)
+			.setName('History & Undo')
+			.setHeading();
 
 		// Enable history tracking
 		new Setting(containerEl)

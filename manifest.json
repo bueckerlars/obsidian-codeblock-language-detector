@@ -6,6 +6,5 @@
 	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting",
 	"author": "Lars Bücker",
 	"authorUrl": "https://github.com/bueckerlars",
-	"fundingUrl": "",
 	"isDesktopOnly": false
 }

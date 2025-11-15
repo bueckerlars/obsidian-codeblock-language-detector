@@ -1,6 +1,6 @@
 {
 	"name": "codeblock-language-detector",
-	"version": "0.2.2",
+	"version": "0.2.3",
 	"description": "CodeBlock Language Detector - Automatically detects and adds language tags to code blocks",
 	"main": "main.js",
 	"scripts": {

@@ -21,7 +21,7 @@
 	},
 	"dependencies": {
 		"@vscode/vscode-languagedetection": "^1.0.22",
-		"highlight.js": "^11.9.0"
+		"highlight.js": "^11.11.0"
 	},
 	"devDependencies": {
 		"@types/node": "^16.11.6",

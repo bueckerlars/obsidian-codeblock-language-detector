@@ -267,7 +267,8 @@ export class ConfigurationManager {
 			};
 
 		} catch (error) {
-			errors.push(`Failed to parse configuration: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			errors.push(`Failed to parse configuration: ${errorMessage}`);
 			return { success: false, errors, warnings };
 		}
 	}

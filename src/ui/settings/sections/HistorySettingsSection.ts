@@ -1,5 +1,6 @@
 import { Setting, Notice } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
+import { ConfirmModal } from '../../utils/ConfirmModal';
 
 /**
  * Settings section for history configuration
@@ -97,7 +98,10 @@ export class HistorySettingsSection {
 					.setButtonText('Clear All History')
 					.setWarning()
 					.onClick(async () => {
-						if (confirm('Are you sure you want to clear all history? This action cannot be undone.')) {
+						const modal = new ConfirmModal(this.plugin.app, 'Clear History', 'Are you sure you want to clear all history? This action cannot be undone.');
+						modal.open();
+						const confirmed = await modal.promise;
+						if (confirmed) {
 							this.plugin.historyService.clearHistory();
 							new Notice('History cleared');
 						}
@@ -111,8 +115,11 @@ export class HistorySettingsSection {
 	private exportHistory(): void {
 		try {
 			const historyJson = this.plugin.historyService.exportHistory();
-			navigator.clipboard.writeText(historyJson).then(() => {
+			void navigator.clipboard.writeText(historyJson).then(() => {
 				new Notice('History exported to clipboard');
+			}).catch((error) => {
+				console.error('Error exporting history to clipboard:', error);
+				new Notice('Error exporting history to clipboard');
 			});
 		} catch (error) {
 			console.error('Error exporting history:', error);
@@ -132,7 +139,9 @@ export class HistorySettingsSection {
 				return;
 			}
 
-			const replace = confirm('Replace existing history? Click OK to replace, Cancel to merge.');
+			const modal = new ConfirmModal(this.plugin.app, 'Import History', 'Replace existing history? Click OK to replace, Cancel to merge.');
+			modal.open();
+			const replace = await modal.promise;
 			const importedCount = this.plugin.historyService.importHistory(clipboardText, replace);
 			
 			new Notice(`Imported ${importedCount} history entries`);

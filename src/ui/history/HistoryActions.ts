@@ -2,6 +2,7 @@ import { App, ButtonComponent, Notice, TFile, MarkdownView } from 'obsidian';
 import { HistoryEntry } from '../../types';
 import { HistoryService } from '../../services';
 import AutoSyntaxHighlightPlugin from '../../../main';
+import { ConfirmModal } from '../utils/ConfirmModal';
 
 /**
  * Handles actions that can be performed on history entries
@@ -55,8 +56,10 @@ export class HistoryActions {
 		
 		showStatsBtn.addEventListener('click', () => {
 			// Import here to avoid circular dependency
-			import('./StatisticsModal').then(({ StatisticsModal }) => {
+			void import('./StatisticsModal').then(({ StatisticsModal }) => {
 				new StatisticsModal(this.app, this.plugin).open();
+			}).catch((error) => {
+				console.error('Error loading StatisticsModal:', error);
 			});
 		});
 	}
@@ -105,7 +108,8 @@ export class HistoryActions {
 			return false;
 		} catch (error) {
 			console.error('Error toggling entry status:', error);
-			new Notice(`Error: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			new Notice(`Error: ${errorMessage}`);
 			return false;
 		}
 	}
@@ -204,7 +208,10 @@ export class HistoryActions {
 		}
 
 		const confirmMessage = `Are you sure you want to ${operation} ${entries.length} entries?`;
-		if (!confirm(confirmMessage)) {
+		const modal = new ConfirmModal(this.app, 'Confirm Action', confirmMessage);
+		modal.open();
+		const confirmed = await modal.promise;
+		if (!confirmed) {
 			return;
 		}
 

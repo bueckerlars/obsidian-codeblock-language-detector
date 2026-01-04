@@ -28,7 +28,7 @@ export class PatternMatchingDetector implements ILanguageDetector {
 			this.patterns.set(key, pattern);
 		});
 		
-		console.log(`🎯 PatternMatchingDetector initialized with ${this.patterns.size} patterns: ${Array.from(this.patterns.keys()).join(', ')}`);
+		console.debug(`PatternMatchingDetector initialized with ${this.patterns.size} patterns: ${Array.from(this.patterns.keys()).join(', ')}`);
 	}
 
 	/**
@@ -36,9 +36,9 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	 * @param code The code to analyze
 	 * @returns Detection result or null if confidence is too low
 	 */
-	async detectLanguage(code: string): Promise<DetectionResult | null> {
+	detectLanguage(code: string): Promise<DetectionResult | null> {
 		if (!code || code.trim().length === 0) {
-			return null;
+			return Promise.resolve(null);
 		}
 
 		const results: Array<{ language: string; confidence: number }> = [];
@@ -60,14 +60,14 @@ export class PatternMatchingDetector implements ILanguageDetector {
 		results.sort((a, b) => b.confidence - a.confidence);
 
 		if (results.length === 0 || results[0].confidence < this.minConfidence * 100) {
-			return null;
+			return Promise.resolve(null);
 		}
 
-		return {
+		return Promise.resolve({
 			language: results[0].language,
 			confidence: Math.round(results[0].confidence),
 			method: 'pattern-matching'
-		};
+		});
 	}
 
 	/**

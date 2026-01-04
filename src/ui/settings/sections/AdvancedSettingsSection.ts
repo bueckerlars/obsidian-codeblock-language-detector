@@ -1,5 +1,6 @@
 import { Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
+import { ConfirmModal } from '../../utils/ConfirmModal';
 
 /**
  * Settings section for advanced configuration
@@ -21,7 +22,7 @@ export class AdvancedSettingsSection {
 			.setHeading();
 
 		// Plugin version and info
-		new Setting(containerEl)
+		void new Setting(containerEl)
 			.setName('Plugin information')
 			.setDesc('Current plugin version and statistics')
 			.then(setting => {
@@ -49,7 +50,7 @@ export class AdvancedSettingsSection {
 					.onClick(async () => {
 						const settings = JSON.stringify(this.plugin.settings, null, 2);
 						await navigator.clipboard.writeText(settings);
-						console.log('Settings exported to clipboard');
+						console.debug('Settings exported to clipboard');
 					});
 			});
 
@@ -69,7 +70,7 @@ export class AdvancedSettingsSection {
 								await this.plugin.saveSettings();
 								// Trigger display refresh
 								this.onSettingsChanged?.();
-								console.log('Settings imported successfully');
+								console.debug('Settings imported successfully');
 							} else {
 								console.error('Invalid settings format');
 							}
@@ -88,7 +89,10 @@ export class AdvancedSettingsSection {
 					.setButtonText('Reset')
 					.setWarning()
 					.onClick(async () => {
-						if (confirm('Are you sure you want to reset all settings to defaults?')) {
+						const modal = new ConfirmModal(this.plugin.app, 'Reset Settings', 'Are you sure you want to reset all settings to defaults?');
+						modal.open();
+						const confirmed = await modal.promise;
+						if (confirmed) {
 							await this.plugin.resetSettings();
 							// Trigger display refresh
 							this.onSettingsChanged?.();

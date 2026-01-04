@@ -1,4 +1,13 @@
 import { LanguagePattern } from '../../types';
+import bashPattern from '../../data/patterns/bash.json';
+import cppPattern from '../../data/patterns/cpp.json';
+import javaPattern from '../../data/patterns/java.json';
+import javascriptPattern from '../../data/patterns/javascript.json';
+import jsxPattern from '../../data/patterns/jsx.json';
+import pythonPattern from '../../data/patterns/python.json';
+import tsxPattern from '../../data/patterns/tsx.json';
+import typescriptPattern from '../../data/patterns/typescript.json';
+import vuePattern from '../../data/patterns/vue.json';
 
 /**
  * Static pattern loader that includes all patterns at build time
@@ -25,15 +34,15 @@ export class PatternLoader {
 		try {
 			// Import all pattern files - this ensures they are bundled
 			const patterns = [
-				require('../../data/patterns/bash.json') as LanguagePattern,
-				require('../../data/patterns/cpp.json') as LanguagePattern,
-				require('../../data/patterns/java.json') as LanguagePattern,
-				require('../../data/patterns/javascript.json') as LanguagePattern,
-				require('../../data/patterns/jsx.json') as LanguagePattern,
-				require('../../data/patterns/python.json') as LanguagePattern,
-				require('../../data/patterns/tsx.json') as LanguagePattern,
-				require('../../data/patterns/typescript.json') as LanguagePattern,
-				require('../../data/patterns/vue.json') as LanguagePattern,
+				bashPattern as LanguagePattern,
+				cppPattern as LanguagePattern,
+				javaPattern as LanguagePattern,
+				javascriptPattern as LanguagePattern,
+				jsxPattern as LanguagePattern,
+				pythonPattern as LanguagePattern,
+				tsxPattern as LanguagePattern,
+				typescriptPattern as LanguagePattern,
+				vuePattern as LanguagePattern,
 			];
 
 			patterns.forEach(pattern => {
@@ -45,7 +54,7 @@ export class PatternLoader {
 				}
 			});
 
-			console.log(`📦 PatternLoader: Successfully loaded ${this.patterns.size} language patterns`);
+			console.debug(`PatternLoader: Successfully loaded ${this.patterns.size} language patterns`);
 		} catch (error) {
 			console.error('Error loading patterns:', error);
 		}

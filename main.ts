@@ -182,7 +182,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Migrate from legacy settings format (version 0) to new format
 	 * @param legacyData The legacy settings data
 	 */
-	private async migrateFromLegacySettings(legacyData: any): Promise<void> {
+	private migrateFromLegacySettings(legacyData: any): void {
 		// Only migrate if legacy settings exist and new format doesn't
 		if (!this.settings.detectorConfigurations || Object.keys(this.settings.detectorConfigurations).length === 0) {
 			this.settings.detectorConfigurations = {};
@@ -191,7 +191,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			const legacyOrder = legacyData.detectionMethodOrder || ['vscode-ml', 'highlight-js', 'pattern-matching'];
 			
 			// Migrate vscode-ml
-			if (legacyData.hasOwnProperty('enableVSCodeML')) {
+			if (Object.prototype.hasOwnProperty.call(legacyData, 'enableVSCodeML')) {
 				this.settings.detectorConfigurations['vscode-ml'] = {
 					enabled: legacyData.enableVSCodeML !== false,
 					confidenceThreshold: legacyData.confidenceThreshold || 70,
@@ -201,7 +201,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			}
 			
 			// Migrate highlight-js
-			if (legacyData.hasOwnProperty('enableHighlightJs')) {
+			if (Object.prototype.hasOwnProperty.call(legacyData, 'enableHighlightJs')) {
 				this.settings.detectorConfigurations['highlight-js'] = {
 					enabled: legacyData.enableHighlightJs !== false,
 					confidenceThreshold: legacyData.confidenceThreshold || 70,
@@ -211,7 +211,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			}
 			
 			// Migrate pattern-matching
-			if (legacyData.hasOwnProperty('enablePatternMatching')) {
+			if (Object.prototype.hasOwnProperty.call(legacyData, 'enablePatternMatching')) {
 				this.settings.detectorConfigurations['pattern-matching'] = {
 					enabled: legacyData.enablePatternMatching !== false,
 					confidenceThreshold: legacyData.confidenceThreshold || 70,

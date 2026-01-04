@@ -50,7 +50,7 @@ export class PluginLifecycle {
 			this.fileProcessor.processBasedOnScope();
 		});
 
-		console.log('CodeBlock Language Detector plugin loaded');
+		console.debug('CodeBlock Language Detector plugin loaded');
 	}
 
 	/**
@@ -62,7 +62,7 @@ export class PluginLifecycle {
 			this.eventHandlers.unregisterEventHandlers();
 		}
 
-		console.log('CodeBlock Language Detector plugin unloaded');
+		console.debug('CodeBlock Language Detector plugin unloaded');
 	}
 
 	/**

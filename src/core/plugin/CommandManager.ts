@@ -1,6 +1,7 @@
 import { Editor, MarkdownView, Notice } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../main';
 import { HistoryModal, StatisticsModal } from '../../ui';
+import { ConfirmModal } from '../../ui/utils/ConfirmModal';
 
 /**
  * Manages plugin commands
@@ -63,8 +64,11 @@ export class CommandManager {
 		this.plugin.addCommand({
 			id: 'clear-history',
 			name: 'Clear detection history',
-			callback: () => {
-				if (confirm('Are you sure you want to clear all detection history?')) {
+			callback: async () => {
+				const modal = new ConfirmModal(this.plugin.app, 'Clear History', 'Are you sure you want to clear all detection history?');
+				modal.open();
+				const confirmed = await modal.promise;
+				if (confirmed) {
 					this.plugin.historyService.clearHistory();
 					new Notice('Detection history cleared');
 				}

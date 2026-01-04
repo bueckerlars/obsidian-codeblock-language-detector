@@ -33,7 +33,7 @@ export class UndoIgnoreService implements IUndoIgnoreService {
 		// Bereinige abgelaufene Einträge
 		this.cleanupExpiredEntries();
 		
-		console.log(`Undo ignore entry added for ${filePath} at lines ${codeBlock.startLine}-${codeBlock.endLine}`);
+		console.debug(`Undo ignore entry added for ${filePath} at lines ${codeBlock.startLine}-${codeBlock.endLine}`);
 	}
 
 	/**
@@ -64,7 +64,7 @@ export class UndoIgnoreService implements IUndoIgnoreService {
 			return false;
 		}
 
-		console.log(`Detection ignored for ${filePath} at lines ${codeBlock.startLine}-${codeBlock.endLine} due to recent undo`);
+			console.debug(`Detection ignored for ${filePath} at lines ${codeBlock.startLine}-${codeBlock.endLine} due to recent undo`);
 		return true;
 	}
 
@@ -86,7 +86,7 @@ export class UndoIgnoreService implements IUndoIgnoreService {
 		});
 
 		if (expiredIds.length > 0) {
-			console.log(`Cleaned up ${expiredIds.length} expired undo ignore entries`);
+			console.debug(`Cleaned up ${expiredIds.length} expired undo ignore entries`);
 		}
 	}
 
@@ -96,7 +96,7 @@ export class UndoIgnoreService implements IUndoIgnoreService {
 	clearAllIgnoreEntries(): void {
 		const count = this.ignoreEntries.size;
 		this.ignoreEntries.clear();
-		console.log(`Cleared ${count} undo ignore entries`);
+		console.debug(`Cleared ${count} undo ignore entries`);
 	}
 
 	/**

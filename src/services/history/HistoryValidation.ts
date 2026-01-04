@@ -204,7 +204,7 @@ export class HistoryValidation {
 			const sanitized: any = {};
 
 			// Sanitize basic fields
-			sanitized.id = typeof entry.id === 'string' ? entry.id.trim() : `repair-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+			sanitized.id = typeof entry.id === 'string' ? entry.id.trim() : `repair-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 			sanitized.timestamp = typeof entry.timestamp === 'number' && entry.timestamp > 0 ? entry.timestamp : Date.now();
 			sanitized.fileName = typeof entry.fileName === 'string' ? entry.fileName.trim() : 'unknown.md';
 			sanitized.filePath = typeof entry.filePath === 'string' ? entry.filePath.trim() : 'unknown.md';

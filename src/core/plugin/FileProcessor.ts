@@ -1,6 +1,6 @@
 import { TFile, Notice, MarkdownView } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../main';
-import { HistoryEntry } from '../../types';
+import { HistoryEntry, CodeBlock, DetectionResult } from '../../types';
 
 /**
  * Handles file processing operations
@@ -54,13 +54,13 @@ export class FileProcessor {
 				return 0; // No code blocks to process
 			}
 
-			const codeBlocksToProcess: Array<{ codeBlock: any; detectionResult: any }> = [];
+			const codeBlocksToProcess: Array<{ codeBlock: CodeBlock; detectionResult: DetectionResult }> = [];
 
 			// Process each code block to detect languages
 			for (const codeBlock of codeBlocks) {
 				// Check if this code block should be ignored due to recent undo
 				if (this.plugin.undoIgnoreService.shouldIgnoreDetection(file.path, codeBlock)) {
-					console.log(`Skipping detection for code block at lines ${codeBlock.startLine}-${codeBlock.endLine} due to recent undo`);
+					console.debug(`Skipping detection for code block at lines ${codeBlock.startLine}-${codeBlock.endLine} due to recent undo`);
 					continue;
 				}
 
@@ -139,7 +139,8 @@ export class FileProcessor {
 			return detectionsApplied;
 		} catch (error) {
 			console.error('Error processing file:', error);
-			new Notice(`Error processing ${file.name}: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			new Notice(`Error processing ${file.name}: ${errorMessage}`);
 			return 0;
 		}
 	}
@@ -168,7 +169,8 @@ export class FileProcessor {
 		} catch (error) {
 			notice.hide();
 			console.error('Error processing all files:', error);
-			new Notice(`Error processing files: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			new Notice(`Error processing files: ${errorMessage}`);
 		}
 	}
 
@@ -196,7 +198,8 @@ export class FileProcessor {
 			return true;
 		} catch (error) {
 			console.error('Error undoing language application:', error);
-			new Notice(`Error undoing change: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			new Notice(`Error undoing change: ${errorMessage}`);
 			return false;
 		}
 	}
@@ -222,7 +225,8 @@ export class FileProcessor {
 			return true;
 		} catch (error) {
 			console.error('Error reapplying language detection:', error);
-			new Notice(`Error reapplying change: ${error.message}`);
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			new Notice(`Error reapplying change: ${errorMessage}`);
 			return false;
 		}
 	}

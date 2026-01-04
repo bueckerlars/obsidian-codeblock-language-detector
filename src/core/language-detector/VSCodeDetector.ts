@@ -24,23 +24,25 @@ export class VSCodeDetector implements ILanguageDetector {
 		}
 
 		if (this.initializationPromise) {
-			return this.initializationPromise;
+			await this.initializationPromise;
+			return;
 		}
 
 		this.initializationPromise = this.initializeModel();
-		return this.initializationPromise;
+		await this.initializationPromise;
 	}
 
 	/**
 	 * Initializes the VSCode Language Detection model
 	 */
-	private async initializeModel(): Promise<void> {
+	private initializeModel(): Promise<void> {
 		try {
 			this.modelOperations = new ModelOperations();
 			this.isInitialized = true;
+			return Promise.resolve();
 		} catch (error) {
 			console.error('Failed to initialize VSCode Language Detection model:', error);
-			throw error;
+			return Promise.reject(error);
 		}
 	}
 

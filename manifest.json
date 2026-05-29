@@ -3,7 +3,7 @@
 	"name": "CodeBlock Language Detector",
 	"version": "0.2.7",
 	"minAppVersion": "0.15.0",
-	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting",
+	"description": "Automatically detects and adds language tags to code blocks without specified language for proper syntax highlighting.",
 	"author": "Lars Bücker",
 	"authorUrl": "https://github.com/bueckerlars",
 	"isDesktopOnly": false

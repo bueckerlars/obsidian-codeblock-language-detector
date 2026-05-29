@@ -23,7 +23,7 @@ export class ProcessingScopeSection {
 
 		new Setting(containerEl)
 			.setName('Code block processing scope')
-			.setDesc('Choose whether to process code blocks in the current note only or across the entire vault')
+			.setDesc('Controls manual processing (ribbon icon, command palette). "Entire vault" processes all markdown files; automatic triggers always process only the current note.')
 			.addDropdown(dropdown => {
 				dropdown
 					.addOption('current-note', 'Current note only')

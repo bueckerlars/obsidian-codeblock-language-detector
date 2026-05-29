@@ -1,6 +1,11 @@
 import esbuild from "esbuild";
+import path from "node:path";
 import process from "process";
 import { builtinModules } from "node:module";
+
+const nodeBuiltins = builtinModules.filter(
+	(m) => m !== "fs" && m !== "path"
+);
 
 const banner =
 `/*
@@ -31,7 +36,11 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
-		...builtinModules],
+		...nodeBuiltins],
+	alias: {
+		fs: path.resolve("src/shims/fs-stub.ts"),
+		path: path.resolve("src/shims/path-stub.ts"),
+	},
 	format: "cjs",
 	target: "es2018",
 	logLevel: "info",
@@ -39,6 +48,9 @@ const context = await esbuild.context({
 	treeShaking: true,
 	outfile: "main.js",
 	minify: prod,
+	loader: {
+		".bin": "binary",
+	},
 });
 
 if (prod) {

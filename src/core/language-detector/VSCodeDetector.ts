@@ -1,5 +1,11 @@
 import { ModelOperations } from '@vscode/vscode-languagedetection';
+import modelJson from '@vscode/vscode-languagedetection/model/model.json';
+import modelWeights from '@vscode/vscode-languagedetection/model/group1-shard1of1.bin';
 import { DetectionResult, ILanguageDetector } from '../../types';
+
+function getModelWeightsBuffer(): ArrayBuffer {
+	return modelWeights.slice().buffer;
+}
 
 /**
  * Language detector using Microsoft's VSCode Language Detection ML Model
@@ -37,7 +43,10 @@ export class VSCodeDetector implements ILanguageDetector {
 	 */
 	private initializeModel(): Promise<void> {
 		try {
-			this.modelOperations = new ModelOperations();
+			this.modelOperations = new ModelOperations({
+				modelJsonLoaderFunc: async () => modelJson,
+				weightsLoaderFunc: async () => getModelWeightsBuffer(),
+			});
 			this.isInitialized = true;
 			return Promise.resolve();
 		} catch (error) {

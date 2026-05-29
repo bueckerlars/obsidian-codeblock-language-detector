@@ -1,6 +1,8 @@
 import { Setting, Notice } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
 import { ConfirmModal } from '../../utils/ConfirmModal';
+import { JsonExportModal } from '../../utils/JsonExportModal';
+import { JsonImportModal } from '../../utils/JsonImportModal';
 
 /**
  * Settings section for history configuration
@@ -56,10 +58,10 @@ export class HistorySettingsSection {
 		// Export history button
 		new Setting(containerEl)
 			.setName('Export history')
-			.setDesc('Export history data to clipboard as JSON')
+			.setDesc('Export history data as JSON (copy from dialog)')
 			.addButton(button => {
 				button
-					.setButtonText('Export to Clipboard')
+					.setButtonText('Export')
 					.onClick(() => {
 						this.exportHistory();
 					});
@@ -68,12 +70,12 @@ export class HistorySettingsSection {
 		// Import history button
 		new Setting(containerEl)
 			.setName('Import history')
-			.setDesc('Import history data from clipboard (JSON format)')
+			.setDesc('Import history data from pasted JSON')
 			.addButton(button => {
 				button
-					.setButtonText('Import from Clipboard')
-					.onClick(async () => {
-						await this.importHistory();
+					.setButtonText('Import')
+					.onClick(() => {
+						this.openImportHistoryModal();
 					});
 			});
 
@@ -110,17 +112,17 @@ export class HistorySettingsSection {
 	}
 
 	/**
-	 * Exports history to clipboard
+	 * Opens a dialog to export history as JSON
 	 */
 	private exportHistory(): void {
 		try {
 			const historyJson = this.plugin.historyService.exportHistory();
-			void navigator.clipboard.writeText(historyJson).then(() => {
-				new Notice('History exported to clipboard');
-			}).catch((error) => {
-				console.error('Error exporting history to clipboard:', error);
-				new Notice('Error exporting history to clipboard');
-			});
+			new JsonExportModal(
+				this.plugin.app,
+				'Export History',
+				'Copy the JSON below to back up your detection history.',
+				historyJson
+			).open();
 		} catch (error) {
 			console.error('Error exporting history:', error);
 			new Notice('Error exporting history');
@@ -128,27 +130,33 @@ export class HistorySettingsSection {
 	}
 
 	/**
-	 * Imports history from clipboard
+	 * Opens a dialog to import history from pasted JSON
 	 */
-	private async importHistory(): Promise<void> {
-		try {
-			const clipboardText = await navigator.clipboard.readText();
-			
-			if (!clipboardText.trim()) {
-				new Notice('Clipboard is empty');
-				return;
+	private openImportHistoryModal(): void {
+		new JsonImportModal(
+			this.plugin.app,
+			'Import History',
+			'Paste exported history JSON below.',
+			async (jsonText) => {
+				const confirmModal = new ConfirmModal(
+					this.plugin.app,
+					'Import History',
+					'Replace existing history? Click OK to replace, Cancel to merge.'
+				);
+				confirmModal.open();
+				const replace = await confirmModal.promise;
+				const importedCount = this.plugin.historyService.importHistory(jsonText, replace);
+				new Notice(`Imported ${importedCount} history entries`);
+			},
+			(jsonText) => {
+				try {
+					const parsed = JSON.parse(jsonText);
+					return Array.isArray(parsed) || 'Invalid history data format';
+				} catch {
+					return 'Invalid JSON format';
+				}
 			}
-
-			const modal = new ConfirmModal(this.plugin.app, 'Import History', 'Replace existing history? Click OK to replace, Cancel to merge.');
-			modal.open();
-			const replace = await modal.promise;
-			const importedCount = this.plugin.historyService.importHistory(clipboardText, replace);
-			
-			new Notice(`Imported ${importedCount} history entries`);
-		} catch (error) {
-			console.error('Error importing history:', error);
-			new Notice('Error importing history: Invalid format or clipboard access denied');
-		}
+		).open();
 	}
 
 	/**

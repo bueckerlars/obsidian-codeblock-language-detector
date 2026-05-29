@@ -1,6 +1,8 @@
-import { Setting } from 'obsidian';
+import { Notice, Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
 import { ConfirmModal } from '../../utils/ConfirmModal';
+import { JsonExportModal } from '../../utils/JsonExportModal';
+import { JsonImportModal } from '../../utils/JsonImportModal';
 
 /**
  * Settings section for advanced configuration
@@ -43,40 +45,52 @@ export class AdvancedSettingsSection {
 		// Export/Import settings
 		new Setting(containerEl)
 			.setName('Export settings')
-			.setDesc('Export current plugin settings to clipboard')
+			.setDesc('Export current plugin settings as JSON (copy from dialog)')
 			.addButton(button => {
 				button
 					.setButtonText('Export')
-					.onClick(async () => {
+					.onClick(() => {
 						const settings = JSON.stringify(this.plugin.settings, null, 2);
-						await navigator.clipboard.writeText(settings);
-						console.debug('Settings exported to clipboard');
+						new JsonExportModal(
+							this.plugin.app,
+							'Export Settings',
+							'Copy the JSON below to back up your plugin settings.',
+							settings
+						).open();
 					});
 			});
 
 		new Setting(containerEl)
 			.setName('Import settings')
-			.setDesc('Import plugin settings from clipboard')
+			.setDesc('Import plugin settings from pasted JSON')
 			.addButton(button => {
 				button
 					.setButtonText('Import')
-					.onClick(async () => {
-						try {
-							const clipboardText = await navigator.clipboard.readText();
-							const importedSettings = JSON.parse(clipboardText);
-							
-							if (this.validateSettings(importedSettings)) {
+					.onClick(() => {
+						new JsonImportModal(
+							this.plugin.app,
+							'Import Settings',
+							'Paste exported settings JSON below.',
+							async (jsonText) => {
+								const importedSettings = JSON.parse(jsonText);
+								if (!this.validateSettings(importedSettings)) {
+									new Notice('Invalid settings format');
+									throw new Error('Invalid settings format');
+								}
 								Object.assign(this.plugin.settings, importedSettings);
 								await this.plugin.saveSettings();
-								// Trigger display refresh
 								this.onSettingsChanged?.();
-								console.debug('Settings imported successfully');
-							} else {
-								console.error('Invalid settings format');
+								new Notice('Settings imported successfully');
+							},
+							(jsonText) => {
+								try {
+									const parsed = JSON.parse(jsonText);
+									return this.validateSettings(parsed) || 'Invalid settings format';
+								} catch {
+									return 'Invalid JSON format';
+								}
 							}
-						} catch (error) {
-							console.error('Failed to import settings:', error);
-						}
+						).open();
 					});
 			});
 

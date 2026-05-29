@@ -14,8 +14,7 @@ export class EventHandlers {
 
 	// Debounce timers
 	private debounceTimer: number | null = null;
-	private debounceAllFilesTimer: number | null = null;
-	
+
 	// Cleanup timer for undo ignore entries
 	private cleanupTimer: number | null = null;
 
@@ -28,36 +27,24 @@ export class EventHandlers {
 	 * Initialize event handlers
 	 */
 	private initializeHandlers(): void {
-		// Editor change handler (for auto-on-edit)
+		// Editor change handler (for auto-on-edit) — always processes the active file only
 		this.editorChangeHandler = (editor: Editor, view: MarkdownView) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-edit') {
-				if (this.plugin.settings.processingScope === 'current-note') {
-					this.debounceProcessFile(view.file);
-				} else {
-					this.debounceProcessAllFiles();
-				}
+				this.debounceProcessFile(view.file);
 			}
 		};
 
-		// File open handler (for auto-on-open)
+		// File open handler (for auto-on-open) — always processes the opened file only
 		this.fileOpenHandler = (file: TFile) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-open' && file.extension === 'md') {
-				if (this.plugin.settings.processingScope === 'current-note') {
-					window.setTimeout(() => this.plugin.processFile(file), 500); // Small delay to ensure file is loaded
-				} else {
-					window.setTimeout(() => this.plugin.processAllMarkdownFiles(), 500);
-				}
+				window.setTimeout(() => this.plugin.processFile(file), 500);
 			}
 		};
 
-		// File save handler (for auto-on-save)
+		// File save handler (for auto-on-save) — always processes the saved file only
 		this.fileSaveHandler = (file: TFile) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-save' && file.extension === 'md') {
-				if (this.plugin.settings.processingScope === 'current-note') {
-					this.plugin.processFile(file);
-				} else {
-					this.plugin.processAllMarkdownFiles();
-				}
+				this.plugin.processFile(file);
 			}
 		};
 	}
@@ -69,12 +56,11 @@ export class EventHandlers {
 		const editorChangeRef = this.plugin.app.workspace.on('editor-change', this.editorChangeHandler);
 		const fileOpenRef = this.plugin.app.workspace.on('file-open', this.fileOpenHandler);
 		const fileSaveRef = this.plugin.app.vault.on('modify', this.fileSaveHandler);
-		
+
 		this.plugin.registerEvent(editorChangeRef);
 		this.plugin.registerEvent(fileOpenRef);
 		this.plugin.registerEvent(fileSaveRef);
-		
-		// Start periodic cleanup of expired undo ignore entries
+
 		this.startCleanupTimer();
 	}
 
@@ -82,14 +68,9 @@ export class EventHandlers {
 	 * Unregister all event handlers
 	 */
 	unregisterEventHandlers(): void {
-		// Clear any pending timers
 		if (this.debounceTimer) {
 			window.clearTimeout(this.debounceTimer);
 			this.debounceTimer = null;
-		}
-		if (this.debounceAllFilesTimer) {
-			window.clearTimeout(this.debounceAllFilesTimer);
-			this.debounceAllFilesTimer = null;
 		}
 		if (this.cleanupTimer) {
 			window.clearInterval(this.cleanupTimer);
@@ -104,35 +85,20 @@ export class EventHandlers {
 		if (this.debounceTimer) {
 			window.clearTimeout(this.debounceTimer);
 		}
-		
+
 		this.debounceTimer = window.setTimeout(() => {
 			this.plugin.processFile(file);
-		}, 2000); // 2 second delay
-	}
-
-	/**
-	 * Debounced processing for all files
-	 */
-	private debounceProcessAllFiles(): void {
-		if (this.debounceAllFilesTimer) {
-			window.clearTimeout(this.debounceAllFilesTimer);
-		}
-		
-		this.debounceAllFilesTimer = window.setTimeout(() => {
-			this.plugin.processAllMarkdownFiles();
-		}, 5000); // 5 second delay for all files (longer to avoid too frequent processing)
+		}, 2000);
 	}
 
 	/**
 	 * Starts periodic cleanup of expired undo ignore entries
 	 */
 	private startCleanupTimer(): void {
-		// Run cleanup every 30 seconds
 		this.cleanupTimer = window.setInterval(() => {
 			this.plugin.undoIgnoreService.cleanupExpiredEntries();
 		}, 30000);
-		
-		// Register the interval with the plugin for proper cleanup
+
 		this.plugin.registerInterval(this.cleanupTimer);
 	}
 }

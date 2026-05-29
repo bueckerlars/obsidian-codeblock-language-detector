@@ -1,6 +1,6 @@
 {
 	"name": "codeblock-language-detector",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"description": "CodeBlock Language Detector - Automatically detects and adds language tags to code blocks",
 	"main": "main.js",
 	"scripts": {
@@ -27,7 +27,6 @@
 		"@types/node": "^16.11.6",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
-		"builtin-modules": "3.3.0",
 		"esbuild": "^0.25.9",
 		"obsidian": "latest",
 		"tslib": "2.4.0",

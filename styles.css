@@ -41,7 +41,7 @@ Auto Syntax Highlight Plugin Styles
 }
 
 .aslh-history-entry:hover {
-  background-color: var(--background-modifier-hover) !important;
+  background-color: var(--background-modifier-hover);
 }
 
 .aslh-history-entry.applied {
@@ -359,6 +359,11 @@ Auto Syntax Highlight Plugin Styles
 
 .theme-light .aslh-history-entry:nth-child(even) {
   background-color: var(--background-secondary);
+}
+
+.theme-dark .aslh-history-entry:hover,
+.theme-light .aslh-history-entry:hover {
+  background-color: var(--background-modifier-hover);
 }
 
 /* Animation for smooth transitions */
@@ -814,18 +819,36 @@ Auto Syntax Highlight Plugin Styles
 }
 
 /* Settings validation indicators */
-.setting-error {
-  border-color: var(--color-red) !important;
+.setting-item.setting-error,
+.setting-item input.setting-error,
+.setting-item textarea.setting-error,
+.setting-item select.setting-error,
+input.setting-error,
+textarea.setting-error,
+select.setting-error {
+  border-color: var(--color-red);
   box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.2);
 }
 
-.setting-warning {
-  border-color: var(--color-orange) !important;
+.setting-item.setting-warning,
+.setting-item input.setting-warning,
+.setting-item textarea.setting-warning,
+.setting-item select.setting-warning,
+input.setting-warning,
+textarea.setting-warning,
+select.setting-warning {
+  border-color: var(--color-orange);
   box-shadow: 0 0 0 2px rgba(255, 165, 0, 0.2);
 }
 
-.setting-success {
-  border-color: var(--color-green) !important;
+.setting-item.setting-success,
+.setting-item input.setting-success,
+.setting-item textarea.setting-success,
+.setting-item select.setting-success,
+input.setting-success,
+textarea.setting-success,
+select.setting-success {
+  border-color: var(--color-green);
   box-shadow: 0 0 0 2px rgba(0, 255, 0, 0.2);
 }
 
@@ -881,7 +904,8 @@ Auto Syntax Highlight Plugin Styles
 
 /* Prevent animation on re-render for pre-expanded sections */
 .detector-config-section.pre-expanded {
-	transition: none !important;
+	transition: none;
+	animation: none;
 }
 
 /* Enhanced Drag and Drop Styles */

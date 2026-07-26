@@ -6,7 +6,7 @@ import { DetectionResult, ILanguageDetector, VSCodeDetectorConfig } from '../../
 function getModelWeightsBuffer(): ArrayBuffer {
 	const copy = new Uint8Array(modelWeights.byteLength);
 	copy.set(modelWeights);
-	return copy.buffer as ArrayBuffer;
+	return copy.buffer;
 }
 
 /** Matches VS Code's languageDetectionWebWorker confidence corrections. */

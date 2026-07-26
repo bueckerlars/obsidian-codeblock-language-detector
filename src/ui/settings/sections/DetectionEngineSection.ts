@@ -20,9 +20,6 @@ export class DetectionEngineSection {
 			.setName('Detection Engine')
 			.setHeading();
 
-		const registeredDetectors = this.plugin.detectionEngine.getRegisteredDetectors();
-		const detectionOrder = this.getDetectionOrder();
-
 		// Global confidence threshold
 		new Setting(containerEl)
 			.setName('Global confidence threshold')
@@ -31,7 +28,6 @@ export class DetectionEngineSection {
 				slider
 					.setLimits(0, 100, 5)
 					.setValue(this.plugin.settings.confidenceThreshold)
-					.setDynamicTooltip()
 					.onChange(async (value) => {
 						this.plugin.settings.confidenceThreshold = value;
 						await this.plugin.saveSettings();
@@ -47,18 +43,5 @@ export class DetectionEngineSection {
 				const desc = setting.descEl;
 				desc.createSpan({ text: ` (Current: ${this.plugin.settings.confidenceThreshold}%)` });
 			});
-	}
-
-	/**
-	 * Gets the current detection order
-	 * @returns Array of detector names in order
-	 */
-	private getDetectionOrder(): string[] {
-		const configs = this.plugin.settings.detectorConfigurations || {};
-		
-		return Object.entries(configs)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
 	}
 }

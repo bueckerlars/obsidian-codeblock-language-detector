@@ -119,9 +119,6 @@ export class SyntaxApplier implements ISyntaxApplier {
 		// Preserve the original indentation
 		const leadingWhitespace = fenceLine.match(/^(\s*)/)?.[1] || '';
 		
-		// Remove any existing language tag and add the new one
-		const cleanFence = fenceLine.trim().replace(/^```\w*/, '```');
-		
 		return leadingWhitespace + '```' + language;
 	}
 

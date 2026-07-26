@@ -43,14 +43,14 @@ export class HistoryStorage {
 	 */
 	importHistory(jsonData: string): HistoryEntry[] {
 		try {
-			const importedEntries: HistoryEntry[] = JSON.parse(jsonData);
+			const parsed: unknown = JSON.parse(jsonData);
 			
-			if (!Array.isArray(importedEntries)) {
+			if (!Array.isArray(parsed)) {
 				throw new Error('Invalid history data format');
 			}
 
 			// Filter out invalid entries
-			return importedEntries.filter(entry => this.isValidHistoryEntry(entry));
+			return parsed.filter((entry): entry is HistoryEntry => this.isValidHistoryEntry(entry));
 		} catch (error) {
 			console.error('Error importing history:', error);
 			throw new Error('Failed to import history data');
@@ -75,18 +75,23 @@ export class HistoryStorage {
 	 * @param entry The object to validate
 	 * @returns True if the object is a valid history entry
 	 */
-	private isValidHistoryEntry(entry: any): entry is HistoryEntry {
+	private isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
+		if (typeof entry !== 'object' || entry === null) {
+			return false;
+		}
+
+		const e = entry as Record<string, unknown>;
 		return (
-			typeof entry === 'object' &&
-			typeof entry.id === 'string' &&
-			typeof entry.timestamp === 'number' &&
-			typeof entry.fileName === 'string' &&
-			typeof entry.filePath === 'string' &&
-			typeof entry.codeBlock === 'object' &&
-			typeof entry.detectedLanguage === 'string' &&
-			typeof entry.confidence === 'number' &&
-			typeof entry.method === 'string' &&
-			typeof entry.applied === 'boolean'
+			typeof e.id === 'string' &&
+			typeof e.timestamp === 'number' &&
+			typeof e.fileName === 'string' &&
+			typeof e.filePath === 'string' &&
+			typeof e.codeBlock === 'object' &&
+			e.codeBlock !== null &&
+			typeof e.detectedLanguage === 'string' &&
+			typeof e.confidence === 'number' &&
+			typeof e.method === 'string' &&
+			typeof e.applied === 'boolean'
 		);
 	}
 }

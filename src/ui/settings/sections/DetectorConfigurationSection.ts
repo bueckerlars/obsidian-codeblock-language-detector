@@ -27,7 +27,7 @@ export class DetectorConfigurationSection {
 			.setName('Detector Configuration')
 			.setHeading();
 		
-		const descEl = containerEl.createEl('p', { 
+		containerEl.createEl('p', { 
 			cls: 'setting-item-description',
 			text: 'Configure individual detectors, their confidence thresholds, and execution order. Drag detectors to reorder them.' 
 		});

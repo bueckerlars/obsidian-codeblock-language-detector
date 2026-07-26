@@ -1,5 +1,6 @@
 import { DetectorRegistry } from './DetectorRegistry';
 import { DetectionOrchestrator } from './DetectionOrchestrator';
+import { DetectorSpecificConfig, EngineConfiguration } from '../../../types';
 
 /**
  * Manages configuration for the language detection engine
@@ -17,7 +18,7 @@ export class ConfigurationManager {
 	 * Gets the current engine configuration
 	 * @returns Configuration object
 	 */
-	getConfiguration(): Record<string, any> {
+	getConfiguration(): EngineConfiguration {
 		return {
 			detectionOrder: this.registry.getDetectionOrder(),
 			confidenceThreshold: this.orchestrator.getConfidenceThreshold(),
@@ -32,7 +33,7 @@ export class ConfigurationManager {
 	 * Sets the engine configuration
 	 * @param config Configuration object
 	 */
-	setConfiguration(config: Record<string, any>): void {
+	setConfiguration(config: EngineConfiguration): void {
 		if (config.detectionOrder && Array.isArray(config.detectionOrder)) {
 			this.registry.setDetectionOrder(config.detectionOrder);
 		}
@@ -123,7 +124,7 @@ export class ConfigurationManager {
 	 * Applies detector-specific configurations
 	 * @param detectorConfigs Configuration object for individual detectors
 	 */
-	private applyDetectorConfigurations(detectorConfigs: Record<string, any>): void {
+	private applyDetectorConfigurations(detectorConfigs: Record<string, DetectorSpecificConfig>): void {
 		Object.entries(detectorConfigs).forEach(([detectorName, config]) => {
 			const detector = this.registry.getDetector(detectorName);
 			
@@ -238,7 +239,7 @@ export class ConfigurationManager {
 		const warnings: string[] = [];
 
 		try {
-			const config = JSON.parse(configString);
+			const config = JSON.parse(configString) as unknown;
 			
 			// Validate basic structure
 			if (typeof config !== 'object' || config === null) {
@@ -247,7 +248,7 @@ export class ConfigurationManager {
 			}
 
 			// Apply configuration
-			this.setConfiguration(config);
+			this.setConfiguration(config as EngineConfiguration);
 
 			// Validate the applied configuration
 			const validation = this.validateConfiguration();

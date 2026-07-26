@@ -1,4 +1,4 @@
-import { App, ButtonComponent, Notice, TFile, MarkdownView } from 'obsidian';
+import { App, ButtonComponent, Editor, Notice, TFile, MarkdownView } from 'obsidian';
 import { HistoryEntry } from '../../types';
 import { HistoryService } from '../../services';
 import AutoSyntaxHighlightPlugin from '../../../main';
@@ -133,7 +133,7 @@ export class HistoryActions {
 			await leaf.openFile(file);
 			
 			// Wait a bit for the file to load
-			setTimeout(() => {
+			window.setTimeout(() => {
 				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
 				if (view && view.editor) {
 					this.navigateToCodeBlock(view.editor, entry);
@@ -153,7 +153,7 @@ export class HistoryActions {
 	 * @param editor The editor instance
 	 * @param entry The history entry
 	 */
-	private navigateToCodeBlock(editor: any, entry: HistoryEntry): void {
+	private navigateToCodeBlock(editor: Editor, entry: HistoryEntry): void {
 		const content = editor.getValue();
 		
 		// Try to find by line numbers first

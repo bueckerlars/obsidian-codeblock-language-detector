@@ -1,4 +1,4 @@
-import { DetectionResult, ILanguageDetector } from '../../types';
+import { DetectionResult, EngineConfiguration, ILanguageDetector } from '../../types';
 import { HighlightJsDetector } from './HighlightJsDetector';
 import { PatternMatchingDetector } from './PatternMatchingDetector';
 import { VSCodeDetector } from './VSCodeDetector';
@@ -109,7 +109,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * Gets the current engine configuration
 	 * @returns Configuration object
 	 */
-	getConfiguration(): Record<string, any> {
+	getConfiguration(): EngineConfiguration {
 		return this.configManager.getConfiguration();
 	}
 
@@ -117,7 +117,7 @@ export class LanguageDetectionEngine implements ILanguageDetector {
 	 * Sets the engine configuration
 	 * @param config Configuration object
 	 */
-	setConfiguration(config: Record<string, any>): void {
+	setConfiguration(config: EngineConfiguration): void {
 		this.configManager.setConfiguration(config);
 	}
 

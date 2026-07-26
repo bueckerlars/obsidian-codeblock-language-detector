@@ -7,15 +7,19 @@ export class SettingsValidation {
 	 * @param settings The settings object to validate
 	 * @returns True if settings are valid
 	 */
-	static validateSettings(settings: any): boolean {
+	static validateSettings(settings: unknown): boolean {
+		if (typeof settings !== 'object' || settings === null) {
+			return false;
+		}
+
+		const s = settings as Record<string, unknown>;
 		return (
-			typeof settings === 'object' &&
-			typeof settings.triggerBehavior === 'string' &&
-			typeof settings.confidenceThreshold === 'number' &&
-			typeof settings.enableHistory === 'boolean' &&
-			typeof settings.maxHistoryEntries === 'number' &&
-			typeof settings.showNotifications === 'boolean' &&
-			typeof settings.processingScope === 'string'
+			typeof s.triggerBehavior === 'string' &&
+			typeof s.confidenceThreshold === 'number' &&
+			typeof s.enableHistory === 'boolean' &&
+			typeof s.maxHistoryEntries === 'number' &&
+			typeof s.showNotifications === 'boolean' &&
+			typeof s.processingScope === 'string'
 		);
 	}
 
@@ -42,13 +46,18 @@ export class SettingsValidation {
 	 * @param config The detector configuration to validate
 	 * @returns True if valid
 	 */
-	static validateDetectorConfig(config: any): boolean {
+	static validateDetectorConfig(config: unknown): boolean {
+		if (typeof config !== 'object' || config === null) {
+			return false;
+		}
+
+		const c = config as Record<string, unknown>;
 		return (
-			typeof config === 'object' &&
-			typeof config.enabled === 'boolean' &&
-			typeof config.confidenceThreshold === 'number' &&
-			typeof config.order === 'number' &&
-			typeof config.config === 'object'
+			typeof c.enabled === 'boolean' &&
+			typeof c.confidenceThreshold === 'number' &&
+			typeof c.order === 'number' &&
+			typeof c.config === 'object' &&
+			c.config !== null
 		);
 	}
 }

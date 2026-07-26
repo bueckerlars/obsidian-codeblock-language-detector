@@ -3,6 +3,7 @@ import AutoSyntaxHighlightPlugin from '../../../../main';
 import { ConfirmModal } from '../../utils/ConfirmModal';
 import { JsonExportModal } from '../../utils/JsonExportModal';
 import { JsonImportModal } from '../../utils/JsonImportModal';
+import { SettingsValidation } from '../utils/SettingsValidation';
 
 /**
  * Settings section for advanced configuration
@@ -72,8 +73,8 @@ export class AdvancedSettingsSection {
 							'Import Settings',
 							'Paste exported settings JSON below.',
 							async (jsonText) => {
-								const importedSettings = JSON.parse(jsonText);
-								if (!this.validateSettings(importedSettings)) {
+								const importedSettings: unknown = JSON.parse(jsonText);
+								if (!SettingsValidation.validateSettings(importedSettings)) {
 									new Notice('Invalid settings format');
 									throw new Error('Invalid settings format');
 								}
@@ -84,8 +85,8 @@ export class AdvancedSettingsSection {
 							},
 							(jsonText) => {
 								try {
-									const parsed = JSON.parse(jsonText);
-									return this.validateSettings(parsed) || 'Invalid settings format';
+									const parsed: unknown = JSON.parse(jsonText);
+									return SettingsValidation.validateSettings(parsed) || 'Invalid settings format';
 								} catch {
 									return 'Invalid JSON format';
 								}
@@ -119,21 +120,4 @@ export class AdvancedSettingsSection {
 	 * Callback function called when settings are changed and display needs refresh
 	 */
 	public onSettingsChanged?: () => void;
-
-	/**
-	 * Validates imported settings format
-	 * @param settings The settings object to validate
-	 * @returns True if settings are valid
-	 */
-	private validateSettings(settings: any): boolean {
-		return (
-			typeof settings === 'object' &&
-			typeof settings.triggerBehavior === 'string' &&
-			typeof settings.confidenceThreshold === 'number' &&
-			typeof settings.enableHistory === 'boolean' &&
-			typeof settings.maxHistoryEntries === 'number' &&
-			typeof settings.showNotifications === 'boolean' &&
-			typeof settings.processingScope === 'string'
-		);
-	}
 }

@@ -1,7 +1,7 @@
 import { ModelOperations } from '@vscode/vscode-languagedetection';
 import modelJson from '@vscode/vscode-languagedetection/model/model.json';
 import modelWeights from '@vscode/vscode-languagedetection/model/group1-shard1of1.bin';
-import { DetectionResult, ILanguageDetector } from '../../types';
+import { DetectionResult, ILanguageDetector, VSCodeDetectorConfig } from '../../types';
 
 function getModelWeightsBuffer(): ArrayBuffer {
 	return modelWeights.buffer.slice(
@@ -59,7 +59,7 @@ export class VSCodeDetector implements ILanguageDetector {
 			return Promise.resolve();
 		} catch (error) {
 			console.error('Failed to initialize VSCode Language Detection model:', error);
-			return Promise.reject(error);
+			return Promise.reject(error instanceof Error ? error : new Error(String(error)));
 		}
 	}
 
@@ -318,7 +318,7 @@ export class VSCodeDetector implements ILanguageDetector {
 	 * Gets the current configuration of this detector
 	 * @returns Configuration object
 	 */
-	getConfiguration(): Record<string, any> {
+	getConfiguration(): VSCodeDetectorConfig {
 		return {
 			minConfidence: this.minConfidence,
 			isInitialized: this.isInitialized,
@@ -330,7 +330,7 @@ export class VSCodeDetector implements ILanguageDetector {
 	 * Sets the configuration for this detector
 	 * @param config Configuration object
 	 */
-	setConfiguration(config: Record<string, any>): void {
+	setConfiguration(config: VSCodeDetectorConfig): void {
 		if (typeof config.minConfidence === 'number') {
 			this.setMinConfidence(config.minConfidence);
 		}

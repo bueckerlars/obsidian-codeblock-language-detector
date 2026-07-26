@@ -69,7 +69,7 @@ export class DragDropHandler {
 				e.dataTransfer.setDragImage(dragImage, e.offsetX, e.offsetY);
 				
 				// Clean up drag image after a short delay
-				setTimeout(() => {
+				window.setTimeout(() => {
 					document.body.removeChild(dragImage);
 				}, 0);
 			}
@@ -102,14 +102,14 @@ export class DragDropHandler {
 			this.updateDragPreview(container, detectorName, isInLowerHalf);
 		});
 		
-		card.addEventListener('drop', async (e) => {
+		card.addEventListener('drop', (e) => {
 			e.preventDefault();
 			const draggedDetectorName = e.dataTransfer?.getData('text/plain');
 			
 			if (!draggedDetectorName || draggedDetectorName === detectorName || card.classList.contains('disabled')) return;
 			
 			// Use placeholder position to determine new order
-			await this.handleDrop(container, draggedDetectorName);
+			void this.handleDrop(container, draggedDetectorName);
 		});
 	}
 
@@ -126,13 +126,13 @@ export class DragDropHandler {
 			e.preventDefault();
 		});
 		
-		container.addEventListener('drop', async (e) => {
+		container.addEventListener('drop', (e) => {
 			e.preventDefault();
 			const draggedDetectorName = e.dataTransfer?.getData('text/plain');
 			
 			if (!draggedDetectorName) return;
 			
-			await this.handleDrop(container, draggedDetectorName);
+			void this.handleDrop(container, draggedDetectorName);
 		});
 	}
 

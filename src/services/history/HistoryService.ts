@@ -58,7 +58,7 @@ export class HistoryService implements IHistoryService {
 		this.notifyListeners();
 		
 		// Save to persistent storage
-		this.saveHistory();
+		void this.saveHistory();
 
 		return historyEntry.id;
 	}
@@ -109,7 +109,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (removed) {
 			this.notifyListeners();
-			this.saveHistory();
+			void this.saveHistory();
 		}
 		
 		return removed;
@@ -125,7 +125,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (removedCount > 0) {
 			this.notifyListeners();
-			this.saveHistory();
+			void this.saveHistory();
 		}
 		
 		return removedCount;
@@ -137,7 +137,7 @@ export class HistoryService implements IHistoryService {
 	clearHistory(): void {
 		this.entryManager.clearAllEntries();
 		this.notifyListeners();
-		this.saveHistory();
+		void this.saveHistory();
 	}
 
 	/**
@@ -150,7 +150,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (success) {
 			this.notifyListeners();
-			this.saveHistory();
+			void this.saveHistory();
 		}
 		
 		return success;
@@ -166,7 +166,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (success) {
 			this.notifyListeners();
-			this.saveHistory();
+			void this.saveHistory();
 		}
 		
 		return success;
@@ -192,7 +192,7 @@ export class HistoryService implements IHistoryService {
 		
 		if (success) {
 			this.notifyListeners();
-			this.saveHistory();
+			void this.saveHistory();
 		}
 		
 		return success;
@@ -260,26 +260,7 @@ export class HistoryService implements IHistoryService {
 		methods: string[];
 	}> {
 		const targetEntries = entries || this.entryManager.getAllEntries();
-		const rawStats = this.statistics.getTimeBasedStatistics(targetEntries, timeRangeMs);
-		
-		// Convert the result to have string arrays instead of sets
-		const convertedStats: Record<string, {
-			count: number;
-			appliedCount: number;
-			avgConfidence: number;
-			languages: string[];
-			methods: string[];
-		}> = {};
-		
-		Object.entries(rawStats).forEach(([key, stats]) => {
-			convertedStats[key] = {
-				...stats,
-				languages: Array.from(stats.languages),
-				methods: Array.from(stats.methods)
-			};
-		});
-		
-		return convertedStats;
+		return this.statistics.getTimeBasedStatistics(targetEntries, timeRangeMs);
 	}
 
 	/**
@@ -307,7 +288,7 @@ export class HistoryService implements IHistoryService {
 		const importedCount = this.entryManager.importEntries(importedEntries);
 		
 		this.notifyListeners();
-		this.saveHistory();
+		void this.saveHistory();
 		
 		return importedCount;
 	}
@@ -318,7 +299,7 @@ export class HistoryService implements IHistoryService {
 	 */
 	setMaxEntries(maxEntries: number): void {
 		this.entryManager.setMaxEntries(maxEntries);
-		this.saveHistory();
+		void this.saveHistory();
 	}
 
 	/**
@@ -390,7 +371,7 @@ export class HistoryService implements IHistoryService {
 		this.entryManager.loadEntries(uniqueEntries);
 		
 		this.notifyListeners();
-		this.saveHistory();
+		void this.saveHistory();
 
 		return {
 			totalEntries: entries.length,

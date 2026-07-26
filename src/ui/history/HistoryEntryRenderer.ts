@@ -166,9 +166,9 @@ export class HistoryEntryRenderer {
 		});
 		copyButton.title = 'Copy code to clipboard';
 		copyButton.addEventListener('click', () => {
-			navigator.clipboard.writeText(entry.codeBlock.content);
+			void navigator.clipboard.writeText(entry.codeBlock.content);
 			copyButton.textContent = '✓';
-			setTimeout(() => {
+			window.setTimeout(() => {
 				copyButton.textContent = '📋';
 			}, 1000);
 		});

@@ -11,12 +11,42 @@ export type TriggerBehavior = 'auto-on-open' | 'auto-on-edit' | 'auto-on-save' |
 // Processing scope for code blocks
 export type ProcessingScope = 'current-note' | 'entire-vault';
 
+// Detector-specific configuration payloads
+export interface PatternMatchingDetectorConfig {
+	enabledLanguages?: string[];
+	availableLanguages?: string[];
+	minConfidence?: number;
+}
+
+export interface VSCodeDetectorConfig {
+	minConfidence?: number;
+	isInitialized?: boolean;
+	modelAvailable?: boolean;
+}
+
+/** Engine-level configuration used by LanguageDetectionEngine / ConfigurationManager */
+export interface EngineConfiguration {
+	detectionOrder?: string[];
+	confidenceThreshold?: number;
+	enabledPatternLanguages?: string[];
+	registeredDetectors?: string[];
+	registryInfo?: unknown;
+	performanceMetrics?: unknown;
+	detectorConfigs?: Record<string, DetectorSpecificConfig>;
+}
+
+export type DetectorSpecificConfig =
+	| PatternMatchingDetectorConfig
+	| VSCodeDetectorConfig
+	| EngineConfiguration
+	| Record<string, unknown>;
+
 // Detector configuration interface
 export interface DetectorConfiguration {
 	enabled: boolean;
 	confidenceThreshold: number;
 	order: number;
-	config: Record<string, any>;
+	config: DetectorSpecificConfig;
 }
 
 // Plugin settings interface
@@ -120,8 +150,8 @@ export interface ILanguageDetector {
 	
 	// Optionale erweiterte Konfiguration
 	isConfigurable?(): boolean;           // Ob erweiterte Konfiguration verfügbar ist
-	getConfiguration?(): Record<string, any>; // Aktuelle Konfiguration abrufen
-	setConfiguration?(config: Record<string, any>): void; // Konfiguration setzen
+	getConfiguration?(): DetectorSpecificConfig; // Aktuelle Konfiguration abrufen
+	setConfiguration?(config: DetectorSpecificConfig): void; // Konfiguration setzen
 }
 
 export interface ICodeAnalyzer {

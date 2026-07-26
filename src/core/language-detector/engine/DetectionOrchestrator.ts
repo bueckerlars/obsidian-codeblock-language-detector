@@ -1,4 +1,4 @@
-import { DetectionResult, ILanguageDetector } from '../../../types';
+import { DetectionResult } from '../../../types';
 import { DetectorRegistry } from './DetectorRegistry';
 
 /**

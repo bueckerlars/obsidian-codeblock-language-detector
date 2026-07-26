@@ -37,14 +37,14 @@ export class EventHandlers {
 		// File open handler (for auto-on-open) — always processes the opened file only
 		this.fileOpenHandler = (file: TFile) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-open' && file.extension === 'md') {
-				window.setTimeout(() => this.plugin.processFile(file), 500);
+				window.setTimeout(() => void this.plugin.processFile(file), 500);
 			}
 		};
 
 		// File save handler (for auto-on-save) — always processes the saved file only
 		this.fileSaveHandler = (file: TFile) => {
 			if (this.plugin.settings.triggerBehavior === 'auto-on-save' && file.extension === 'md') {
-				this.plugin.processFile(file);
+				void this.plugin.processFile(file);
 			}
 		};
 	}
@@ -87,7 +87,7 @@ export class EventHandlers {
 		}
 
 		this.debounceTimer = window.setTimeout(() => {
-			this.plugin.processFile(file);
+			void this.plugin.processFile(file);
 		}, 2000);
 	}
 

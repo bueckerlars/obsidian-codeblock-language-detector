@@ -81,10 +81,10 @@ export class StatisticsModal extends Modal {
 
 		const createStatCard = (title: string, value: string | number, description?: string) => {
 			const card = basicStatsGrid.createDiv('aslh-stat-card');
-			card.createEl('div', { text: title, cls: 'aslh-stat-title' });
-			card.createEl('div', { text: value.toString(), cls: 'aslh-stat-value' });
+			card.createDiv({ text: title, cls: 'aslh-stat-title' });
+			card.createDiv({ text: value.toString(), cls: 'aslh-stat-value' });
 			if (description) {
-				card.createEl('div', { text: description, cls: 'aslh-stat-description' });
+				card.createDiv({ text: description, cls: 'aslh-stat-description' });
 			}
 		};
 
@@ -175,20 +175,19 @@ export class StatisticsModal extends Modal {
 
 		const createTrendCard = (title: string, trend: string, recent: number, overall: number, unit: string = '%') => {
 			const card = trendsGrid.createDiv('aslh-trend-card');
-			card.createEl('div', { text: title, cls: 'aslh-trend-title' });
+			card.createDiv({ text: title, cls: 'aslh-trend-title' });
 			
 			const trendIndicator = card.createDiv('aslh-trend-indicator');
 			const icon = trend === 'improving' ? '↗' : trend === 'declining' ? '↘' : '→';
-			const color = trend === 'improving' ? 'green' : trend === 'declining' ? 'red' : 'gray';
 			
-			const iconSpan = trendIndicator.createEl('span', { cls: 'aslh-stat-icon' });
+			const iconSpan = trendIndicator.createSpan({ cls: 'aslh-stat-icon' });
 			iconSpan.classList.add(trend === 'improving' ? 'success' : trend === 'declining' ? 'error' : 'warning');
 			iconSpan.textContent = icon;
 			
 			trendIndicator.appendText(` ${trend}`);
 			
-			card.createEl('div', { text: `Recent: ${recent}${unit}`, cls: 'aslh-trend-current' });
-			card.createEl('div', { text: `Overall: ${overall}${unit}`, cls: 'aslh-trend-overall' });
+			card.createDiv({ text: `Recent: ${recent}${unit}`, cls: 'aslh-trend-current' });
+			card.createDiv({ text: `Overall: ${overall}${unit}`, cls: 'aslh-trend-overall' });
 		};
 
 		createTrendCard(
@@ -223,10 +222,10 @@ export class StatisticsModal extends Modal {
 				const bar = chartContainer.createDiv('aslh-confidence-bar');
 				const percentage = (count / entries.length) * 100;
 				
-				bar.createEl('div', { text: range, cls: 'aslh-bar-label' });
-				const barFill = bar.createEl('div', { cls: 'aslh-bar-fill aslh-stat-bar-fill' });
+				bar.createDiv({ text: range, cls: 'aslh-bar-label' });
+				const barFill = bar.createDiv({ cls: 'aslh-bar-fill aslh-stat-bar-fill' });
 				barFill.style.width = `${Math.max(percentage, 2)}%`;  // Minimum 2% for visibility
-				bar.createEl('div', { text: count.toString(), cls: 'aslh-bar-count' });
+				bar.createDiv({ text: count.toString(), cls: 'aslh-bar-count' });
 			}
 		});
 	}

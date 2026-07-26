@@ -44,7 +44,6 @@ export class HistorySettingsSection {
 				slider
 					.setLimits(10, 1000, 10)
 					.setValue(this.plugin.settings.maxHistoryEntries)
-					.setDynamicTooltip()
 					.onChange(async (value) => {
 						this.plugin.settings.maxHistoryEntries = value;
 						await this.plugin.saveSettings();

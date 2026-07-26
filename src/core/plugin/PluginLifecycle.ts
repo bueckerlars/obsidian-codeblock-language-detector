@@ -47,7 +47,7 @@ export class PluginLifecycle {
 
 		// Add ribbon icon
 		this.plugin.addRibbonIcon('code', 'CodeBlock Language Detector', () => {
-			this.fileProcessor.processBasedOnScope();
+			void this.fileProcessor.processBasedOnScope();
 		});
 
 		console.debug('CodeBlock Language Detector plugin loaded');

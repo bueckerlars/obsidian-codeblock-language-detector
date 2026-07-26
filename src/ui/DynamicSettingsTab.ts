@@ -251,13 +251,9 @@ export class DynamicAutoSyntaxHighlightSettingsTab extends PluginSettingTab {
 
 	/**
 	 * Refresh settings UI after structural changes (detector reorder, import, etc.).
+	 * Uses imperative re-render only — SettingTab.update() requires Obsidian 1.13.0+.
 	 */
 	private refreshSettings(): void {
-		const tabWithUpdate = this as PluginSettingTab & { update?: () => void };
-		if (typeof tabWithUpdate.update === 'function') {
-			tabWithUpdate.update();
-			return;
-		}
 		this.renderSettings();
 	}
 

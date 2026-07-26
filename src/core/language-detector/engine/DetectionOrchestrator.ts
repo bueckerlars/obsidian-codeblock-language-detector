@@ -79,7 +79,8 @@ export class DetectionOrchestrator {
 
 		type DetectionAttempt = { detector: string; result: DetectionResult | null };
 
-		// Use Promise.allSettled for parallel execution
+		// Parallel detection; each promise catches its own errors so Promise.all is safe.
+		// Avoid Promise.allSettled — it is not in the project's TS lib target and types as any.
 		const detectionPromises: Promise<DetectionAttempt>[] = allDetectors.map(async (detector) => {
 			try {
 				const result = await detector.detectLanguage(code);
@@ -90,11 +91,11 @@ export class DetectionOrchestrator {
 			}
 		});
 
-		const settledResults: PromiseSettledResult<DetectionAttempt>[] = await Promise.allSettled(detectionPromises);
+		const attempts: DetectionAttempt[] = await Promise.all(detectionPromises);
 
-		for (const settledResult of settledResults) {
-			if (settledResult.status === 'fulfilled' && settledResult.value.result) {
-				results.push(settledResult.value.result);
+		for (const attempt of attempts) {
+			if (attempt.result) {
+				results.push(attempt.result);
 			}
 		}
 

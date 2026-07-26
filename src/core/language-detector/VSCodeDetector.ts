@@ -7,7 +7,7 @@ function getModelWeightsBuffer(): ArrayBuffer {
 	return modelWeights.buffer.slice(
 		modelWeights.byteOffset,
 		modelWeights.byteOffset + modelWeights.byteLength
-	);
+	) as ArrayBuffer;
 }
 
 /** Matches VS Code's languageDetectionWebWorker confidence corrections. */

@@ -4,8 +4,16 @@ import modelWeights from '@vscode/vscode-languagedetection/model/group1-shard1of
 import { DetectionResult, ILanguageDetector } from '../../types';
 
 function getModelWeightsBuffer(): ArrayBuffer {
-	return modelWeights.slice().buffer;
+	return modelWeights.buffer.slice(
+		modelWeights.byteOffset,
+		modelWeights.byteOffset + modelWeights.byteLength
+	);
 }
+
+/** Matches VS Code's languageDetectionWebWorker confidence corrections. */
+const POSITIVE_CONFIDENCE_BUCKET1 = 0.05;
+const POSITIVE_CONFIDENCE_BUCKET2 = 0.025;
+const NEGATIVE_CONFIDENCE_CORRECTION = 0.5;
 
 /**
  * Language detector using Microsoft's VSCode Language Detection ML Model
@@ -17,7 +25,7 @@ export class VSCodeDetector implements ILanguageDetector {
 	private isInitialized: boolean = false;
 	private initializationPromise: Promise<void> | null = null;
 
-	constructor(minConfidence: number = 0.5) {
+	constructor(minConfidence: number = 0.1) {
 		this.minConfidence = minConfidence;
 	}
 
@@ -80,10 +88,13 @@ export class VSCodeDetector implements ILanguageDetector {
 				return null;
 			}
 
-			// Get the top result
-			const topResult = results[0];
-			
-			// Convert confidence from 0-1 scale to 0-100 scale
+			// Adjust and re-sort like VS Code so common languages aren't
+			// unfairly rejected due to soft softmax probabilities.
+			const adjusted = results
+				.map(result => this.adjustLanguageConfidence(result))
+				.sort((a, b) => b.confidence - a.confidence);
+
+			const topResult = adjusted[0];
 			const confidence = Math.round(topResult.confidence * 100);
 
 			if (confidence < this.minConfidence * 100) {
@@ -102,6 +113,46 @@ export class VSCodeDetector implements ILanguageDetector {
 			console.error('Error in VSCode Language Detection:', error);
 			return null;
 		}
+	}
+
+	/**
+	 * Adjusts raw model confidence the same way VS Code does for known
+	 * high-traffic and problematic languages.
+	 */
+	private adjustLanguageConfidence(modelResult: { languageId: string; confidence: number }): {
+		languageId: string;
+		confidence: number;
+	} {
+		const languageId = modelResult.languageId;
+		let confidence = modelResult.confidence;
+
+		switch (languageId) {
+			case 'js':
+			case 'ts':
+			case 'html':
+			case 'py':
+			case 'xml':
+			case 'php':
+				confidence += POSITIVE_CONFIDENCE_BUCKET1;
+				break;
+			case 'cpp':
+			case 'sh':
+			case 'java':
+			case 'cs':
+			case 'c':
+				confidence += POSITIVE_CONFIDENCE_BUCKET2;
+				break;
+			case 'bat':
+			case 'ini':
+			case 'makefile':
+			case 'sql':
+			case 'csv':
+			case 'toml':
+				confidence -= NEGATIVE_CONFIDENCE_CORRECTION;
+				break;
+		}
+
+		return { languageId, confidence };
 	}
 
 	/**

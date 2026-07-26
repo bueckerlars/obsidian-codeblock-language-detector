@@ -165,14 +165,17 @@ export interface IHistoryService {
 // Note: Available languages are dynamically determined by registered detectors
 
 // Default settings
+/** Default confidence for vscode-ml. Softmax scores are typically low (often < 50%). */
+export const VSCODE_ML_DEFAULT_CONFIDENCE = 10;
+
 export const DEFAULT_SETTINGS: AutoSyntaxHighlightSettings = {
-	version: 1, // Current settings schema version
+	version: 2, // Current settings schema version
 	triggerBehavior: 'auto-on-edit',
 	confidenceThreshold: 70,
 	detectorConfigurations: {
 		'vscode-ml': {
 			enabled: true,
-			confidenceThreshold: 70,
+			confidenceThreshold: VSCODE_ML_DEFAULT_CONFIDENCE,
 			order: 0,
 			config: {}
 		},

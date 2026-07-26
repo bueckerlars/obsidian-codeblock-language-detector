@@ -3,7 +3,8 @@ import { Plugin, TFile } from 'obsidian';
 // Import our types and services
 import { 
 	AutoSyntaxHighlightSettings, 
-	DEFAULT_SETTINGS, 
+	DEFAULT_SETTINGS,
+	VSCODE_ML_DEFAULT_CONFIDENCE,
 	HistoryEntry,
 	DetectorConfiguration
 } from './src/types';
@@ -61,7 +62,11 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			this.settings.detectorConfigurations = {};
 		}
 		
-		// Apply configurations to each registered detector
+		// Set global confidence threshold as fallback default only
+		this.detectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
+
+		// Apply configurations to each registered detector (after global, so
+		// per-detector thresholds are not overwritten)
 		const registeredDetectors = this.detectionEngine.getRegisteredDetectors();
 		
 		for (const detector of registeredDetectors) {
@@ -87,9 +92,6 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			.map(([name, _]) => name);
 		
 		this.detectionEngine.setDetectionOrder(enabledDetectors);
-		
-		// Set global confidence threshold as fallback
-		this.detectionEngine.setConfidenceThreshold(this.settings.confidenceThreshold);
 		
 		// Update pattern languages for pattern-matching detector
 		this.detectionEngine.setEnabledPatternLanguages(this.settings.enabledPatternLanguages);
@@ -170,12 +172,32 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		if (currentVersion === 0) {
 			await this.migrateFromLegacySettings(loadedData);
 		}
+
+		// Migrate from version 1 to version 2: vscode-ml softmax scores
+		// are typically low, so the previous default of 70 made the detector a no-op.
+		if (currentVersion < 2) {
+			this.migrateVSCodeMlConfidenceThreshold();
+		}
 		
 		// Set the new version
 		this.settings.version = targetVersion;
 		await this.saveSettings();
 		
 		console.log('Settings migration completed');
+	}
+
+	/**
+	 * Lower vscode-ml confidence when still at the ineffective legacy default (70).
+	 */
+	private migrateVSCodeMlConfidenceThreshold(): void {
+		const configs = this.settings.detectorConfigurations;
+		if (!configs || !configs['vscode-ml']) {
+			return;
+		}
+
+		if (configs['vscode-ml'].confidenceThreshold === 70) {
+			configs['vscode-ml'].confidenceThreshold = VSCODE_ML_DEFAULT_CONFIDENCE;
+		}
 	}
 
 	/**
@@ -194,7 +216,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			if (Object.prototype.hasOwnProperty.call(legacyData, 'enableVSCodeML')) {
 				this.settings.detectorConfigurations['vscode-ml'] = {
 					enabled: legacyData.enableVSCodeML !== false,
-					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					confidenceThreshold: VSCODE_ML_DEFAULT_CONFIDENCE,
 					order: legacyOrder.indexOf('vscode-ml') !== -1 ? legacyOrder.indexOf('vscode-ml') : 0,
 					config: {}
 				};

@@ -171,7 +171,11 @@ export class DetectorConfigCard {
 	private createConfidenceThresholdSetting(configSection: HTMLElement, detectorName: string, detectorConfig: DetectorConfiguration): void {
 		new Setting(configSection)
 			.setName('Confidence threshold')
-			.setDesc('Minimum confidence required for this detector (0-100)')
+			.setDesc(
+				detectorName === 'vscode-ml'
+					? 'Minimum confidence for this detector (0-100). ML softmax scores are typically low — values around 10–25 work best.'
+					: 'Minimum confidence required for this detector (0-100)'
+			)
 			.addSlider(slider => {
 				slider
 					.setLimits(0, 100, 5)
@@ -259,7 +263,7 @@ export class DetectorConfigCard {
 		// Model info
 		const infoContainer = container.createDiv('detector-info');
 		infoContainer.createEl('p', { 
-			text: 'Powered by Microsoft\'s VSCode Language Detection using machine learning (guesslang model).',
+			text: 'Powered by Microsoft\'s VSCode Language Detection using machine learning (guesslang model). Softmax confidence scores are typically low, so keep this detector\'s threshold around 10–25.',
 			cls: 'detector-description'
 		});
 		

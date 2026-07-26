@@ -52,17 +52,13 @@ export class ConfigurationManager {
 	}
 
 	/**
-	 * Updates the confidence threshold for all components
+	 * Updates the global confidence threshold used as a fallback default.
+	 * Does not overwrite per-detector thresholds — those are applied separately
+	 * from each detector's own configuration.
 	 * @param threshold New confidence threshold (0-100)
 	 */
 	setConfidenceThreshold(threshold: number): void {
-		const normalizedThreshold = Math.max(0, Math.min(100, threshold)) / 100;
-		
-		// Update orchestrator
-		this.orchestrator.setConfidenceThreshold(threshold);
-		
-		// Update all detectors
-		this.registry.updateAllDetectorThresholds(normalizedThreshold);
+		this.orchestrator.setConfidenceThreshold(Math.max(0, Math.min(100, threshold)));
 	}
 
 	/**

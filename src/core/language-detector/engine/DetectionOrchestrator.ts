@@ -31,10 +31,11 @@ export class DetectionOrchestrator {
 			try {
 				const detectorName = detector.getName();
 				const result = await detector.detectLanguage(code);
-				
-				if (result && 
-					result.confidence >= this.confidenceThreshold && 
-					this.isLanguageEnabledForMethod(result.language, detectorName)) {
+
+				// Detectors already filter by their own confidence threshold.
+				// Do not re-apply the global threshold here — it would ignore
+				// per-detector settings (e.g. vscode-ml needs a much lower floor).
+				if (result && this.isLanguageEnabledForMethod(result.language, detectorName)) {
 					return result;
 				}
 			} catch (error) {

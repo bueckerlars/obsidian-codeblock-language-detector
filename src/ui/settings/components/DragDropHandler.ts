@@ -1,5 +1,6 @@
 import AutoSyntaxHighlightPlugin from '../../../../main';
 import { DetectorConfiguration } from '../../../types';
+import { getEnabledDetectorNamesSorted } from '../../../utils/detectorOrder';
 
 /**
  * Handles drag and drop functionality for detector reordering
@@ -312,12 +313,8 @@ export class DragDropHandler {
 	 * @returns Array of detector names in order
 	 */
 	private getDetectionOrder(): string[] {
-		const configs = this.plugin.settings.detectorConfigurations || {};
-		
-		return Object.entries(configs)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
+		const configs: Record<string, DetectorConfiguration> = this.plugin.settings.detectorConfigurations ?? {};
+		return getEnabledDetectorNamesSorted(configs);
 	}
 
 	/**

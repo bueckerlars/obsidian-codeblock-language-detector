@@ -125,7 +125,8 @@ export class ConfigurationManager {
 	 * @param detectorConfigs Configuration object for individual detectors
 	 */
 	private applyDetectorConfigurations(detectorConfigs: Record<string, DetectorSpecificConfig>): void {
-		Object.entries(detectorConfigs).forEach(([detectorName, config]) => {
+		for (const detectorName of Object.keys(detectorConfigs)) {
+			const config = detectorConfigs[detectorName];
 			const detector = this.registry.getDetector(detectorName);
 			
 			if (detector && detector.isConfigurable && detector.isConfigurable()) {
@@ -133,7 +134,7 @@ export class ConfigurationManager {
 					detector.setConfiguration(config);
 				}
 			}
-		});
+		}
 	}
 
 	/**
@@ -239,16 +240,16 @@ export class ConfigurationManager {
 		const warnings: string[] = [];
 
 		try {
-			const config = JSON.parse(configString) as unknown;
+			const parsed: unknown = JSON.parse(configString);
 			
 			// Validate basic structure
-			if (typeof config !== 'object' || config === null) {
+			if (!this.isEngineConfiguration(parsed)) {
 				errors.push('Configuration must be a valid object');
 				return { success: false, errors, warnings };
 			}
 
 			// Apply configuration
-			this.setConfiguration(config as EngineConfiguration);
+			this.setConfiguration(parsed);
 
 			// Validate the applied configuration
 			const validation = this.validateConfiguration();
@@ -268,6 +269,13 @@ export class ConfigurationManager {
 			errors.push(`Failed to parse configuration: ${errorMessage}`);
 			return { success: false, errors, warnings };
 		}
+	}
+
+	/**
+	 * Type guard for engine configuration objects
+	 */
+	private isEngineConfiguration(value: unknown): value is EngineConfiguration {
+		return typeof value === 'object' && value !== null;
 	}
 
 	/**

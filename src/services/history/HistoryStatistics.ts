@@ -92,10 +92,11 @@ export class HistoryStatistics {
 		});
 
 		// Round confidence values
-		Object.values(methodStats).forEach(stats => {
+		for (const method of Object.keys(methodStats)) {
+			const stats = methodStats[method];
 			stats.avgConfidence = Math.round(stats.avgConfidence * 100) / 100;
 			stats.successRate = Math.round(stats.successRate * 100) / 100;
-		});
+		}
 
 		return methodStats;
 	}
@@ -153,10 +154,11 @@ export class HistoryStatistics {
 		});
 
 		// Round confidence values
-		Object.values(languageStats).forEach(stats => {
+		for (const language of Object.keys(languageStats)) {
+			const stats = languageStats[language];
 			stats.avgConfidence = Math.round(stats.avgConfidence * 100) / 100;
 			stats.successRate = Math.round(stats.successRate * 100) / 100;
-		});
+		}
 
 		return languageStats;
 	}
@@ -224,7 +226,8 @@ export class HistoryStatistics {
 			languages: string[];
 			methods: string[];
 		}> = {};
-		Object.entries(timeStats).forEach(([key, stats]) => {
+		for (const key of Object.keys(timeStats)) {
+			const stats = timeStats[key];
 			result[key] = {
 				count: stats.count,
 				appliedCount: stats.appliedCount,
@@ -232,7 +235,7 @@ export class HistoryStatistics {
 				languages: Array.from(stats.languages),
 				methods: Array.from(stats.methods)
 			};
-		});
+		}
 
 		return result;
 	}

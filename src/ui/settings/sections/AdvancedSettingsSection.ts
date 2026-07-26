@@ -18,11 +18,16 @@ export class AdvancedSettingsSection {
 	/**
 	 * Creates the advanced settings section
 	 * @param containerEl The container element to add settings to
+	 * @param options.includeHeading Whether to render the section heading (default true)
 	 */
-	create(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Advanced')
-			.setHeading();
+	create(containerEl: HTMLElement, options: { includeHeading?: boolean } = {}): void {
+		const includeHeading = options.includeHeading !== false;
+
+		if (includeHeading) {
+			new Setting(containerEl)
+				.setName('Advanced')
+				.setHeading();
+		}
 
 		// Plugin version and info
 		void new Setting(containerEl)
@@ -102,7 +107,7 @@ export class AdvancedSettingsSection {
 			.addButton(button => {
 				button
 					.setButtonText('Reset')
-					.setWarning()
+					.setClass('mod-warning')
 					.onClick(async () => {
 						const modal = new ConfirmModal(this.plugin.app, 'Reset Settings', 'Are you sure you want to reset all settings to defaults?');
 						modal.open();

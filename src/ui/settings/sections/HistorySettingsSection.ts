@@ -23,6 +23,14 @@ export class HistorySettingsSection {
 			.setName('History & Undo')
 			.setHeading();
 
+		this.createCoreSettings(containerEl);
+		this.createTools(containerEl);
+	}
+
+	/**
+	 * Creates enable/max-entries controls (imperative path).
+	 */
+	createCoreSettings(containerEl: HTMLElement): void {
 		// Enable history tracking
 		new Setting(containerEl)
 			.setName('Enable history tracking')
@@ -53,7 +61,13 @@ export class HistorySettingsSection {
 				const desc = setting.descEl;
 				desc.createSpan({ text: ` (Current: ${this.plugin.settings.maxHistoryEntries})` });
 			});
+	}
 
+	/**
+	 * Creates history action buttons (export/import/validate/clear).
+	 * Used by declarative settings without duplicating core toggles/sliders.
+	 */
+	createTools(containerEl: HTMLElement): void {
 		// Export history button
 		new Setting(containerEl)
 			.setName('Export history')
@@ -97,7 +111,7 @@ export class HistorySettingsSection {
 			.addButton(button => {
 				button
 					.setButtonText('Clear All History')
-					.setWarning()
+					.setClass('mod-warning')
 					.onClick(async () => {
 						const modal = new ConfirmModal(this.plugin.app, 'Clear History', 'Are you sure you want to clear all history? This action cannot be undone.');
 						modal.open();
@@ -149,7 +163,7 @@ export class HistorySettingsSection {
 			},
 			(jsonText) => {
 				try {
-					const parsed = JSON.parse(jsonText);
+					const parsed: unknown = JSON.parse(jsonText);
 					return Array.isArray(parsed) || 'Invalid history data format';
 				} catch {
 					return 'Invalid JSON format';

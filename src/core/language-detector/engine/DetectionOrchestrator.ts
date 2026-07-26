@@ -77,8 +77,10 @@ export class DetectionOrchestrator {
 		const results: DetectionResult[] = [];
 		const allDetectors = this.registry.getAllDetectors();
 
+		type DetectionAttempt = { detector: string; result: DetectionResult | null };
+
 		// Use Promise.allSettled for parallel execution
-		const detectionPromises = allDetectors.map(async (detector) => {
+		const detectionPromises: Promise<DetectionAttempt>[] = allDetectors.map(async (detector) => {
 			try {
 				const result = await detector.detectLanguage(code);
 				return { detector: detector.getName(), result };
@@ -88,13 +90,13 @@ export class DetectionOrchestrator {
 			}
 		});
 
-		const settledResults = await Promise.allSettled(detectionPromises);
+		const settledResults: PromiseSettledResult<DetectionAttempt>[] = await Promise.allSettled(detectionPromises);
 
-		settledResults.forEach((settledResult) => {
+		for (const settledResult of settledResults) {
 			if (settledResult.status === 'fulfilled' && settledResult.value.result) {
 				results.push(settledResult.value.result);
 			}
-		});
+		}
 
 		return results.sort((a, b) => b.confidence - a.confidence);
 	}
@@ -142,8 +144,15 @@ export class DetectionOrchestrator {
 			languageCounts[result.language] = (languageCounts[result.language] || 0) + 1;
 		});
 
-		const consensusLanguage = Object.entries(languageCounts)
-			.sort(([,a], [,b]) => b - a)[0]?.[0] || null;
+		let consensusLanguage: string | null = null;
+		let maxLanguageCount = 0;
+		for (const language of Object.keys(languageCounts)) {
+			const count = languageCounts[language];
+			if (count > maxLanguageCount) {
+				maxLanguageCount = count;
+				consensusLanguage = language;
+			}
+		}
 
 		const avgConfidence = validResults.length > 0
 			? validResults.reduce((sum, r) => sum + r.confidence, 0) / validResults.length

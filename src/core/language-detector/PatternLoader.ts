@@ -49,11 +49,10 @@ export class PatternLoader {
 				if (this.isValidPattern(pattern)) {
 					this.patterns.set(pattern.name.toLowerCase(), pattern);
 					console.debug(`Loaded pattern: ${pattern.name}`);
+				} else if (typeof pattern === 'object' && pattern !== null && 'name' in pattern) {
+					console.warn(`Invalid pattern structure for: ${String(pattern.name)}`);
 				} else {
-					const name = typeof pattern === 'object' && pattern !== null && 'name' in pattern
-						? String((pattern as { name: unknown }).name)
-						: 'unknown';
-					console.warn(`Invalid pattern structure for: ${name}`);
+					console.warn('Invalid pattern structure for: unknown');
 				}
 			});
 

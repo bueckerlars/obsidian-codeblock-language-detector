@@ -14,6 +14,7 @@ import { LanguageDetectionEngine } from './src/core/language-detector';
 import { SyntaxApplier } from './src/core/syntax-applier';
 import { HistoryService, UndoIgnoreService } from './src/services';
 import { PluginLifecycle } from './src/core/plugin';
+import { getEnabledDetectorNamesSorted } from './src/utils/detectorOrder';
 
 /** Legacy settings shape used for v0 → v1 migration */
 interface LegacySettingsData {
@@ -97,10 +98,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		}
 		
 		// Set the detection order based on enabled detectors and their order values
-		const enabledDetectors = Object.entries(this.settings.detectorConfigurations)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
+		const enabledDetectors = getEnabledDetectorNamesSorted(this.settings.detectorConfigurations);
 		
 		this.detectionEngine.setDetectionOrder(enabledDetectors);
 		

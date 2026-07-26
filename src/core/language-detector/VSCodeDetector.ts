@@ -4,10 +4,9 @@ import modelWeights from '@vscode/vscode-languagedetection/model/group1-shard1of
 import { DetectionResult, ILanguageDetector, VSCodeDetectorConfig } from '../../types';
 
 function getModelWeightsBuffer(): ArrayBuffer {
-	return modelWeights.buffer.slice(
-		modelWeights.byteOffset,
-		modelWeights.byteOffset + modelWeights.byteLength
-	);
+	const copy = new Uint8Array(modelWeights.byteLength);
+	copy.set(modelWeights);
+	return copy.buffer;
 }
 
 /** Matches VS Code's languageDetectionWebWorker confidence corrections. */

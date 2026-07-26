@@ -157,10 +157,14 @@ export class HistoryValidation {
 			if (errors.length === 0 && this.isValidHistoryEntry(entry)) {
 				validEntries.push(entry);
 			} else {
+				const invalidEntry: Record<string, unknown> = { _index: index };
+				if (typeof entry === 'object' && entry !== null) {
+					Object.assign(invalidEntry, entry);
+				} else {
+					invalidEntry.value = entry;
+				}
 				invalidEntries.push({
-					entry: typeof entry === 'object' && entry !== null
-						? { ...(entry as object), _index: index }
-						: { _index: index, value: entry },
+					entry: invalidEntry,
 					errors
 				});
 			}

@@ -92,10 +92,11 @@ export class HistoryStatistics {
 		});
 
 		// Round confidence values
-		Object.values(methodStats).forEach(stats => {
+		for (const method of Object.keys(methodStats)) {
+			const stats = methodStats[method];
 			stats.avgConfidence = Math.round(stats.avgConfidence * 100) / 100;
 			stats.successRate = Math.round(stats.successRate * 100) / 100;
-		});
+		}
 
 		return methodStats;
 	}
@@ -153,10 +154,11 @@ export class HistoryStatistics {
 		});
 
 		// Round confidence values
-		Object.values(languageStats).forEach(stats => {
+		for (const language of Object.keys(languageStats)) {
+			const stats = languageStats[language];
 			stats.avgConfidence = Math.round(stats.avgConfidence * 100) / 100;
 			stats.successRate = Math.round(stats.successRate * 100) / 100;
-		});
+		}
 
 		return languageStats;
 	}
@@ -171,8 +173,8 @@ export class HistoryStatistics {
 		count: number;
 		appliedCount: number;
 		avgConfidence: number;
-		languages: Set<string>;
-		methods: Set<string>;
+		languages: string[];
+		methods: string[];
 	}> {
 		const timeStats: Record<string, {
 			count: number;
@@ -217,15 +219,23 @@ export class HistoryStatistics {
 		});
 
 		// Round confidence values and convert sets to arrays
-		const result: Record<string, any> = {};
-		Object.entries(timeStats).forEach(([key, stats]) => {
+		const result: Record<string, {
+			count: number;
+			appliedCount: number;
+			avgConfidence: number;
+			languages: string[];
+			methods: string[];
+		}> = {};
+		for (const key of Object.keys(timeStats)) {
+			const stats = timeStats[key];
 			result[key] = {
-				...stats,
+				count: stats.count,
+				appliedCount: stats.appliedCount,
 				avgConfidence: Math.round(stats.avgConfidence * 100) / 100,
 				languages: Array.from(stats.languages),
 				methods: Array.from(stats.methods)
 			};
-		});
+		}
 
 		return result;
 	}

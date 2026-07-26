@@ -33,24 +33,26 @@ export class PatternLoader {
 	private static initializePatterns(): void {
 		try {
 			// Import all pattern files - this ensures they are bundled
-			const patterns = [
-				bashPattern as LanguagePattern,
-				cppPattern as LanguagePattern,
-				javaPattern as LanguagePattern,
-				javascriptPattern as LanguagePattern,
-				jsxPattern as LanguagePattern,
-				pythonPattern as LanguagePattern,
-				tsxPattern as LanguagePattern,
-				typescriptPattern as LanguagePattern,
-				vuePattern as LanguagePattern,
+			const patterns: unknown[] = [
+				bashPattern,
+				cppPattern,
+				javaPattern,
+				javascriptPattern,
+				jsxPattern,
+				pythonPattern,
+				tsxPattern,
+				typescriptPattern,
+				vuePattern,
 			];
 
 			patterns.forEach(pattern => {
 				if (this.isValidPattern(pattern)) {
 					this.patterns.set(pattern.name.toLowerCase(), pattern);
 					console.debug(`Loaded pattern: ${pattern.name}`);
+				} else if (typeof pattern === 'object' && pattern !== null && 'name' in pattern) {
+					console.warn(`Invalid pattern structure for: ${String(pattern.name)}`);
 				} else {
-					console.warn(`Invalid pattern structure for: ${pattern?.name || 'unknown'}`);
+					console.warn('Invalid pattern structure for: unknown');
 				}
 			});
 
@@ -63,19 +65,26 @@ export class PatternLoader {
 	/**
 	 * Validates if a pattern object has the required structure
 	 */
-	private static isValidPattern(pattern: any): boolean {
+	private static isValidPattern(pattern: unknown): pattern is LanguagePattern {
+		if (typeof pattern !== 'object' || pattern === null) {
+			return false;
+		}
+
+		const p = pattern as Record<string, unknown>;
+		const comments = p.comments as Record<string, unknown> | undefined;
+
 		return (
-			pattern &&
-			typeof pattern.name === 'string' &&
-			Array.isArray(pattern.extensions) &&
-			Array.isArray(pattern.keywords) &&
-			Array.isArray(pattern.patterns) &&
-			Array.isArray(pattern.imports) &&
-			pattern.comments &&
-			Array.isArray(pattern.comments.line) &&
-			Array.isArray(pattern.comments.block) &&
-			Array.isArray(pattern.operators) &&
-			Array.isArray(pattern.builtins)
+			typeof p.name === 'string' &&
+			Array.isArray(p.extensions) &&
+			Array.isArray(p.keywords) &&
+			Array.isArray(p.patterns) &&
+			Array.isArray(p.imports) &&
+			typeof comments === 'object' &&
+			comments !== null &&
+			Array.isArray(comments.line) &&
+			Array.isArray(comments.block) &&
+			Array.isArray(p.operators) &&
+			Array.isArray(p.builtins)
 		);
 	}
 

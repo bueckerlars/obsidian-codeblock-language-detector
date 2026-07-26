@@ -7,6 +7,8 @@ import { DynamicAutoSyntaxHighlightSettingsTab } from '../../ui';
 import { EventHandlers } from './EventHandlers';
 import { CommandManager } from './CommandManager';
 import { FileProcessor } from './FileProcessor';
+import { getEnabledDetectorNamesSorted } from '../../utils/detectorOrder';
+import { DetectorConfiguration } from '../../types';
 
 /**
  * Manages plugin lifecycle operations
@@ -47,7 +49,7 @@ export class PluginLifecycle {
 
 		// Add ribbon icon
 		this.plugin.addRibbonIcon('code', 'CodeBlock Language Detector', () => {
-			this.fileProcessor.processBasedOnScope();
+			void this.fileProcessor.processBasedOnScope();
 		});
 
 		console.debug('CodeBlock Language Detector plugin loaded');
@@ -135,17 +137,13 @@ export class PluginLifecycle {
 	 * Get detection order from detector configurations
 	 */
 	private getDetectionOrderFromConfigurations(): string[] {
-		const configs = this.plugin.settings.detectorConfigurations || {};
+		const configs: Record<string, DetectorConfiguration> = this.plugin.settings.detectorConfigurations ?? {};
 		
 		// If no configurations exist, use default order
 		if (Object.keys(configs).length === 0) {
 			return ['vscode-ml', 'highlight-js', 'pattern-matching'];
 		}
 		
-		// Get enabled detectors sorted by order
-		return Object.entries(configs)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
+		return getEnabledDetectorNamesSorted(configs);
 	}
 }

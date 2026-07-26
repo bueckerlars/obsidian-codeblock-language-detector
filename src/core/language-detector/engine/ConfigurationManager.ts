@@ -1,5 +1,6 @@
 import { DetectorRegistry } from './DetectorRegistry';
 import { DetectionOrchestrator } from './DetectionOrchestrator';
+import { DetectorSpecificConfig, EngineConfiguration } from '../../../types';
 
 /**
  * Manages configuration for the language detection engine
@@ -17,7 +18,7 @@ export class ConfigurationManager {
 	 * Gets the current engine configuration
 	 * @returns Configuration object
 	 */
-	getConfiguration(): Record<string, any> {
+	getConfiguration(): EngineConfiguration {
 		return {
 			detectionOrder: this.registry.getDetectionOrder(),
 			confidenceThreshold: this.orchestrator.getConfidenceThreshold(),
@@ -32,7 +33,7 @@ export class ConfigurationManager {
 	 * Sets the engine configuration
 	 * @param config Configuration object
 	 */
-	setConfiguration(config: Record<string, any>): void {
+	setConfiguration(config: EngineConfiguration): void {
 		if (config.detectionOrder && Array.isArray(config.detectionOrder)) {
 			this.registry.setDetectionOrder(config.detectionOrder);
 		}
@@ -123,8 +124,9 @@ export class ConfigurationManager {
 	 * Applies detector-specific configurations
 	 * @param detectorConfigs Configuration object for individual detectors
 	 */
-	private applyDetectorConfigurations(detectorConfigs: Record<string, any>): void {
-		Object.entries(detectorConfigs).forEach(([detectorName, config]) => {
+	private applyDetectorConfigurations(detectorConfigs: Record<string, DetectorSpecificConfig>): void {
+		for (const detectorName of Object.keys(detectorConfigs)) {
+			const config = detectorConfigs[detectorName];
 			const detector = this.registry.getDetector(detectorName);
 			
 			if (detector && detector.isConfigurable && detector.isConfigurable()) {
@@ -132,7 +134,7 @@ export class ConfigurationManager {
 					detector.setConfiguration(config);
 				}
 			}
-		});
+		}
 	}
 
 	/**
@@ -238,16 +240,16 @@ export class ConfigurationManager {
 		const warnings: string[] = [];
 
 		try {
-			const config = JSON.parse(configString);
+			const parsed: unknown = JSON.parse(configString);
 			
 			// Validate basic structure
-			if (typeof config !== 'object' || config === null) {
+			if (!this.isEngineConfiguration(parsed)) {
 				errors.push('Configuration must be a valid object');
 				return { success: false, errors, warnings };
 			}
 
 			// Apply configuration
-			this.setConfiguration(config);
+			this.setConfiguration(parsed);
 
 			// Validate the applied configuration
 			const validation = this.validateConfiguration();
@@ -267,6 +269,13 @@ export class ConfigurationManager {
 			errors.push(`Failed to parse configuration: ${errorMessage}`);
 			return { success: false, errors, warnings };
 		}
+	}
+
+	/**
+	 * Type guard for engine configuration objects
+	 */
+	private isEngineConfiguration(value: unknown): value is EngineConfiguration {
+		return typeof value === 'object' && value !== null;
 	}
 
 	/**

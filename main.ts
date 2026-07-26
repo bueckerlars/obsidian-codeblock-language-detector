@@ -14,6 +14,18 @@ import { LanguageDetectionEngine } from './src/core/language-detector';
 import { SyntaxApplier } from './src/core/syntax-applier';
 import { HistoryService, UndoIgnoreService } from './src/services';
 import { PluginLifecycle } from './src/core/plugin';
+import { getEnabledDetectorNamesSorted } from './src/utils/detectorOrder';
+
+/** Legacy settings shape used for v0 → v1 migration */
+interface LegacySettingsData {
+	version?: number;
+	enableVSCodeML?: boolean;
+	enableHighlightJs?: boolean;
+	enablePatternMatching?: boolean;
+	detectionMethodOrder?: string[];
+	confidenceThreshold?: number;
+	enabledPatternLanguages?: string[];
+}
 
 /**
  * Main plugin class for CodeBlock Language Detector
@@ -86,10 +98,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		}
 		
 		// Set the detection order based on enabled detectors and their order values
-		const enabledDetectors = Object.entries(this.settings.detectorConfigurations)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
+		const enabledDetectors = getEnabledDetectorNamesSorted(this.settings.detectorConfigurations);
 		
 		this.detectionEngine.setDetectionOrder(enabledDetectors);
 		
@@ -114,7 +123,7 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Load plugin settings
 	 */
 	async loadSettings(): Promise<void> {
-		const loadedData = await this.loadData();
+		const loadedData: unknown = await this.loadData();
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 		
 		// Ensure uiState is initialized for backward compatibility
@@ -154,23 +163,22 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Migrate settings from older versions if needed
 	 * @param loadedData The raw loaded settings data
 	 */
-	private async migrateSettingsIfNeeded(loadedData: any): Promise<void> {
+	private async migrateSettingsIfNeeded(loadedData: unknown): Promise<void> {
 		if (!loadedData || typeof loadedData !== 'object') {
 			return;
 		}
-		
-		const currentVersion = loadedData.version || 0;
+
+		const data = loadedData as LegacySettingsData;
+		const currentVersion = typeof data.version === 'number' ? data.version : 0;
 		const targetVersion = DEFAULT_SETTINGS.version;
 		
 		if (currentVersion >= targetVersion) {
 			return; // No migration needed
 		}
 		
-		console.log(`Migrating settings from version ${currentVersion} to ${targetVersion}`);
-		
 		// Migrate from version 0 (legacy) to version 1
 		if (currentVersion === 0) {
-			await this.migrateFromLegacySettings(loadedData);
+			this.migrateFromLegacySettings(data);
 		}
 
 		// Migrate from version 1 to version 2: vscode-ml softmax scores
@@ -182,8 +190,6 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 		// Set the new version
 		this.settings.version = targetVersion;
 		await this.saveSettings();
-		
-		console.log('Settings migration completed');
 	}
 
 	/**
@@ -204,13 +210,15 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 	 * Migrate from legacy settings format (version 0) to new format
 	 * @param legacyData The legacy settings data
 	 */
-	private migrateFromLegacySettings(legacyData: any): void {
+	private migrateFromLegacySettings(legacyData: LegacySettingsData): void {
 		// Only migrate if legacy settings exist and new format doesn't
 		if (!this.settings.detectorConfigurations || Object.keys(this.settings.detectorConfigurations).length === 0) {
 			this.settings.detectorConfigurations = {};
 			
 			// Migrate legacy enable flags and detection order
-			const legacyOrder = legacyData.detectionMethodOrder || ['vscode-ml', 'highlight-js', 'pattern-matching'];
+			const legacyOrder = Array.isArray(legacyData.detectionMethodOrder)
+				? legacyData.detectionMethodOrder
+				: ['vscode-ml', 'highlight-js', 'pattern-matching'];
 			
 			// Migrate vscode-ml
 			if (Object.prototype.hasOwnProperty.call(legacyData, 'enableVSCodeML')) {
@@ -226,7 +234,9 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			if (Object.prototype.hasOwnProperty.call(legacyData, 'enableHighlightJs')) {
 				this.settings.detectorConfigurations['highlight-js'] = {
 					enabled: legacyData.enableHighlightJs !== false,
-					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					confidenceThreshold: typeof legacyData.confidenceThreshold === 'number'
+						? legacyData.confidenceThreshold
+						: 70,
 					order: legacyOrder.indexOf('highlight-js') !== -1 ? legacyOrder.indexOf('highlight-js') : 1,
 					config: {}
 				};
@@ -236,10 +246,14 @@ export default class AutoSyntaxHighlightPlugin extends Plugin {
 			if (Object.prototype.hasOwnProperty.call(legacyData, 'enablePatternMatching')) {
 				this.settings.detectorConfigurations['pattern-matching'] = {
 					enabled: legacyData.enablePatternMatching !== false,
-					confidenceThreshold: legacyData.confidenceThreshold || 70,
+					confidenceThreshold: typeof legacyData.confidenceThreshold === 'number'
+						? legacyData.confidenceThreshold
+						: 70,
 					order: legacyOrder.indexOf('pattern-matching') !== -1 ? legacyOrder.indexOf('pattern-matching') : 2,
 					config: {
-						enabledLanguages: legacyData.enabledPatternLanguages || ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash']
+						enabledLanguages: Array.isArray(legacyData.enabledPatternLanguages)
+							? legacyData.enabledPatternLanguages
+							: ['javascript', 'typescript', 'python', 'java', 'cpp', 'bash']
 					}
 				};
 			}

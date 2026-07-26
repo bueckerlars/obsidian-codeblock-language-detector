@@ -1,4 +1,4 @@
-import { DetectionResult, ILanguageDetector, LanguagePattern } from '../../types';
+import { DetectionResult, ILanguageDetector, LanguagePattern, PatternMatchingDetectorConfig } from '../../types';
 import { PatternLoader } from './PatternLoader';
 
 /**
@@ -136,7 +136,7 @@ export class PatternMatchingDetector implements ILanguageDetector {
 				if (regex.test(code)) {
 					matches++;
 				}
-			} catch (error) {
+			} catch {
 				// Skip invalid regex patterns
 				continue;
 			}
@@ -341,7 +341,7 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	 * Gets the current configuration
 	 * @returns Configuration object with enabled languages
 	 */
-	getConfiguration(): Record<string, any> {
+	getConfiguration(): PatternMatchingDetectorConfig {
 		return {
 			enabledLanguages: this.getEnabledLanguages(),
 			availableLanguages: this.getAvailableLanguages(),
@@ -353,7 +353,7 @@ export class PatternMatchingDetector implements ILanguageDetector {
 	 * Sets the configuration
 	 * @param config Configuration object
 	 */
-	setConfiguration(config: Record<string, any>): void {
+	setConfiguration(config: PatternMatchingDetectorConfig): void {
 		if (config.enabledLanguages && Array.isArray(config.enabledLanguages)) {
 			this.setEnabledLanguages(config.enabledLanguages);
 		}

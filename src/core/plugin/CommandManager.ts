@@ -22,7 +22,7 @@ export class CommandManager {
 			id: 'detect-languages-manual',
 			name: 'Detect and apply language tags',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				this.plugin.processBasedOnScope();
+				void this.plugin.processBasedOnScope();
 			}
 		});
 
@@ -34,7 +34,7 @@ export class CommandManager {
 				const markdownView = this.plugin.app.workspace.getActiveViewOfType(MarkdownView);
 				if (markdownView) {
 					if (!checking) {
-						this.plugin.processFile(markdownView.file);
+						void this.plugin.processFile(markdownView.file);
 					}
 					return true;
 				}
@@ -56,7 +56,7 @@ export class CommandManager {
 			id: 'process-all-files',
 			name: 'Process all markdown files',
 			callback: () => {
-				this.plugin.processAllMarkdownFiles();
+				void this.plugin.processAllMarkdownFiles();
 			}
 		});
 

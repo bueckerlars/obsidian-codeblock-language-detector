@@ -1,6 +1,6 @@
 import { Setting } from 'obsidian';
 import AutoSyntaxHighlightPlugin from '../../../../main';
-import { DetectorConfiguration } from '../../../types';
+import { DetectorConfiguration, ILanguageDetector, PatternMatchingDetectorConfig } from '../../../types';
 import { DragDropHandler } from './DragDropHandler';
 import { LanguageToggleGrid } from './LanguageToggleGrid';
 import { DetectorConfigUtils } from '../utils/DetectorConfigUtils';
@@ -28,7 +28,7 @@ export class DetectorConfigCard {
 	 * @param order The display order
 	 * @param enabled Whether the detector is enabled
 	 */
-	create(container: HTMLElement, detector: any, order: number, enabled: boolean): void {
+	create(container: HTMLElement, detector: ILanguageDetector, order: number, enabled: boolean): void {
 		const detectorName = detector.getName();
 		const detectorConfig = this.configUtils.getDetectorConfig(detectorName);
 		
@@ -49,15 +49,16 @@ export class DetectorConfigCard {
 		// Toggle checkbox
 		const toggle = leftSection.createEl('input', { type: 'checkbox' });
 		toggle.checked = enabled;
-		toggle.addEventListener('change', async () => {
-			await this.configUtils.toggleDetector(detectorName, toggle.checked);
-			this.onDisplayRefresh();
+		toggle.addEventListener('change', () => {
+			void this.configUtils.toggleDetector(detectorName, toggle.checked).then(() => {
+				this.onDisplayRefresh();
+			});
 		});
 		
 		// Center section: Detector info
 		const centerSection = header.createDiv('detector-center-section');
-		const title = centerSection.createEl('h4', { text: detector.getDisplayName() });
-		const desc = centerSection.createEl('p', { 
+		centerSection.createEl('h4', { text: detector.getDisplayName() });
+		centerSection.createEl('p', { 
 			text: detector.getDescription(),
 			cls: 'detector-description' 
 		});
@@ -88,7 +89,7 @@ export class DetectorConfigCard {
 			
 			// Expand/collapse functionality
 			expandButton.addEventListener('click', () => {
-				this.toggleConfigSection(configSection, expandButton, detectorName);
+				void this.toggleConfigSection(configSection, expandButton, detectorName);
 			});
 			
 			// Confidence threshold
@@ -180,7 +181,6 @@ export class DetectorConfigCard {
 				slider
 					.setLimits(0, 100, 5)
 					.setValue(detectorConfig.confidenceThreshold)
-					.setDynamicTooltip()
 					.onChange(async (value) => {
 						await this.configUtils.updateDetectorConfig(detectorName, { 
 							...detectorConfig, 
@@ -194,7 +194,7 @@ export class DetectorConfigCard {
 					});
 			})
 			.then(setting => {
-				const valueSpan = setting.descEl.createSpan({ 
+				setting.descEl.createSpan({ 
 					text: ` (${detectorConfig.confidenceThreshold}%)`,
 					cls: 'confidence-value'
 				});
@@ -207,11 +207,11 @@ export class DetectorConfigCard {
 	 * @param detector The detector instance
 	 * @param detectorConfig The detector configuration
 	 */
-	private createDetectorSpecificConfig(container: HTMLElement, detector: any, detectorConfig: DetectorConfiguration): void {
+	private createDetectorSpecificConfig(container: HTMLElement, detector: ILanguageDetector, detectorConfig: DetectorConfiguration): void {
 		const detectorName = detector.getName();
 		
 		if (detectorName === 'vscode-ml') {
-			this.createVSCodeDetectorConfig(container, detector);
+			this.createVSCodeDetectorConfig(container);
 		} else if (detectorName === 'pattern-matching') {
 			this.createPatternMatchingDetectorConfig(container, detector, detectorConfig);
 		}
@@ -220,9 +220,8 @@ export class DetectorConfigCard {
 	/**
 	 * Creates VSCode detector-specific configuration
 	 * @param container The container element
-	 * @param detector The detector instance
 	 */
-	private createVSCodeDetectorConfig(container: HTMLElement, detector: any): void {
+	private createVSCodeDetectorConfig(container: HTMLElement): void {
 		container.createEl('h5', { text: 'VSCode ML Detection Configuration' });
 		
 		const vscodeDetector = this.plugin.detectionEngine.getVSCodeDetector();
@@ -246,17 +245,19 @@ export class DetectorConfigCard {
 				text: 'Initialize Model', 
 				cls: 'init-model-btn' 
 			});
-			initButton.addEventListener('click', async () => {
-				try {
-					initButton.textContent = 'Initializing...';
-					initButton.disabled = true;
-					await vscodeDetector.initialize();
-					this.onDisplayRefresh();
-				} catch (error) {
-					console.error('Failed to initialize VSCode model:', error);
-					initButton.textContent = 'Initialization Failed';
-					initButton.classList.add('error');
-				}
+			initButton.addEventListener('click', () => {
+				void (async () => {
+					try {
+						initButton.textContent = 'Initializing...';
+						initButton.disabled = true;
+						await vscodeDetector.initialize();
+						this.onDisplayRefresh();
+					} catch (error) {
+						console.error('Failed to initialize VSCode model:', error);
+						initButton.textContent = 'Initialization Failed';
+						initButton.classList.add('error');
+					}
+				})();
 			});
 		}
 		
@@ -290,14 +291,17 @@ export class DetectorConfigCard {
 	 * @param detector The detector instance
 	 * @param detectorConfig The detector configuration
 	 */
-	private createPatternMatchingDetectorConfig(container: HTMLElement, detector: any, detectorConfig: DetectorConfiguration): void {
+	private createPatternMatchingDetectorConfig(container: HTMLElement, detector: ILanguageDetector, detectorConfig: DetectorConfiguration): void {
 		container.createEl('h5', { text: 'Pattern Matching Configuration' });
 		
 		const patternDetector = this.plugin.detectionEngine.getPatternMatchingDetector();
 		if (!patternDetector) return;
 		
 		const availableLanguages = patternDetector.getAvailableLanguages();
-		const enabledLanguages = detectorConfig.config.enabledLanguages || [];
+		const patternConfig = detectorConfig.config as PatternMatchingDetectorConfig;
+		const enabledLanguages = Array.isArray(patternConfig.enabledLanguages)
+			? patternConfig.enabledLanguages
+			: [];
 		
 		// Create language toggle grid
 		const languageToggleGrid = new LanguageToggleGrid(
@@ -323,14 +327,16 @@ export class DetectorConfigCard {
 		const upBtn = orderControls.createEl('button', { text: '↑', cls: 'order-btn' });
 		const downBtn = orderControls.createEl('button', { text: '↓', cls: 'order-btn' });
 		
-		upBtn.addEventListener('click', async () => {
-			await this.configUtils.moveDetector(detectorName, currentOrder - 1);
-			this.onDisplayRefresh();
+		upBtn.addEventListener('click', () => {
+			void this.configUtils.moveDetector(detectorName, currentOrder - 1).then(() => {
+				this.onDisplayRefresh();
+			});
 		});
 		
-		downBtn.addEventListener('click', async () => {
-			await this.configUtils.moveDetector(detectorName, currentOrder + 1);
-			this.onDisplayRefresh();
+		downBtn.addEventListener('click', () => {
+			void this.configUtils.moveDetector(detectorName, currentOrder + 1).then(() => {
+				this.onDisplayRefresh();
+			});
 		});
 		
 		// Disable buttons at boundaries

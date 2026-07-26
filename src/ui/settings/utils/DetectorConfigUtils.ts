@@ -1,5 +1,6 @@
 import { DetectorConfiguration } from '../../../types';
 import AutoSyntaxHighlightPlugin from '../../../../main';
+import { getEnabledDetectorNamesSorted } from '../../../utils/detectorOrder';
 
 /**
  * Utility functions for detector configuration management
@@ -17,7 +18,7 @@ export class DetectorConfigUtils {
 	 * @returns The detector configuration
 	 */
 	getDetectorConfig(detectorName: string): DetectorConfiguration {
-		const configs = this.plugin.settings.detectorConfigurations || {};
+		const configs: Record<string, DetectorConfiguration> = this.plugin.settings.detectorConfigurations ?? {};
 		return configs[detectorName] || {
 			enabled: true,
 			confidenceThreshold: this.plugin.settings.confidenceThreshold,
@@ -49,12 +50,8 @@ export class DetectorConfigUtils {
 	 * @returns Array of detector names in order
 	 */
 	getDetectionOrder(): string[] {
-		const configs = this.plugin.settings.detectorConfigurations || {};
-		
-		return Object.entries(configs)
-			.filter(([_, config]) => config.enabled)
-			.sort((a, b) => a[1].order - b[1].order)
-			.map(([name, _]) => name);
+		const configs: Record<string, DetectorConfiguration> = this.plugin.settings.detectorConfigurations ?? {};
+		return getEnabledDetectorNamesSorted(configs);
 	}
 
 	/**

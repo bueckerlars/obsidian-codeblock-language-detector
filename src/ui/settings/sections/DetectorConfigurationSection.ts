@@ -21,13 +21,18 @@ export class DetectorConfigurationSection {
 	/**
 	 * Creates the detector configuration settings section
 	 * @param containerEl The container element to add settings to
+	 * @param options.includeHeading Whether to render the section heading (default true)
 	 */
-	create(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('Detector Configuration')
-			.setHeading();
+	create(containerEl: HTMLElement, options: { includeHeading?: boolean } = {}): void {
+		const includeHeading = options.includeHeading !== false;
+
+		if (includeHeading) {
+			new Setting(containerEl)
+				.setName('Detector Configuration')
+				.setHeading();
+		}
 		
-		const descEl = containerEl.createEl('p', { 
+		containerEl.createEl('p', { 
 			cls: 'setting-item-description',
 			text: 'Configure individual detectors, their confidence thresholds, and execution order. Drag detectors to reorder them.' 
 		});

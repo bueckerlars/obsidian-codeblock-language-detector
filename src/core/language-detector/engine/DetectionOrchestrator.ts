@@ -1,4 +1,4 @@
-import { DetectionResult, ILanguageDetector } from '../../../types';
+import { DetectionResult } from '../../../types';
 import { DetectorRegistry } from './DetectorRegistry';
 
 /**
@@ -77,8 +77,11 @@ export class DetectionOrchestrator {
 		const results: DetectionResult[] = [];
 		const allDetectors = this.registry.getAllDetectors();
 
-		// Use Promise.allSettled for parallel execution
-		const detectionPromises = allDetectors.map(async (detector) => {
+		type DetectionAttempt = { detector: string; result: DetectionResult | null };
+
+		// Parallel detection; each promise catches its own errors so Promise.all is safe.
+		// Avoid Promise.allSettled — it is not in the project's TS lib target and types as any.
+		const detectionPromises: Promise<DetectionAttempt>[] = allDetectors.map(async (detector) => {
 			try {
 				const result = await detector.detectLanguage(code);
 				return { detector: detector.getName(), result };
@@ -88,13 +91,13 @@ export class DetectionOrchestrator {
 			}
 		});
 
-		const settledResults = await Promise.allSettled(detectionPromises);
+		const attempts: DetectionAttempt[] = await Promise.all(detectionPromises);
 
-		settledResults.forEach((settledResult) => {
-			if (settledResult.status === 'fulfilled' && settledResult.value.result) {
-				results.push(settledResult.value.result);
+		for (const attempt of attempts) {
+			if (attempt.result) {
+				results.push(attempt.result);
 			}
-		});
+		}
 
 		return results.sort((a, b) => b.confidence - a.confidence);
 	}
@@ -142,8 +145,15 @@ export class DetectionOrchestrator {
 			languageCounts[result.language] = (languageCounts[result.language] || 0) + 1;
 		});
 
-		const consensusLanguage = Object.entries(languageCounts)
-			.sort(([,a], [,b]) => b - a)[0]?.[0] || null;
+		let consensusLanguage: string | null = null;
+		let maxLanguageCount = 0;
+		for (const language of Object.keys(languageCounts)) {
+			const count = languageCounts[language];
+			if (count > maxLanguageCount) {
+				maxLanguageCount = count;
+				consensusLanguage = language;
+			}
+		}
 
 		const avgConfidence = validResults.length > 0
 			? validResults.reduce((sum, r) => sum + r.confidence, 0) / validResults.length

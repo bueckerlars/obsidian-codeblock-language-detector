@@ -27,12 +27,12 @@ export class LanguageToggleGrid {
 		const selectAllBtn = quickActionsContainer.createEl('button', { text: 'Select All', cls: 'aslh-select-all-btn' });
 		const selectNoneBtn = quickActionsContainer.createEl('button', { text: 'Select None', cls: 'aslh-select-none-btn' });
 		
-		selectAllBtn.addEventListener('click', async () => {
-			await this.updateEnabledLanguages([...availableLanguages]);
+		selectAllBtn.addEventListener('click', () => {
+			void this.updateEnabledLanguages([...availableLanguages]);
 		});
 		
-		selectNoneBtn.addEventListener('click', async () => {
-			await this.updateEnabledLanguages([]);
+		selectNoneBtn.addEventListener('click', () => {
+			void this.updateEnabledLanguages([]);
 		});
 		
 		// Language grid
@@ -67,7 +67,7 @@ export class LanguageToggleGrid {
 		languageLabel.textContent = language;
 		
 		// Click handler
-		languageItem.addEventListener('click', async () => {
+		languageItem.addEventListener('click', () => {
 			const currentlyEnabled = enabledLanguages.includes(language);
 			let newEnabledLanguages: string[];
 			
@@ -77,7 +77,7 @@ export class LanguageToggleGrid {
 				newEnabledLanguages = [...enabledLanguages, language];
 			}
 			
-			await this.updateEnabledLanguages(newEnabledLanguages);
+			void this.updateEnabledLanguages(newEnabledLanguages);
 		});
 	}
 

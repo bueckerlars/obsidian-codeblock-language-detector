@@ -1,4 +1,4 @@
-import { HistoryEntry } from '../../types';
+import { CodeBlock, HistoryEntry } from '../../types';
 
 /**
  * Provides validation utilities for history data
@@ -9,18 +9,23 @@ export class HistoryValidation {
 	 * @param entry The object to validate
 	 * @returns True if the object is a valid history entry
 	 */
-	static isValidHistoryEntry(entry: any): entry is HistoryEntry {
+	static isValidHistoryEntry(entry: unknown): entry is HistoryEntry {
+		if (typeof entry !== 'object' || entry === null) {
+			return false;
+		}
+
+		const e = entry as Record<string, unknown>;
 		return (
-			typeof entry === 'object' &&
-			typeof entry.id === 'string' &&
-			typeof entry.timestamp === 'number' &&
-			typeof entry.fileName === 'string' &&
-			typeof entry.filePath === 'string' &&
-			typeof entry.codeBlock === 'object' &&
-			typeof entry.detectedLanguage === 'string' &&
-			typeof entry.confidence === 'number' &&
-			typeof entry.method === 'string' &&
-			typeof entry.applied === 'boolean'
+			typeof e.id === 'string' &&
+			typeof e.timestamp === 'number' &&
+			typeof e.fileName === 'string' &&
+			typeof e.filePath === 'string' &&
+			typeof e.codeBlock === 'object' &&
+			e.codeBlock !== null &&
+			typeof e.detectedLanguage === 'string' &&
+			typeof e.confidence === 'number' &&
+			typeof e.method === 'string' &&
+			typeof e.applied === 'boolean'
 		);
 	}
 
@@ -29,7 +34,7 @@ export class HistoryValidation {
 	 * @param entry The entry to validate
 	 * @returns Array of validation errors, empty if valid
 	 */
-	static validateHistoryEntry(entry: any): string[] {
+	static validateHistoryEntry(entry: unknown): string[] {
 		const errors: string[] = [];
 
 		if (!entry || typeof entry !== 'object') {
@@ -37,44 +42,46 @@ export class HistoryValidation {
 			return errors;
 		}
 
+		const e = entry as Record<string, unknown>;
+
 		// Validate required fields
-		if (typeof entry.id !== 'string' || entry.id.trim() === '') {
+		if (typeof e.id !== 'string' || e.id.trim() === '') {
 			errors.push('Invalid or missing id');
 		}
 
-		if (typeof entry.timestamp !== 'number' || entry.timestamp <= 0) {
+		if (typeof e.timestamp !== 'number' || e.timestamp <= 0) {
 			errors.push('Invalid or missing timestamp');
 		}
 
-		if (typeof entry.fileName !== 'string' || entry.fileName.trim() === '') {
+		if (typeof e.fileName !== 'string' || e.fileName.trim() === '') {
 			errors.push('Invalid or missing fileName');
 		}
 
-		if (typeof entry.filePath !== 'string' || entry.filePath.trim() === '') {
+		if (typeof e.filePath !== 'string' || e.filePath.trim() === '') {
 			errors.push('Invalid or missing filePath');
 		}
 
-		if (!entry.codeBlock || typeof entry.codeBlock !== 'object') {
+		if (!e.codeBlock || typeof e.codeBlock !== 'object') {
 			errors.push('Invalid or missing codeBlock');
 		} else {
 			// Validate codeBlock structure
-			const codeBlockErrors = this.validateCodeBlock(entry.codeBlock);
+			const codeBlockErrors = this.validateCodeBlock(e.codeBlock);
 			errors.push(...codeBlockErrors);
 		}
 
-		if (typeof entry.detectedLanguage !== 'string' || entry.detectedLanguage.trim() === '') {
+		if (typeof e.detectedLanguage !== 'string' || e.detectedLanguage.trim() === '') {
 			errors.push('Invalid or missing detectedLanguage');
 		}
 
-		if (typeof entry.confidence !== 'number' || entry.confidence < 0 || entry.confidence > 100) {
+		if (typeof e.confidence !== 'number' || e.confidence < 0 || e.confidence > 100) {
 			errors.push('Invalid confidence (must be a number between 0 and 100)');
 		}
 
-		if (typeof entry.method !== 'string' || entry.method.trim() === '') {
+		if (typeof e.method !== 'string' || e.method.trim() === '') {
 			errors.push('Invalid or missing method');
 		}
 
-		if (typeof entry.applied !== 'boolean') {
+		if (typeof e.applied !== 'boolean') {
 			errors.push('Invalid or missing applied flag');
 		}
 
@@ -86,7 +93,7 @@ export class HistoryValidation {
 	 * @param codeBlock The code block to validate
 	 * @returns Array of validation errors
 	 */
-	static validateCodeBlock(codeBlock: any): string[] {
+	static validateCodeBlock(codeBlock: unknown): string[] {
 		const errors: string[] = [];
 
 		if (!codeBlock || typeof codeBlock !== 'object') {
@@ -94,30 +101,32 @@ export class HistoryValidation {
 			return errors;
 		}
 
-		if (typeof codeBlock.content !== 'string') {
+		const cb = codeBlock as Record<string, unknown>;
+
+		if (typeof cb.content !== 'string') {
 			errors.push('CodeBlock content must be a string');
 		}
 
-		if (typeof codeBlock.startLine !== 'number' || codeBlock.startLine < 1) {
+		if (typeof cb.startLine !== 'number' || cb.startLine < 1) {
 			errors.push('CodeBlock startLine must be a positive number');
 		}
 
-		if (typeof codeBlock.endLine !== 'number' || codeBlock.endLine < 1) {
+		if (typeof cb.endLine !== 'number' || cb.endLine < 1) {
 			errors.push('CodeBlock endLine must be a positive number');
 		}
 
-		if (typeof codeBlock.hasLanguage !== 'boolean') {
+		if (typeof cb.hasLanguage !== 'boolean') {
 			errors.push('CodeBlock hasLanguage must be a boolean');
 		}
 
-		if (typeof codeBlock.startLine === 'number' && typeof codeBlock.endLine === 'number') {
-			if (codeBlock.startLine > codeBlock.endLine) {
+		if (typeof cb.startLine === 'number' && typeof cb.endLine === 'number') {
+			if (cb.startLine > cb.endLine) {
 				errors.push('CodeBlock startLine cannot be greater than endLine');
 			}
 		}
 
 		// Optional field validation
-		if (codeBlock.originalLanguage !== undefined && typeof codeBlock.originalLanguage !== 'string') {
+		if (cb.originalLanguage !== undefined && typeof cb.originalLanguage !== 'string') {
 			errors.push('CodeBlock originalLanguage must be a string when provided');
 		}
 
@@ -129,14 +138,14 @@ export class HistoryValidation {
 	 * @param entries The entries to validate
 	 * @returns Object containing valid entries and validation results
 	 */
-	static validateHistoryEntries(entries: any[]): {
+	static validateHistoryEntries(entries: unknown[]): {
 		validEntries: HistoryEntry[];
-		invalidEntries: Array<{ entry: any; errors: string[] }>;
+		invalidEntries: Array<{ entry: unknown; errors: string[] }>;
 		validCount: number;
 		invalidCount: number;
 	} {
 		const validEntries: HistoryEntry[] = [];
-		const invalidEntries: Array<{ entry: any; errors: string[] }> = [];
+		const invalidEntries: Array<{ entry: unknown; errors: string[] }> = [];
 
 		if (!Array.isArray(entries)) {
 			throw new Error('Entries must be an array');
@@ -145,11 +154,17 @@ export class HistoryValidation {
 		entries.forEach((entry, index) => {
 			const errors = this.validateHistoryEntry(entry);
 			
-			if (errors.length === 0) {
-				validEntries.push(entry as HistoryEntry);
+			if (errors.length === 0 && this.isValidHistoryEntry(entry)) {
+				validEntries.push(entry);
 			} else {
+				const invalidEntry: Record<string, unknown> = { _index: index };
+				if (typeof entry === 'object' && entry !== null) {
+					Object.assign(invalidEntry, entry);
+				} else {
+					invalidEntry.value = entry;
+				}
 				invalidEntries.push({
-					entry: { ...entry, _index: index },
+					entry: invalidEntry,
 					errors
 				});
 			}
@@ -194,61 +209,58 @@ export class HistoryValidation {
 	 * @param entry The entry to sanitize
 	 * @returns Sanitized entry or null if irreparable
 	 */
-	static sanitizeHistoryEntry(entry: any): HistoryEntry | null {
+	static sanitizeHistoryEntry(entry: unknown): HistoryEntry | null {
 		if (!entry || typeof entry !== 'object') {
 			return null;
 		}
 
 		try {
-			// Attempt to repair the entry
-			const sanitized: any = {};
+			const e = entry as Record<string, unknown>;
+			const codeBlockRaw = e.codeBlock && typeof e.codeBlock === 'object'
+				? e.codeBlock as Record<string, unknown>
+				: null;
 
-			// Sanitize basic fields
-			sanitized.id = typeof entry.id === 'string' ? entry.id.trim() : `repair-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-			sanitized.timestamp = typeof entry.timestamp === 'number' && entry.timestamp > 0 ? entry.timestamp : Date.now();
-			sanitized.fileName = typeof entry.fileName === 'string' ? entry.fileName.trim() : 'unknown.md';
-			sanitized.filePath = typeof entry.filePath === 'string' ? entry.filePath.trim() : 'unknown.md';
-			sanitized.detectedLanguage = typeof entry.detectedLanguage === 'string' ? entry.detectedLanguage.trim() : 'text';
-			sanitized.method = typeof entry.method === 'string' ? entry.method.trim() : 'unknown';
-			sanitized.applied = typeof entry.applied === 'boolean' ? entry.applied : false;
-
-			// Sanitize confidence
-			if (typeof entry.confidence === 'number' && entry.confidence >= 0 && entry.confidence <= 100) {
-				sanitized.confidence = entry.confidence;
-			} else {
-				sanitized.confidence = 50; // Default confidence
-			}
-
-			// Sanitize code block
-			if (entry.codeBlock && typeof entry.codeBlock === 'object') {
-				sanitized.codeBlock = {
-					content: typeof entry.codeBlock.content === 'string' ? entry.codeBlock.content : '',
-					startLine: typeof entry.codeBlock.startLine === 'number' && entry.codeBlock.startLine > 0 ? entry.codeBlock.startLine : 1,
-					endLine: typeof entry.codeBlock.endLine === 'number' && entry.codeBlock.endLine > 0 ? entry.codeBlock.endLine : 1,
-					hasLanguage: typeof entry.codeBlock.hasLanguage === 'boolean' ? entry.codeBlock.hasLanguage : false
-				};
-
-				// Fix line number consistency
-				if (sanitized.codeBlock.startLine > sanitized.codeBlock.endLine) {
-					sanitized.codeBlock.endLine = sanitized.codeBlock.startLine;
+			const codeBlock: CodeBlock = codeBlockRaw
+				? {
+					content: typeof codeBlockRaw.content === 'string' ? codeBlockRaw.content : '',
+					startLine: typeof codeBlockRaw.startLine === 'number' && codeBlockRaw.startLine > 0 ? codeBlockRaw.startLine : 1,
+					endLine: typeof codeBlockRaw.endLine === 'number' && codeBlockRaw.endLine > 0 ? codeBlockRaw.endLine : 1,
+					hasLanguage: typeof codeBlockRaw.hasLanguage === 'boolean' ? codeBlockRaw.hasLanguage : false
 				}
-
-				// Add optional originalLanguage if present
-				if (typeof entry.codeBlock.originalLanguage === 'string') {
-					sanitized.codeBlock.originalLanguage = entry.codeBlock.originalLanguage;
-				}
-			} else {
-				sanitized.codeBlock = {
+				: {
 					content: '',
 					startLine: 1,
 					endLine: 1,
 					hasLanguage: false
 				};
+
+			// Fix line number consistency
+			if (codeBlock.startLine > codeBlock.endLine) {
+				codeBlock.endLine = codeBlock.startLine;
 			}
+
+			// Add optional originalLanguage if present
+			if (codeBlockRaw && typeof codeBlockRaw.originalLanguage === 'string') {
+				codeBlock.originalLanguage = codeBlockRaw.originalLanguage;
+			}
+
+			const sanitized: HistoryEntry = {
+				id: typeof e.id === 'string' ? e.id.trim() : `repair-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+				timestamp: typeof e.timestamp === 'number' && e.timestamp > 0 ? e.timestamp : Date.now(),
+				fileName: typeof e.fileName === 'string' ? e.fileName.trim() : 'unknown.md',
+				filePath: typeof e.filePath === 'string' ? e.filePath.trim() : 'unknown.md',
+				detectedLanguage: typeof e.detectedLanguage === 'string' ? e.detectedLanguage.trim() : 'text',
+				method: typeof e.method === 'string' ? e.method.trim() : 'unknown',
+				applied: typeof e.applied === 'boolean' ? e.applied : false,
+				confidence: typeof e.confidence === 'number' && e.confidence >= 0 && e.confidence <= 100
+					? e.confidence
+					: 50,
+				codeBlock
+			};
 
 			// Final validation
 			if (this.isValidHistoryEntry(sanitized)) {
-				return sanitized as HistoryEntry;
+				return sanitized;
 			}
 
 			return null;

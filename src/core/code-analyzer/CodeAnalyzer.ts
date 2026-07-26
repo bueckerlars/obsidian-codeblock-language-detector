@@ -14,7 +14,6 @@ export class CodeAnalyzer implements ICodeAnalyzer {
 	 */
 	findCodeBlocks(content: string): CodeBlock[] {
 		const codeBlocks: CodeBlock[] = [];
-		const lines = content.split('\n');
 		
 		// Reset regex to ensure we start from the beginning
 		this.fencedCodeBlockRegex.lastIndex = 0;

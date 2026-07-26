@@ -81,10 +81,10 @@ export class StatisticsModal extends Modal {
 
 		const createStatCard = (title: string, value: string | number, description?: string) => {
 			const card = basicStatsGrid.createDiv('aslh-stat-card');
-			card.createEl('div', { text: title, cls: 'aslh-stat-title' });
-			card.createEl('div', { text: value.toString(), cls: 'aslh-stat-value' });
+			card.createDiv({ text: title, cls: 'aslh-stat-title' });
+			card.createDiv({ text: value.toString(), cls: 'aslh-stat-value' });
 			if (description) {
-				card.createEl('div', { text: description, cls: 'aslh-stat-description' });
+				card.createDiv({ text: description, cls: 'aslh-stat-description' });
 			}
 		};
 
@@ -114,13 +114,14 @@ export class StatisticsModal extends Modal {
 		headerRow.createEl('th', { text: 'Avg Confidence' });
 
 		// Data rows
-		Object.entries(detailedStats.methods).forEach(([method, stats]) => {
+		for (const method of Object.keys(detailedStats.methods)) {
+			const stats = detailedStats.methods[method];
 			const row = methodsTable.createEl('tr');
 			row.createEl('td', { text: method });
 			row.createEl('td', { text: stats.count.toString() });
 			row.createEl('td', { text: `${stats.successRate}%` });
 			row.createEl('td', { text: `${stats.avgConfidence}%` });
-		});
+		}
 	}
 
 	/**
@@ -142,17 +143,18 @@ export class StatisticsModal extends Modal {
 		headerRow.createEl('th', { text: 'Avg Confidence' });
 
 		// Get top 10 languages
-		const topLanguages = Object.entries(detailedStats.languages)
-			.sort(([,a], [,b]) => b.count - a.count)
+		const topLanguages = Object.keys(detailedStats.languages)
+			.map((language) => ({ language, stats: detailedStats.languages[language] }))
+			.sort((a, b) => b.stats.count - a.stats.count)
 			.slice(0, 10);
 
 		// Data rows
-		topLanguages.forEach(([language, stats]) => {
+		for (const { language, stats } of topLanguages) {
 			const row = languagesTable.createEl('tr');
 			row.createEl('td', { text: language });
 			row.createEl('td', { text: stats.count.toString() });
 			row.createEl('td', { text: `${stats.avgConfidence}%` });
-		});
+		}
 	}
 
 	/**
@@ -175,20 +177,19 @@ export class StatisticsModal extends Modal {
 
 		const createTrendCard = (title: string, trend: string, recent: number, overall: number, unit: string = '%') => {
 			const card = trendsGrid.createDiv('aslh-trend-card');
-			card.createEl('div', { text: title, cls: 'aslh-trend-title' });
+			card.createDiv({ text: title, cls: 'aslh-trend-title' });
 			
 			const trendIndicator = card.createDiv('aslh-trend-indicator');
 			const icon = trend === 'improving' ? '↗' : trend === 'declining' ? '↘' : '→';
-			const color = trend === 'improving' ? 'green' : trend === 'declining' ? 'red' : 'gray';
 			
-			const iconSpan = trendIndicator.createEl('span', { cls: 'aslh-stat-icon' });
+			const iconSpan = trendIndicator.createSpan({ cls: 'aslh-stat-icon' });
 			iconSpan.classList.add(trend === 'improving' ? 'success' : trend === 'declining' ? 'error' : 'warning');
 			iconSpan.textContent = icon;
 			
 			trendIndicator.appendText(` ${trend}`);
 			
-			card.createEl('div', { text: `Recent: ${recent}${unit}`, cls: 'aslh-trend-current' });
-			card.createEl('div', { text: `Overall: ${overall}${unit}`, cls: 'aslh-trend-overall' });
+			card.createDiv({ text: `Recent: ${recent}${unit}`, cls: 'aslh-trend-current' });
+			card.createDiv({ text: `Overall: ${overall}${unit}`, cls: 'aslh-trend-overall' });
 		};
 
 		createTrendCard(
@@ -218,17 +219,18 @@ export class StatisticsModal extends Modal {
 		const distribution = this.historyService.getConfidenceDistribution(entries);
 		const chartContainer = section.createDiv('aslh-confidence-chart');
 
-		Object.entries(distribution).forEach(([range, count]) => {
+		for (const range of Object.keys(distribution)) {
+			const count = distribution[range];
 			if (count > 0) {
 				const bar = chartContainer.createDiv('aslh-confidence-bar');
 				const percentage = (count / entries.length) * 100;
 				
-				bar.createEl('div', { text: range, cls: 'aslh-bar-label' });
-				const barFill = bar.createEl('div', { cls: 'aslh-bar-fill aslh-stat-bar-fill' });
+				bar.createDiv({ text: range, cls: 'aslh-bar-label' });
+				const barFill = bar.createDiv({ cls: 'aslh-bar-fill aslh-stat-bar-fill' });
 				barFill.style.width = `${Math.max(percentage, 2)}%`;  // Minimum 2% for visibility
-				bar.createEl('div', { text: count.toString(), cls: 'aslh-bar-count' });
+				bar.createDiv({ text: count.toString(), cls: 'aslh-bar-count' });
 			}
-		});
+		}
 	}
 
 	/**
@@ -252,19 +254,20 @@ export class StatisticsModal extends Modal {
 		headerRow.createEl('th', { text: 'Languages' });
 
 		// Get last 7 days of data, sorted by date
-		const sortedTimeStats = Object.entries(timeStats)
-			.sort(([a], [b]) => b.localeCompare(a))  // Sort descending by date
-			.slice(0, 7);
+		const sortedTimeStats = Object.keys(timeStats)
+			.sort((a, b) => b.localeCompare(a))  // Sort descending by date
+			.slice(0, 7)
+			.map((date) => ({ date, stats: timeStats[date] }));
 
 		// Data rows
-		sortedTimeStats.forEach(([date, stats]) => {
+		for (const { date, stats } of sortedTimeStats) {
 			const row = timeTable.createEl('tr');
 			row.createEl('td', { text: date });
 			row.createEl('td', { text: stats.count.toString() });
 			row.createEl('td', { text: stats.appliedCount.toString() });
 			row.createEl('td', { text: `${stats.avgConfidence}%` });
 			row.createEl('td', { text: stats.languages.slice(0, 3).join(', ') }); // Show top 3 languages
-		});
+		}
 
 		if (sortedTimeStats.length === 0) {
 			timeTable.remove();
